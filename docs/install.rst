@@ -41,6 +41,7 @@ Enter the virtual environment and install dependencies from the ``requirements.t
 .. code-block:: sh
 	
 	$ source /data/venv/bin/activate
+	(venv) $ cd deephunter/
 	(venv) $ pip install -r requirements.txt
 
 Download DeepHunter
