@@ -187,9 +187,11 @@ Fix permissions:
 
 .. code-block:: sh
 
-	$ chmod -R 755 /data
-	$ chmod 666 /data/deephunter/campaigns.log 
-	$ chmod 666 /data/deephunter/static/mitre.json 
+	$ sudo chmod -R 755 /data
+	$ sudo touch /data/deephunter/campaigns.log
+	$ sudo chmod 666 /data/deephunter/campaigns.log 
+	$ sudo touch /data/deephunter/campaigns.log	
+	$ sudo chmod 666 /data/deephunter/static/mitre.json 
 
 To start the Celery service automatically, you may want to create a file in ``/etc/systemd/system/celery.service`` as follows:
 
