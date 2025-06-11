@@ -1,7 +1,7 @@
-Authlib==1.5.2
+Authlib==1.6.0
 beautifulsoup4==4.13.4
-celery==5.5.2
-Django==5.2.1
+celery==5.5.3
+Django==5.2.3
 django-auto-logout==0.5.1
 django-dbbackup==4.3.0
 django-extensions==4.1
@@ -12,7 +12,7 @@ lxml==5.4.0
 mysqlclient==2.2.7
 numpy==2.2.6
 python-gnupg==0.5.4
-redis==6.1.0
-requests==2.32.3
+redis==6.2.0
+requests==2.32.4
 scipy==1.15.3
-vt-py==0.20.0
+vt-py==0.21.0
