@@ -557,3 +557,13 @@ STAR_RULES_DEFAULTS
 		'treatAsThreat': '', # Undefined(or empty)|Suspicious|Malicious.
 		'networkQuarantine': 'false' # true|false
 	}
+
+RARE_OCCURRENCES
+================
+
+- **Type**: integer
+- **Description**: Used to define the threshold for rare occurrences. If a threat hunting analytic matches less than the defined number of distinct hosts (in the full retention), it is considered a rare occurrence.
+- **Example**:
+.. code-block:: python
+
+	RARE_OCCURRENCES = 5

@@ -9,4 +9,5 @@ urlpatterns = [
     path('missing_mitre', views.missing_mitre, name='missing_mitre'),
     path('disabled_analytics', views.disabled_analytics, name='disabled_analytics'),
     path('query_error', views.query_error, name='query_error'),
+    path('rare_occurrences', views.rare_occurrences, name='rare_occurrences'),
 ]

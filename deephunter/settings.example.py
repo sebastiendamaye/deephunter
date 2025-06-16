@@ -299,3 +299,6 @@ STAR_RULES_DEFAULTS = {
     'treatAsThreat': 'Malicious', # Undefined(or empty)|Suspicious|Malicious.
     'networkQuarantine': 'true' # true|false
 }
+
+# Max number of distinct hostnames to consider an analytic as rare
+RARE_OCCURRENCES_THRESHOLD = 10

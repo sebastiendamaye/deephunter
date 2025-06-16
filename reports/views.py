@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponse, HttpResponseRedirect, FileResponse, JsonResponse
 from django.utils import timezone
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from urllib.parse import quote
 from datetime import datetime, timedelta, date
 from qm.models import Country, Query, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus
@@ -18,6 +18,8 @@ STATIC_PATH = settings.STATIC_ROOT
 DB_DATA_RETENTION = settings.DB_DATA_RETENTION
 # max hosts threshold
 ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
+# threshold for rare occurrences
+RARE_OCCURRENCES_THRESHOLD = settings.RARE_OCCURRENCES_THRESHOLD
 
 @login_required
 def campaigns_stats(request):
@@ -284,3 +286,18 @@ def query_error(request):
         }
     
     return render(request, 'query_error.html', context)
+
+@login_required
+def rare_occurrences(request):
+    queries = (
+        Endpoint.objects
+        .values('snapshot__query__id', 'snapshot__query__name')
+        .annotate(distinct_hostnames=Count('hostname', distinct=True))
+        .filter(distinct_hostnames__lt=RARE_OCCURRENCES_THRESHOLD)
+        .order_by('distinct_hostnames')
+        )
+    context = {
+        'queries': queries
+        }
+    
+    return render(request, 'rare_occurrences.html', context)
