@@ -1,4 +1,4 @@
 sphinx-togglebutton
 sphinx-copybutton
 sphinx-design
-sphinx-book-theme
+sphinx-rtd-theme
