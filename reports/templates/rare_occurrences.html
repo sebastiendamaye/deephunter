@@ -9,22 +9,31 @@
 <p>This report shows Threat Hunting Analytics with few distinct endpoints in the entire database. It may be a useful indicator to identify suspicious behaviors.</p>
 <table class="mitre">
 	<tr>
-		<th>Admin/Stats</th>
-		<th># distinct endpoints</th>
 		<th>Analytic</th>
 		<th>Confidence</th>
 		<th>Relevance</th>
+		<th>Admin/Stats</th>
+		<th># distinct endpoints</th>
+		<th>Endpoints</th>
 	</tr>
 	{% for query in queries %}
 	<tr>
+		<td>{{ query.name }}</td>
+        <td class="acenter"><div class="confidence_{{ query.confidence }}">{{ query.confidence|confidencelabel }}</div></td>
+        <td class="acenter"><div class="confidence_{{ query.relevance }}">{{ query.relevance|confidencelabel }}</div></td>
 		<td class="acenter">
-			[<a href="/admin/qm/query/{{ query.snapshot__query__id }}/change/" target="_blank">admin</a>]
-			[<a href="/{{ query.snapshot__query__id }}/trend/" target="_blank">stats</a>]
+			[<a href="/admin/qm/query/{{ query.id }}/change/" target="_blank">admin</a>]
+			[<a href="/{{ query.id }}/trend/" target="_blank">stats</a>]
 		</td>
 		<td class="acenter">{{ query.distinct_hostnames }}</td>
-		<td>{{ query.snapshot__query__name }}</td>
-        <td class="acenter"><div class="confidence_{{ query.snapshot__query__confidence }}">{{ query.snapshot__query__confidence|confidencelabel }}</div></td>
-        <td class="acenter"><div class="confidence_{{ query.snapshot__query__relevance }}">{{ query.snapshot__query__relevance|confidencelabel }}</div></td>
+		<td>
+			{% if query.endpoints %}
+				{% for endpoint in query.endpoints %}
+					<a href="/timeline?hostname={{ endpoint }}" target="_blank">{{ endpoint }}</a> |
+				{% endfor %}
+			{% endif %}
+		</td>
+
 	</tr>
 	{% endfor %}
 </table>

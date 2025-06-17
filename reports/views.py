@@ -296,8 +296,23 @@ def rare_occurrences(request):
         .filter(distinct_hostnames__lt=RARE_OCCURRENCES_THRESHOLD)
         .order_by('distinct_hostnames')
         )
+    
+    data = []
+    for query in queries:
+        q = get_object_or_404(Query, pk=query['snapshot__query__id'])
+        endpoints = Endpoint.objects.filter(snapshot__query=q).values('hostname').distinct()
+
+        data.append({
+            'name': query['snapshot__query__name'],
+            'id': query['snapshot__query__id'],
+            'confidence': query['snapshot__query__confidence'],
+            'relevance': query['snapshot__query__relevance'],
+            'distinct_hostnames': query['distinct_hostnames'],
+            'endpoints': [endpoint['hostname'] for endpoint in endpoints]
+            })        
+
     context = {
-        'queries': queries
+        'queries': data
         }
     
     return render(request, 'rare_occurrences.html', context)
