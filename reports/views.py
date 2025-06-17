@@ -291,7 +291,7 @@ def query_error(request):
 def rare_occurrences(request):
     queries = (
         Endpoint.objects
-        .values('snapshot__query__id', 'snapshot__query__name')
+        .values('snapshot__query__id', 'snapshot__query__name', 'snapshot__query__confidence', 'snapshot__query__relevance')
         .annotate(distinct_hostnames=Count('hostname', distinct=True))
         .filter(distinct_hostnames__lt=RARE_OCCURRENCES_THRESHOLD)
         .order_by('distinct_hostnames')

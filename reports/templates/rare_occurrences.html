@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load qm_extras %}
 
 {% block style %}
 <link rel="stylesheet" href="/static/css/list_queries.css" />
@@ -11,6 +12,8 @@
 		<th>Admin/Stats</th>
 		<th># distinct endpoints</th>
 		<th>Analytic</th>
+		<th>Confidence</th>
+		<th>Relevance</th>
 	</tr>
 	{% for query in queries %}
 	<tr>
@@ -20,6 +23,8 @@
 		</td>
 		<td class="acenter">{{ query.distinct_hostnames }}</td>
 		<td>{{ query.snapshot__query__name }}</td>
+        <td class="acenter"><div class="confidence_{{ query.snapshot__query__confidence }}">{{ query.snapshot__query__confidence|confidencelabel }}</div></td>
+        <td class="acenter"><div class="confidence_{{ query.snapshot__query__relevance }}">{{ query.snapshot__query__relevance|confidencelabel }}</div></td>
 	</tr>
 	{% endfor %}
 </table>
