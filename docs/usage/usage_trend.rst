@@ -13,7 +13,7 @@ There is a minimum of 3 graphs:
 
 - **distribution of the runtime (in seconds)**: time taken to run the query associated to this analytic over time.
 - **distribution of number of events**: number of events matching the query associated to this analytic for each campaign
-- **distribution of number of endpoints** (unfiltered): number of endpoints matching the query associated to this analytic for each campaign
+- **distribution of number of endpoints** (unfiltered): number of endpoints matching the query associated to this analytic for each campaign. Clicking on dots will replay the query for the selected date.
 - **optional graphs** (depending on the `CUSTOM_FIELDS <settings.html#custom-fields>`_ property): distribution of number of endpoints with custom filters.
 
 The ``see endpoints`` link at the top left corner shows the list of all endpoints matching the current threat hunting analytic.

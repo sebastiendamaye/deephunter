@@ -602,7 +602,10 @@ def timeline(request):
 @login_required
 def events(request, endpointname, query_id, eventdate):    
     query = get_object_or_404(Query, pk=query_id)
-    customized_query = "{} \n| filter endpoint.name='{}'".format(query.query, endpointname)
+    if endpointname != 'NULL':
+        customized_query = "{} \n| filter endpoint.name='{}'".format(query.query, endpointname)
+    else:
+        customized_query = query.query
 
     if query.columns:
         q = quote('{}\n{}'.format(customized_query, query.columns))
