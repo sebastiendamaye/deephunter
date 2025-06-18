@@ -18,7 +18,7 @@
 	</tr>
 	{% for query in queries %}
 	<tr>
-		<td>{{ query.name }}</td>
+		<td title="DESCRIPTION:&#013;===========&#013;{{ query.description }}&#013;&#013;QUERY:&#013;===========&#013;{{query.query}}">{{ query.name }}</td>
         <td class="acenter"><div class="confidence_{{ query.confidence }}">{{ query.confidence|confidencelabel }}</div></td>
         <td class="acenter"><div class="confidence_{{ query.relevance }}">{{ query.relevance|confidencelabel }}</div></td>
 		<td class="acenter">

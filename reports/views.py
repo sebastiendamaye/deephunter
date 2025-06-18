@@ -291,7 +291,7 @@ def query_error(request):
 def rare_occurrences(request):
     queries = (
         Endpoint.objects
-        .values('snapshot__query__id', 'snapshot__query__name', 'snapshot__query__confidence', 'snapshot__query__relevance')
+        .values('snapshot__query__id', 'snapshot__query__name', 'snapshot__query__confidence', 'snapshot__query__relevance', 'snapshot__query__description', 'snapshot__query__query')
         .annotate(distinct_hostnames=Count('hostname', distinct=True))
         .filter(distinct_hostnames__lt=RARE_OCCURRENCES_THRESHOLD)
         .order_by('distinct_hostnames')
@@ -303,10 +303,12 @@ def rare_occurrences(request):
         endpoints = Endpoint.objects.filter(snapshot__query=q).values('hostname').distinct()
 
         data.append({
-            'name': query['snapshot__query__name'],
             'id': query['snapshot__query__id'],
+            'name': query['snapshot__query__name'],
             'confidence': query['snapshot__query__confidence'],
             'relevance': query['snapshot__query__relevance'],
+            'description': query['snapshot__query__description'],
+            'query': query['snapshot__query__query'],
             'distinct_hostnames': query['distinct_hostnames'],
             'endpoints': [endpoint['hostname'] for endpoint in endpoints]
             })        
