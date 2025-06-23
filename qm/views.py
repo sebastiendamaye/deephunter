@@ -321,13 +321,17 @@ def trend(request, query_id):
             'anomaly_alert_count': a_anomaly_alert_count[i],
             'anomaly_alert_endpoints': a_anomaly_alert_endpoints[i]
             } )
-    
+
+    endpoints = Endpoint.objects.filter(snapshot__query=query).values('hostname').distinct()
+
     context = {
         'query': query,
         'stats': stats_vals,
         'c1_name': c1_name,
         'c2_name': c2_name,
         'c3_name': c3_name,
+        'distinct_endpoints': endpoints.count(),
+        'endpoints': endpoints,
         }
     return render(request, 'trend.html', context)
 

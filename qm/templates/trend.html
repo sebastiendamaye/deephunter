@@ -17,6 +17,7 @@
 	</div>
 	<div><b>#hits z-score threshold:</b> {{ query.anomaly_threshold_count }}</div>
 	<div><b>#endpoints z-score threshold:</b> {{ query.anomaly_threshold_endpoints }}</div>
+	<div><b>Distinct endpoints: </b>{{ distinct_endpoints }} ({% for endpoint in endpoints %}<a href="/timeline?hostname={{ endpoint.hostname }}" target="_blank">{{ endpoint.hostname }}</a> {% if not forloop.last %} | {% endif %} {% endfor %})</div>
 </div>
 <div class="clear"></div>
 
@@ -276,14 +277,6 @@ window.onload = function () {
 		}
 		e.chart.render();
 	}
-
-	/***
-	function onClick(e){
-		console.log("click");
-		alert(  e.dataSeries.type+ ", dataPoint { x:" + e.dataPoint.x + ", y: "+ e.dataPoint.y + " }" );   
-	}
-	***/
-
 }
 
 </script>
