@@ -17,7 +17,14 @@
 	</div>
 	<div><b>#hits z-score threshold:</b> {{ query.anomaly_threshold_count }}</div>
 	<div><b>#endpoints z-score threshold:</b> {{ query.anomaly_threshold_endpoints }}</div>
-	<div><b>Distinct endpoints: </b>{{ distinct_endpoints }} ({% for endpoint in endpoints %}<a href="/timeline?hostname={{ endpoint.hostname }}" target="_blank">{{ endpoint.hostname }}</a> {% if not forloop.last %} | {% endif %} {% endfor %})</div>
+	<div><b>Distinct endpoints: </b>{{ distinct_endpoints }}
+		({% for endpoint in endpoints|slice:":10" %}
+			<a href="/timeline?hostname={{ endpoint.hostname }}" target="_blank">{{ endpoint.hostname }}</a>
+			{% if not forloop.last %} | {% endif %}
+		{% endfor %}
+		{% if distinct_endpoints > 10 %}| ...{% endif %}
+		)
+		</div>
 </div>
 <div class="clear"></div>
 
