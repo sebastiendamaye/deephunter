@@ -12,8 +12,13 @@
 </div>
 <div class="charts_left">
 	<div>
-	[<a href="/admin/qm/query/{{ query.id }}/change/" target="_blank">edit in admin</a>]
-	[<a href="/admin/qm/endpoint/?snapshot__query__name={{ query.name }}" target="_blank">see endpoints</a>]
+		[<a href="/admin/qm/query/{{ query.id }}/change/" target="_blank">edit in admin</a>]
+		[<a href="/admin/qm/endpoint/?snapshot__query__name={{ query.name }}" target="_blank">see endpoints</a>]
+		{% if perms.qm.delete_campaign %}
+			<div id="progress_{{ query.id }}" class="progress">...</div>&nbsp;
+			<div class="progress"><a href="/{{ query.id }}/deletestats/" target="_blank" class="buttonred">Delete stats</a></div>
+		{% endif %}
+
 	</div>
 	<div><b>#hits z-score threshold:</b> {{ query.anomaly_threshold_count }}</div>
 	<div><b>#endpoints z-score threshold:</b> {{ query.anomaly_threshold_endpoints }}</div>
@@ -287,5 +292,16 @@ window.onload = function () {
 }
 
 </script>
+
+{% if perms.qm.delete_campaign %}
+<script type="text/javascript" nonce="jg6kl5z3v2">
+$(document).ready(function() {
+	setInterval(function() {
+		$("#progress_{{ query.id }}").load('/{{ query.id }}/progress/')
+	}, 2000);
+});
+</script>
+{% endif %}
+
 </body>
 </html>
