@@ -10,3 +10,4 @@
    reports_disabled_analytics
    reports_query_error
    reports_rare_occurrences
+   reports_zero_occurrence

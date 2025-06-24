@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load qm_extras %}
+
+{% block style %}
+<link rel="stylesheet" href="/static/css/list_queries.css" />
+{% endblock %}
+{% block body %}
+<h1>Analytics with zero occurence</h1>
+<p>This report shows Threat Hunting Analytics (with the "run_daily" flag set) that never matched any endpoint (according to the data retention).</p>
+<p>Number of Analytics: {{ queries|length }}</p>
+<table class="mitre">
+	<tr>
+		<th>Analytic</th>
+		<th>Confidence</th>
+		<th>Relevance</th>
+		<th>Admin/Stats</th>
+	</tr>
+	{% for query in queries %}
+	<tr>
+		<td title="DESCRIPTION:&#013;===========&#013;{{ query.description }}&#013;&#013;QUERY:&#013;===========&#013;{{query.query}}">{{ query.name }}</td>
+        <td class="acenter"><div class="confidence_{{ query.confidence }}">{{ query.confidence|confidencelabel }}</div></td>
+        <td class="acenter"><div class="confidence_{{ query.relevance }}">{{ query.relevance|confidencelabel }}</div></td>
+		<td class="acenter">
+			[<a href="/admin/qm/query/{{ query.id }}/change/" target="_blank">admin</a>]
+			[<a href="/{{ query.id }}/trend/" target="_blank">stats</a>]
+		</td>
+
+	</tr>
+	{% endfor %}
+</table>
+{% endblock %}

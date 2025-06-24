@@ -318,3 +318,13 @@ def rare_occurrences(request):
         }
     
     return render(request, 'rare_occurrences.html', context)
+
+
+@login_required
+def zero_occurrence(request):
+    queries_without_endpoints = Query.objects.filter(run_daily=True).annotate(
+        endpoint_count=Count('snapshot__endpoint')).filter(endpoint_count=0)
+    context = {
+        'queries': queries_without_endpoints
+        }
+    return render(request, 'zero_occurrence.html', context)
