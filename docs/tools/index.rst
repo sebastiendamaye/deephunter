@@ -1,3 +1,6 @@
+Tools
+#####
+
 .. toctree::
    :maxdepth: 2
    :caption: Tools
