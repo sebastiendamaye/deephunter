@@ -146,6 +146,8 @@
 <div id="contextMenu">
 	<a id="link_events" href="" target="_blank">Open events</a>
 	<a id="link_storylineid" href="" target="_blank">Open Storyline ID</a>
+	<a id="link_trend" href="" target="_blank">See trend</a>
+	<a id="link_admin" href="" target="_blank">Edit in admin</a>
 </div>
 
 <script type="text/javascript" nonce="jc3vgs67dm">
@@ -274,6 +276,9 @@ timeline.on('doubleClick', function (properties) {
 			$('#link_storylineid').addClass('disabled');
 		}
 		
+		$('#link_admin').attr('href', '/admin/qm/query/'+mygroups[properties['group']]+'/change/');
+		$('#link_trend').attr('href', '/'+mygroups[properties['group']]+'/trend/');
+
 		var x = properties.pageX;
 		var y = properties.pageY;
 

@@ -28,4 +28,4 @@ How to use the timeline?
 - **Compact view**: By default, the view shows as many boxes as necessary, for each day. It may happen that several threats are detected on a given day, or several applications are installed the same day. To have a more compact and readable timeline, click on ``compact view``, to limit the timeline to a maximum of 1 box/day.
 - **Send to Netview**: Sends the machine name to the `netview <usage_netview.html>`_ module.
 - **Simple click**: Click on a box to highlight boxes with the same storylineID. Highlighted boxes appear in red.
-- **Double click**: Shows a contextual menu to choose between inspecting events or the storyline ID(s) related to the clicked node. Links will point to SentinelOne.
+- **Double click**: Shows a contextual menu with options to inspect events or the storyline ID(s) related to the clicked node, view the trend graph for the selected analytic, or edit the selected analytic in the admin backend.
