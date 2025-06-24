@@ -621,9 +621,9 @@ def events(request, endpointname, query_id, eventdate):
 @login_required
 def storyline(request, storylineids, eventdate):    
     if ',' in storylineids:
-        filter = "src.process.storyline.id in {}".format(tuple(storylineids.split(',')))
+        filter = "src.process.storyline.id in {} or tgt.process.storyline.id in {}".format(tuple(storylineids.split(',')), tuple(storylineids.split(',')))
     else:
-        filter = f"src.process.storyline.id = '{storylineids}'"
+        filter = f"src.process.storyline.id = '{storylineids}' or tgt.process.storyline.id = '{storylineids}'"
     return HttpResponseRedirect('{}/events?filter={}&startTime={}&endTime=%2B1+day&{}'.format(XDR_URL, quote_plus(filter), eventdate, XDR_PARAMS))
 
 @login_required
