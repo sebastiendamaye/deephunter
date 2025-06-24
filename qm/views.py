@@ -527,7 +527,7 @@ def timeline(request):
                                 'group': gid,
                                 'start':  datetime.strptime(app['installedDate'][:10], '%Y-%m-%d'),
                                 'end': datetime.strptime(app['installedDate'][:10], '%Y-%m-%d')+timedelta(days=1),
-                                'description': '{} ({})'.format(app['name'], app['publisher'])
+                                'description': '{} ({})'.format(app['name'].strip(), app['publisher'].strip())
                                 })
                             iid += 1
                 
