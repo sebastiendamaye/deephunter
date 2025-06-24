@@ -431,7 +431,7 @@ SentinelOne frontend URL
 	### Legacy URL for threats
 	#S1_THREATS_URL = #'https://tenant.sentinelone.net/incidents/threats?filter={"computerName__contains":"{}","timeTitle":"Last%203%20Months"}'
 	### New URL for threats
-	S1_THREATS_URL = 'https://tenant.sentinelone.net/incidents/unified-alerts?_scopeLevel=global&_categoryId=threatsAndAlerts&uamAlertsTable.filters=assetName__FULLTEXT%3D{}&uamAlertsTable.timeRange=LAST_3_MONTHS'
+	S1_THREATS_URL = 'https://tenant.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS'
 
 LOGIN_URL
 *********
