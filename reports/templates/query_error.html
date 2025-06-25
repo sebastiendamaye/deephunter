@@ -10,7 +10,7 @@
 <p>Notice that updating the "query" field of threat hunting analytics will automatically remove the error flag and message. These threat hunting analytics will no longer appear in this report.</p>
 <table class="mitre">
 	<tr>
-		<th>Admin/Stats</th>
+		<th>Admin/Stats/Run</th>
 		<th>Analytic</th>
 		<th>Query</th>
 		<th>Maxhosts Count</th>
@@ -23,6 +23,7 @@
 		<td>
 			[<a target="_blank" href="/admin/qm/query/{{ query.id }}/change/">admin</a>]
 			[<a target="_blank" href="/{{ query.id }}/trend/">stats</a>]
+			[<a target="_blank" href="/{{ query.id }}/pq/0/">run in PQ</a>]
 		</td>
 		<td>{{ query.name }}</td>
 		<td><pre>{{ query.query }}</pre></td>

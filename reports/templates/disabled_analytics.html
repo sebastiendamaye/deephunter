@@ -10,7 +10,7 @@
 <p>Notice that updating the "query" field of threat hunting analytics will automatically reset the counter, and they will no longer appear in this report.</p>
 <table class="mitre">
 	<tr>
-		<th>Admin/Stats</th>
+		<th>Admin/Stats/Run</th>
 		<th>Maxhosts Count</th>
 		<th>Run daily</th>
 		<th>Analytic</th>
@@ -20,6 +20,7 @@
 		<td>
 			[<a target="_blank" href="/admin/qm/query/{{ query.id }}/change/">admin</a>]
 			[<a target="_blank" href="/{{ query.id }}/trend/">stats</a>]
+			[<a target="_blank" href="/{{ query.id }}/pq/0/">run in PQ</a>]
 		</td>
 		<td class="acenter">{{ query.maxhosts_count }}</td>
 		<td class="acenter">
@@ -28,7 +29,7 @@
 			{% else %}
 				<img src="/static/admin/img/icon-no.svg" alt="no" />
 			{% endif %}
-		<td>{{ query.name }}</td>
+		<td title="DESCRIPTION:&#013;===========&#013;{{ query.description }}&#013;&#013;QUERY:&#013;===========&#013;{{query.query}}">{{ query.name }}</td>
 	</tr>	
 {% endfor %}
 </table>
