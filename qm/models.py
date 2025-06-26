@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from simple_history.models import HistoricalRecords
+from connectors.models import Connector
 
 class Country(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -122,7 +123,6 @@ class Query(models.Model):
     ]
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True, help_text="Description, Markdown syntax")
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
     notes = models.TextField(blank=True, help_text="Threat hunting notes, Markdown syntax")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     pub_date = models.DateTimeField(auto_now_add=True)
@@ -130,11 +130,13 @@ class Query(models.Model):
     pub_status = models.CharField(max_length=5, choices=STATUS_CHOICES, default='DRAFT')
     confidence = models.IntegerField(choices=CONFIDENCE_CHOICES, default=1)
     relevance = models.IntegerField(choices=RELEVANCE_CHOICES, default=1)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
     weighted_relevance = models.GeneratedField(
         expression=models.F("relevance") * models.F("confidence")/4,
         output_field=models.FloatField(),
         db_persist=False
     )
+    connector = models.ForeignKey(Connector, on_delete=models.CASCADE, help_text="Connector to use for this query")
     query = models.TextField()
     columns = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag, blank=True)

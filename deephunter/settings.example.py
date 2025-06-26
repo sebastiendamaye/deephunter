@@ -136,6 +136,7 @@ INSTALLED_APPS = [
     'qm',
     'extensions',
 	'reports',
+    'connectors',
 ]
 
 MIDDLEWARE = [
