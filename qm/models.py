@@ -136,7 +136,7 @@ class Query(models.Model):
         output_field=models.FloatField(),
         db_persist=False
     )
-    connector = models.ForeignKey(Connector, on_delete=models.CASCADE, help_text="Connector to use for this query")
+    connector = models.ForeignKey(Connector, on_delete=models.CASCADE, blank=True, null=True, help_text="Connector to use for this query")
     query = models.TextField()
     columns = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
