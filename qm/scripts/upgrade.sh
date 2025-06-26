@@ -156,7 +156,7 @@ check_empty "USER" "$USER"
 GITHUB_URL=$(grep -oP 'GITHUB_URL\s?=\s?"\K[^"]+' /tmp/settings.py)
 check_empty "GITHUB_URL" "$GITHUB_URL"
 # List of django apps for migrations
-APPS=(qm extensions reports)
+APPS=(qm extensions reports connectors)
 
 
 ######################################
