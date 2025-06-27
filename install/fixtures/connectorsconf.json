@@ -1,0 +1,277 @@
+[
+    {
+        "model": "connectors.connectorconf",
+        "pk": 35,
+        "fields": {
+            "connector": 1,
+            "key": "S1_URL",
+            "value": "https://my_tenant.sentinelone.net",
+            "type": "char",
+            "description": "S1_URL is the SentinelOne URL for your tenant and is used for any API call to SentinelOne."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 36,
+        "fields": {
+            "connector": 1,
+            "key": "S1_TOKEN_EXPIRATION",
+            "value": "30",
+            "type": "int",
+            "description": "Number of days during which the SentinelOne token is valid (30 by default)."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 37,
+        "fields": {
+            "connector": 1,
+            "key": "S1_TOKEN",
+            "value": "****************",
+            "type": "char",
+            "description": "S1_TOKEN is the token associated to your API."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 38,
+        "fields": {
+            "connector": 1,
+            "key": "XDR_URL",
+            "value": "https://xdr.eu1.sentinelone.net",
+            "type": "char",
+            "description": "URL address to use to point to SentinelOne frontend from the timeline view. For the legacy UI, you can use \"https://xdr.eu1.sentinelone.net\". For the new UI, use the same URL as for the \"S1_URL\" parameter."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 39,
+        "fields": {
+            "connector": 1,
+            "key": "XDR_PARAMS",
+            "value": "view=edr",
+            "type": "char",
+            "description": "Parameters associated to the URL address used to point to SentinelOne frontend from the timeline view. For the legacy UI, you can use \"view=edr\" parameters. For the new UI, use \"_categoryId=eventSearch\"."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 40,
+        "fields": {
+            "connector": 1,
+            "key": "S1_THREATS_URL",
+            "value": "https://tenant.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS",
+            "type": "char",
+            "description": "URL address used to point to the threats page in SentinelOne. Notice that S1_THREATS_URL is dnyamically rendered by the Django view using format to evaluate the correct hostname. This is why the {} string appears in the URL. For legacy UI, use the following URL:  'https://tenant.sentinelone.net/incidents/threats?filter={\"computerName__contains\":\"{}\",\"timeTitle\":\"Last%203%20Months\"}'. For the new UI, use 'https://tenant.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS'"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 41,
+        "fields": {
+            "connector": 1,
+            "key": "SYNC_STAR_RULES",
+            "value": "True",
+            "type": "bool",
+            "description": "Possible values: True|False"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 42,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_PREFIX",
+            "value": "TH_",
+            "type": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 43,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_SEVERITY",
+            "value": "High",
+            "type": "char",
+            "description": "Possible values: Low|Medium|High|Critical"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 44,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_STATUS",
+            "value": "Active",
+            "type": "char",
+            "description": "Possible values: Active|Draft"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 45,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_EXPIRATION",
+            "value": "",
+            "type": "int",
+            "description": "Will automatically consider expirationMode is \"Temporary\" and define an expiration (in days). Empty string to ignore"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 46,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_COOLOFFPERIOD",
+            "value": "",
+            "type": "int",
+            "description": "Cool Off Period (in minutes). Empty string to ignore"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 47,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_TREATASTHREAT",
+            "value": "",
+            "type": "char",
+            "description": "Undefined(or empty)|Suspicious|Malicious"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 48,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_NETWORKQUARANTINE",
+            "value": "false",
+            "type": "bool",
+            "description": "Possible values: true|false"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 1,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_SERVER",
+            "value": "domain.com",
+            "type": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 2,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_PORT",
+            "value": "636",
+            "type": "int",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 3,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_SSL",
+            "value": "True",
+            "type": "bool",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 4,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_USER",
+            "value": "user@domain",
+            "type": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 5,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_PWD",
+            "value": "*********",
+            "type": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 6,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_SEARCH_BASE",
+            "value": "DC=gad,DC=domain,DC=com",
+            "type": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 7,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_USER_NAME",
+            "value": "displayName",
+            "type": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 8,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_JOB_TITLE",
+            "value": "title",
+            "type": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 9,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_BUSINESS_UNIT",
+            "value": "division",
+            "type": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 10,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_OFFICE",
+            "value": "physicalDeliveryOfficeName",
+            "type": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 11,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_COUNTRY",
+            "value": "co",
+            "type": "char",
+            "description": ""
+        }
+    }
+]

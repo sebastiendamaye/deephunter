@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName, ThreatActor, Query, Snapshot, Campaign, Endpoint, Tag, CeleryStatus, Category
+from connectors.models import Connector
 from django.contrib.admin.models import LogEntry
 from simple_history.admin import SimpleHistoryAdmin
 from django.conf import settings
@@ -11,13 +12,19 @@ admin.site.index_title = 'DeepHunter_'
 CUSTOM_FIELDS = settings.CUSTOM_FIELDS
 
 class QueryHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ('name', 'update_date', 'created_by', 'pub_status', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'star_rule', 'dynamic_query', 'query_error', 'maxhosts_count', 'query')
-    list_filter = ['pub_status', 'created_by', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'star_rule', 'maxhosts_count', 'dynamic_query', 'query_error', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name', 'target_os', 'tags__name']
+    list_display = ('name', 'update_date', 'created_by', 'pub_status', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'star_rule', 'dynamic_query', 'query_error', 'maxhosts_count', 'connector', 'query')
+    list_filter = ['pub_status', 'created_by', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'star_rule', 'maxhosts_count', 'dynamic_query', 'query_error', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name', 'target_os', 'tags__name', 'connector']
     search_fields = ['name', 'description', 'notes', 'emulation_validation']
     filter_horizontal = ('mitre_techniques', 'threats', 'actors', 'target_os', 'vulnerabilities', 'tags')
     history_list_display = ['query', 'columns']
     exclude = ('query_error', 'query_error_message')
     save_as = True
+
+    # Only show connectors that are flagged for TH analytics
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "connector":
+            kwargs["queryset"] = Connector.objects.filter(visible_in_analytics=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change): 
         if not change:

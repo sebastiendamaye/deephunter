@@ -1,1 +1,22 @@
-[{"model": "connectors.connector", "pk": 2, "fields": {"name": "active_directory", "description": "The Active Directory connector is used in the timeline view to get additional information about the owner of an endpoint.", "enabled": true}}, {"model": "connectors.connector", "pk": 1, "fields": {"name": "sentinelone", "description": "SentinelOne EDR", "enabled": true}}]
+[
+    {
+        "model": "connectors.connector",
+        "pk": 1,
+        "fields": {
+            "name": "sentinelone",
+            "description": "SentinelOne EDR",
+            "enabled": true,
+            "visible_in_analytics": false
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 2,
+        "fields": {
+            "name": "active_directory",
+            "description": "The Active Directory connector is used in the timeline view to get additional information about the owner of an endpoint.",
+            "enabled": true,
+            "visible_in_analytics": true
+        }
+    }
+]

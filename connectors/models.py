@@ -4,6 +4,7 @@ class Connector(models.Model):
     name = models.CharField(max_length=20, unique=True)
     description = models.TextField(blank=True)
     enabled = models.BooleanField(default=False)
+    visible_in_analytics = models.BooleanField(default=True, help_text="Should this connector be visible in threat hunting analytics?")
     
     def __str__(self):
         return self.name

@@ -3,7 +3,7 @@ from .models import Connector, ConnectorConf
 from django.conf import settings
 
 class ConnectorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'enabled')
+    list_display = ('name', 'description', 'enabled', 'visible_in_analytics')
     list_filter = ['name', 'description']
     search_fields = ['name', 'description']
 
