@@ -27,12 +27,13 @@ def campaigns_stats(request):
     seconds_in_day = 24 * 60 * 60
     
     for i in reversed(range(DB_DATA_RETENTION)):
-        d = date.today() - timedelta(days=i)
+        d=datetime.combine(datetime.today(), datetime.min.time()) - timedelta(days=i)
+        
         try:
             campaign = Campaign.objects.get(
                 name__startswith="daily_cron_",
-                date_start__gte=timezone.now().replace(year=d.year, month=d.month, day=d.day, hour=0, minute=0, second=0),
-                date_start__lte=timezone.now().replace(year=d.year, month=d.month, day=d.day, hour=23, minute=59, second=59)
+                date_start__gt=d,
+                date_start__lt=d + timedelta(days=1)
                 )        
             difference = campaign.date_end - campaign.date_start
             dur = divmod(difference.days * seconds_in_day + difference.seconds, 60)
