@@ -9,11 +9,9 @@ admin.site.site_title = 'DeepHunter_'
 admin.site.site_header = 'DeepHunter_'
 admin.site.index_title = 'DeepHunter_'
 
-CUSTOM_FIELDS = settings.CUSTOM_FIELDS
-
 class QueryHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ('name', 'update_date', 'created_by', 'pub_status', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'star_rule', 'dynamic_query', 'query_error', 'maxhosts_count', 'connector', 'query')
-    list_filter = ['pub_status', 'created_by', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'star_rule', 'maxhosts_count', 'dynamic_query', 'query_error', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name', 'target_os', 'tags__name', 'connector']
+    list_display = ('name', 'update_date', 'created_by', 'pub_status', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'maxhosts_count', 'connector', 'query')
+    list_filter = ['pub_status', 'created_by', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'maxhosts_count', 'dynamic_query', 'query_error', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name', 'target_os', 'tags__name', 'connector']
     search_fields = ['name', 'description', 'notes', 'emulation_validation']
     filter_horizontal = ('mitre_techniques', 'threats', 'actors', 'target_os', 'vulnerabilities', 'tags')
     history_list_display = ['query', 'columns']
@@ -33,43 +31,12 @@ class QueryHistoryAdmin(SimpleHistoryAdmin):
         return super().save_model(request, obj, form, change)
 
 class SnapshotAdmin(admin.ModelAdmin):
-    list_display = ('get_campaign', 'query', 'date', 'runtime', 'hits_count', 'hits_endpoints',)
-    
-    if CUSTOM_FIELDS['c1']:
-        list_display += ('get_hits_c1',)
-        c1_description = CUSTOM_FIELDS['c1']['description']
-    else:
-        c1_description = ''
-    
-    if CUSTOM_FIELDS['c2']:
-        list_display += ('get_hits_c2',)
-        c2_description = CUSTOM_FIELDS['c2']['description']
-    else:
-        c2_description = ''
-    
-    if CUSTOM_FIELDS['c3']:
-        list_display += ('get_hits_c3',)
-        c3_description = CUSTOM_FIELDS['c3']['description']
-    else:
-        c3_description = ''
-    list_display += ('zscore_count', 'zscore_endpoints', 'anomaly_alert_count', 'anomaly_alert_endpoints',)
+    list_display = ('get_campaign', 'query', 'date', 'runtime', 'hits_count', 'hits_endpoints','zscore_count', 'zscore_endpoints', 'anomaly_alert_count', 'anomaly_alert_endpoints',)
     list_filter = ['campaign__name', 'query', 'date', 'anomaly_alert_count', 'anomaly_alert_endpoints']
     
     @admin.display(description='campaign')
     def get_campaign(self, obj):
         return obj.campaign
-    
-    @admin.display(description=c1_description)
-    def get_hits_c1(self, obj):
-        return obj.hits_c1
-        
-    @admin.display(description=c2_description)
-    def get_hits_c2(self, obj):
-        return obj.hits_c2
-    
-    @admin.display(description=c3_description)
-    def get_hits_c3(self, obj):
-        return obj.hits_c3
     
 class CampaignAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'date_start', 'date_end', 'nb_queries')

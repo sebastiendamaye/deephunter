@@ -266,7 +266,7 @@ timeline.on('doubleClick', function (properties) {
 	} else {
 
 		var nodeID = properties['item'];
-		$('#link_events').attr('href', '/events/{{hostname}}/'+mygroups[properties['group']]+'/'+formatDate(properties['time'])+'/');
+		$('#link_events').attr('href', '/events/'+mygroups[properties['group']]+'/'+formatDate(properties['time'])+'/{{hostname}}/');
 		
 		if (storylineid[nodeID] != '') {
 			$('#link_storylineid').attr('href', '/storyline/'+storylineid[nodeID]+'/'+formatDate(properties['time'])+'/');

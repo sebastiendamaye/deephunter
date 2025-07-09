@@ -1,48 +1,39 @@
 import requests
-import json
 from django.conf import settings
-from time import sleep
-from ldap3 import Server, Connection, ALL
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseRedirect, FileResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q, Sum
-from urllib.parse import quote, quote_plus
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta, timezone
 import numpy as np
 from scipy import stats
 from .models import Country, Query, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus, Category
+from connectors.models import Connector
 from .tasks import regenerate_stats
 import ipaddress
-import re
+from connectors.utils import is_connector_enabled, get_connector_conf
 
-VT_API_KEY = settings.VT_API_KEY
-CUSTOM_FIELDS = settings.CUSTOM_FIELDS
+# Dynamically import all connectors
+import importlib
+import pkgutil
+import plugins
+all_connectors = {}
+for loader, module_name, is_pkg in pkgutil.iter_modules(plugins.__path__):
+    module = importlib.import_module(f"plugins.{module_name}")
+    all_connectors[module_name] = module
+
+
+PROXY = settings.PROXY
+STATIC_PATH = settings.STATIC_ROOT
 BASE_DIR = settings.BASE_DIR
 UPDATE_ON = settings.UPDATE_ON
+DB_DATA_RETENTION = settings.DB_DATA_RETENTION
+GITHUB_LATEST_RELEASE_URL = settings.GITHUB_LATEST_RELEASE_URL
+GITHUB_COMMIT_URL = settings.GITHUB_COMMIT_URL
 
-# Params for requests API calls
-S1_URL = settings.S1_URL
-S1_TOKEN = settings.S1_TOKEN
-PROXY = settings.PROXY
-XDR_URL = settings.XDR_URL
-XDR_PARAMS = settings.XDR_PARAMS
-S1_THREATS_URL = settings.S1_THREATS_URL
 
-# Params for LDAP3 calls
-LDAP_SERVER = settings.LDAP_SERVER
-LDAP_PORT = settings.LDAP_PORT
-LDAP_SSL = settings.LDAP_SSL
-LDAP_USER = settings.LDAP_USER
-LDAP_PWD = settings.LDAP_PWD
-LDAP_SEARCH_BASE = settings.LDAP_SEARCH_BASE
-LDAP_ATTRIBUTES = settings.LDAP_ATTRIBUTES
-
-# Params for S1 TOKEN
-STATIC_PATH = settings.STATIC_ROOT
-S1_TOKEN_EXPIRATION = settings.S1_TOKEN_EXPIRATION
 
 @login_required
 def index(request):
@@ -61,6 +52,10 @@ def index(request):
             )
             posted_search = request.POST['search']
             
+        if 'connectors' in request.POST:
+            queries = queries.filter(connector__pk__in=request.POST.getlist('connectors'))
+            posted_filters['connectors'] = request.POST.getlist('connectors')
+
         if 'categories' in request.POST:
             queries = queries.filter(category__pk__in=request.POST.getlist('categories'))
             posted_filters['categories'] = request.POST.getlist('categories')
@@ -123,13 +118,13 @@ def index(request):
                 queries = queries.filter(run_daily=False)
                 posted_filters['run_daily'] = 0
             
-        if 'star_rule' in request.POST:
-            if request.POST['star_rule'] == '1':
-                queries = queries.filter(star_rule=True)
-                posted_filters['star_rule'] = 1
+        if 'create_rule' in request.POST:
+            if request.POST['create_rule'] == '1':
+                queries = queries.filter(create_rule=True)
+                posted_filters['create_rule'] = 1
             else:
-                queries = queries.filter(star_rule=False)
-                posted_filters['star_rule'] = 0
+                queries = queries.filter(create_rule=False)
+                posted_filters['create_rule'] = 0
 
         if 'dynamic_query' in request.POST:
             if request.POST['dynamic_query'] == '1':
@@ -184,42 +179,25 @@ def index(request):
         snapshot = Snapshot.objects.filter(query=query, date=datetime.today()-timedelta(days=1)).order_by('date')
         if len(snapshot) > 0:
             snapshot = snapshot[0]
-            query.hits_c1 = snapshot.hits_c1
-            query.hits_c2 = snapshot.hits_c2
-            query.hits_c3 = snapshot.hits_c3
             query.hits_endpoints = snapshot.hits_endpoints
             query.hits_count = snapshot.hits_count
             query.anomaly_alert_count = snapshot.anomaly_alert_count
             query.anomaly_alert_endpoints = snapshot.anomaly_alert_endpoints
         else:
-            query.hits_c1 = 0
-            query.hits_c2 = 0
-            query.hits_c3 = 0
             query.hits_endpoints = 0
             query.hits_count = 0
         
         # Sparkline: show sparkline only for last 20 days event count
         snapshots = Snapshot.objects.filter(query=query, date__gt=datetime.today()-timedelta(days=20))
         query.sparkline = [snapshot.hits_endpoints for snapshot in snapshots]
-
-    custom_fields = []
-    if CUSTOM_FIELDS['c1']:
-        custom_fields.append(CUSTOM_FIELDS['c1']['name'])
-    if CUSTOM_FIELDS['c2']:
-        custom_fields.append(CUSTOM_FIELDS['c2']['name'])
-    if CUSTOM_FIELDS['c3']:
-        custom_fields.append(CUSTOM_FIELDS['c3']['name'])
-    
+        
     # Check if token is about to expire
-    tokenexpires = 1000
-    try:
-        with open('{}/tokendate.txt'.format(STATIC_PATH), 'r') as f:
-            d = re.search(r'\d{4}-\d{2}-\d{2}', f.readline())
-            tokendate = datetime.strptime(d.group(), "%Y-%m-%d")
-            tokenelapseddays = (datetime.today() - tokendate).days
-            tokenexpires = S1_TOKEN_EXPIRATION - tokenelapseddays
-    except:
-        tokenexpires = 1000
+    expires_on = all_connectors.get('sentinelone').get_token_expiration_date()
+    dt = datetime.strptime(expires_on, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
+    now = datetime.now(timezone.utc)
+    delta = dt - now
+    tokenexpires = delta.days + 1
+    
 
     # Check if new version available
     try:
@@ -229,7 +207,7 @@ def index(request):
         # update on new release only
         if UPDATE_ON == 'release':
             r = requests.get(
-                'https://api.github.com/repos/sebastiendamaye/deephunter/releases/latest',
+                GITHUB_LATEST_RELEASE_URL,
                 proxies=PROXY
                 )
             remote_ver = r.json()['name']
@@ -239,7 +217,7 @@ def index(request):
         else:
             # update on every new commit
             r = requests.get(
-                'https://raw.githubusercontent.com/sebastiendamaye/deephunter/refs/heads/main/static/commit_id.txt',
+                GITHUB_COMMIT_URL,
                 proxies=PROXY
                 )
             remote_ver = r.text.strip()
@@ -256,6 +234,7 @@ def index(request):
 
     context = {
         'queries': queries,
+        'connectors': Connector.objects.filter(visible_in_analytics=True),
         'target_os': TargetOs.objects.all(),
         'vulnerabilities': Vulnerability.objects.all(),
         'tags': Tag.objects.all(),
@@ -268,7 +247,6 @@ def index(request):
         'created_by': User.objects.filter(id__in=Query.objects.exclude(created_by__isnull=True).values('created_by').distinct()),
         'posted_search': posted_search,
         'posted_filters': posted_filters,
-        'custom_fields': custom_fields,
         'tokenexpires': tokenexpires,
         'update_available': update_available
     }
@@ -287,25 +265,8 @@ def trend(request, query_id):
     z_count = stats.zscore(a_count)
     a_endpoints = np.array([snapshot.hits_endpoints for snapshot in snapshots])
     z_endpoints = stats.zscore(a_endpoints)
-    a_c1 = np.array([snapshot.hits_c1 for snapshot in snapshots])
-    a_c2 = np.array([snapshot.hits_c2 for snapshot in snapshots])
-    a_c3 = np.array([snapshot.hits_c3 for snapshot in snapshots])
     a_anomaly_alert_count = np.array([snapshot.anomaly_alert_count for snapshot in snapshots])
     a_anomaly_alert_endpoints = np.array([snapshot.anomaly_alert_endpoints for snapshot in snapshots])
-    if CUSTOM_FIELDS['c1']:
-        c1_name = CUSTOM_FIELDS['c1']['name']
-    else:
-        c1_name = ''
-
-    if CUSTOM_FIELDS['c2']:
-        c2_name = CUSTOM_FIELDS['c2']['name']
-    else:
-        c2_name = ''
-
-    if CUSTOM_FIELDS['c3']:
-        c3_name = CUSTOM_FIELDS['c3']['name']
-    else:
-        c3_name = ''
 
     for i,v in enumerate(a_count):
         stats_vals.append( {
@@ -315,9 +276,6 @@ def trend(request, query_id):
             'zscore_count': z_count[i],
             'hits_endpoints': a_endpoints[i],
             'zscore_endpoints': z_endpoints[i],
-            'hits_c1': a_c1[i],
-            'hits_c2': a_c2[i],
-            'hits_c3': a_c3[i],
             'anomaly_alert_count': a_anomaly_alert_count[i],
             'anomaly_alert_endpoints': a_anomaly_alert_endpoints[i]
             } )
@@ -327,37 +285,10 @@ def trend(request, query_id):
     context = {
         'query': query,
         'stats': stats_vals,
-        'c1_name': c1_name,
-        'c2_name': c2_name,
-        'c3_name': c3_name,
         'distinct_endpoints': endpoints.count(),
         'endpoints': endpoints,
         }
     return render(request, 'trend.html', context)
-
-@login_required
-def pq(request, query_id, site):
-    query = get_object_or_404(Query, pk=query_id)
-    if site==1 or site==2 or site==3:
-        # site=1 means 1st custom field (C1), site=2 means 2nd custom field (C2), etc
-        if site==1:
-            custom_field = CUSTOM_FIELDS['c1']['filter']
-        elif site==2:
-            custom_field = CUSTOM_FIELDS['c2']['filter']
-        elif site==3:
-            custom_field = CUSTOM_FIELDS['c3']['filter']
-        
-        customized_query = "{} \n| filter {}".format(query.query, custom_field)
-    else:
-        customized_query = query.query
-    
-    if query.columns:
-        q = quote('{}\n{}'.format(customized_query, query.columns))
-    else:
-        q = quote(customized_query)
-    
-    startdate = (datetime.today()-timedelta(days=1)).strftime('%Y-%m-%d')
-    return HttpResponseRedirect('{}/query?filter={}&{}&startTime={}&endTime=%2B1day'.format(XDR_URL, q.replace('%0D', ''), XDR_PARAMS, startdate))
 
 @login_required
 def querydetail(request, query_id):
@@ -382,29 +313,11 @@ def querydetail(request, query_id):
         progress = round(celery_status.progress)
     except:
         progress = 999
-    
-    if CUSTOM_FIELDS['c1']:
-        c1 = CUSTOM_FIELDS['c1']['description']
-    else:
-        c1 = ''
-        
-    if CUSTOM_FIELDS['c2']:
-        c2 = CUSTOM_FIELDS['c2']['description']
-    else:
-        c2 = ''
-    
-    if CUSTOM_FIELDS['c3']:
-        c3 = CUSTOM_FIELDS['c3']['description']
-    else:
-        c3 = ''
-        
+            
     context = {
         'q': query,
         'endpoints': endpoints,
-        'progress': progress,
-        'c1': c1,
-        'c2': c2,
-        'c3': c3        
+        'progress': progress
         }
     return render(request, 'query_detail.html', context)
 
@@ -423,7 +336,16 @@ def timeline(request):
     gid = 0 # group id
     iid = 0 # item id
     storylineid_json = {}
-    
+
+    hostname = ''
+    username = ''
+    machinedetails = ''
+    apps = ''
+    user_name = ''
+    job_title = ''
+    business_unit = ''
+    location = ''
+
     if request.GET:
         hostname = request.GET['hostname'].strip()
         endpoints = Endpoint.objects.filter(hostname=hostname).order_by('snapshot__date')
@@ -450,121 +372,87 @@ def timeline(request):
             storylineid_json[iid] = e.storylineid.split('#')
             iid += 1
         
+
         # Populate threats (group ID = 999 for easy identification in template)
         gid = 999
-        createdat = (datetime.today()-timedelta(days=90)).isoformat()
-        
-        r = requests.get(
-            '{}/web/api/v2.1/threats?computerName__contains={}&createdAt__gte={}'.format(S1_URL, hostname, createdat),
-            params = {"limit": 100},
-            headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
-            proxies=PROXY
-            )
-        
-        threats = r.json()['data']
-        if threats:
-            groups.append({'id':gid, 'content':'Threats (S1)'})
-        
-        for threat in threats:
-            if threat['threatInfo']:
-                #if threat['threatInfo']['analystVerdict'] != 'false_positive':
-                detectedat = threat['threatInfo']['identifiedAt']
-                items.append({
-                    'id': iid,
-                    'group': gid,
-                    'start': datetime.strptime(detectedat, '%Y-%m-%dT%H:%M:%S.%fZ'),
-                    'end': datetime.strptime(detectedat, '%Y-%m-%dT%H:%M:%S.%fZ')+timedelta(days=1),
-                    'description': '{} [{}] [{}]'.format(
-                        threat['threatInfo']['threatName'],
-                        threat['threatInfo']['analystVerdict'],
-                        threat['threatInfo']['confidenceLevel']
-                        ),
-                    'storylineid': 'StorylineID: {}'.format(threat['threatInfo']['storyline'])
-                    })
-                storylineid_json[iid] = [threat['threatInfo']['storyline']]
-                iid += 1
+        created_at = (datetime.today()-timedelta(days=DB_DATA_RETENTION)).isoformat()
 
-        # Populate applications (group ID = 998 for easy identification in template)
-        gid = 998
+        # Recursively call the get_threats function in each connector to build a consolidated list of threats
+        for connector in all_connectors.values():
+        
+            if hasattr(connector, 'get_threats'):
+                # If the connector has a get_threats method, call it
+                #try:
+                threats = connector.get_threats(hostname, created_at)
+                if threats:
+                    groups.append({'id':gid, 'content':f'Threats ({connector.__name__.split(".")[1]})'})
+                    for threat in threats:
+                        detectedat = threat['threatInfo']['identifiedAt']
+                        items.append({
+                            'id': iid,
+                            'group': gid,
+                            'start': datetime.strptime(detectedat, '%Y-%m-%dT%H:%M:%S.%fZ'),
+                            'end': datetime.strptime(detectedat, '%Y-%m-%dT%H:%M:%S.%fZ')+timedelta(days=1),
+                            'description': '{} [{}] [{}]'.format(
+                                threat['threatInfo']['threatName'],
+                                threat['threatInfo']['analystVerdict'],
+                                threat['threatInfo']['confidenceLevel']
+                                ),
+                            'storylineid': 'StorylineID: {}'.format(threat['threatInfo']['storyline'])
+                            })
+                        storylineid_json[iid] = [threat['threatInfo']['storyline']]
+                        iid += 1
+                """except Exception as e:
+                    print(f"Error getting threats for {hostname}")"""
 
-        # Get machine ID
-        r = requests.get(
-            '{}/web/api/v2.1/agents?computerName={}'.format(S1_URL, hostname),
-            headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
-            proxies=PROXY
-            )
-        try:
-            machinedetails = r.json()['data'][0]
-            id = r.json()['data'][0]['id']
+        ###
+        # The below content is only available if SentinelOne connector is enabled
+        ###
+        if is_connector_enabled('sentinelone'):
+
             username = ''
 
-            if id:
-                # Get username
-                r = requests.get(
-                    '{}/web/api/v2.1/agents?ids={}'.format(S1_URL, id),
-                    headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
-                    proxies=PROXY
-                    )
-                username = r.json()['data'][0]['lastLoggedInUserName']
-            
-                groups.append({'id':gid, 'content':'Apps install (S1)'})
+            # Get machine details from SentinelOne            
+            machinedetails = all_connectors.get('sentinelone').get_machine_details(hostname)
+            if machinedetails:
+                agent_id = machinedetails['id']
+
+                if agent_id:
+                    # Get username
+                    username = all_connectors.get('sentinelone').get_last_logged_in_user(agent_id)
                 
-                createdat = (datetime.today()-timedelta(days=90))
-                # Get applications
-                
-                r = requests.get(
-                    '{}/web/api/v2.1/agents/applications?ids={}'.format(S1_URL, id),
-                    headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
-                    proxies=PROXY
-                    )
-                apps = r.json()['data']
-                
-                for app in apps:
-                    if app['installedDate']:
-                        if datetime.strptime(app['installedDate'][:10], '%Y-%m-%d') >= createdat:
-                            items.append({
-                                'id': iid,
-                                'group': gid,
-                                'start':  datetime.strptime(app['installedDate'][:10], '%Y-%m-%d'),
-                                'end': datetime.strptime(app['installedDate'][:10], '%Y-%m-%d')+timedelta(days=1),
-                                'description': '{} ({})'.format(app['name'].strip(), app['publisher'].strip())
-                                })
-                            iid += 1
-                
-                # Get user info from AD
-                user_name = 'N/A'
-                job_title = 'N/A'
-                business_unit = 'N/A'
-                location = 'N/A'
-                if LDAP_SERVER:
-                    server = Server(LDAP_SERVER, port=LDAP_PORT, use_ssl=LDAP_SSL, get_info=ALL)
-                    conn = Connection(server, LDAP_USER, LDAP_PWD, auto_bind=True)
-                    conn.search(
-                        LDAP_SEARCH_BASE,
-                        '(sAMAccountName={})'.format(username),
-                        attributes=[
-                            LDAP_ATTRIBUTES['USER_NAME'],
-                            LDAP_ATTRIBUTES['JOB_TITLE'],
-                            LDAP_ATTRIBUTES['BUSINESS_UNIT'],
-                            LDAP_ATTRIBUTES['OFFICE'],
-                            LDAP_ATTRIBUTES['COUNTRY']
-                            ]
-                        )
-                    if conn.entries:
-                        entry = conn.entries[0]
+                    # Populate applications (group ID = 998 for easy identification in template)
+                    gid = 998
+                    groups.append({'id':gid, 'content':'Apps install (S1)'})
+                    
+                    createdat = (datetime.today()-timedelta(days=DB_DATA_RETENTION))
+                    apps = all_connectors.get('sentinelone').get_applications(agent_id)
+                    
+                    for app in apps:
+                        if app['installedDate']:
+                            if datetime.strptime(app['installedDate'][:10], '%Y-%m-%d') >= createdat:
+                                items.append({
+                                    'id': iid,
+                                    'group': gid,
+                                    'start':  datetime.strptime(app['installedDate'][:10], '%Y-%m-%d'),
+                                    'end': datetime.strptime(app['installedDate'][:10], '%Y-%m-%d')+timedelta(days=1),
+                                    'description': '{} ({})'.format(app['name'].strip(), app['publisher'].strip())
+                                    })
+                                iid += 1
+                    
+                    # Get user info from AD
+                    user_name = 'N/A'
+                    job_title = 'N/A'
+                    business_unit = 'N/A'
+                    location = 'N/A'
+
+                    entry = all_connectors.get('activedirectory').ldap_search(username)
+                    if entry:
                         user_name = entry.displayName
                         job_title = entry.title
                         business_unit = entry.division
                         location = "{}, {}".format(entry.physicalDeliveryOfficeName, entry.co)
                     
-        except:
-            username = ''
-            machinedetails = ''
-            apps = ''
-            user_name = ''
-            job_title = ''
-            business_unit = ''
-            location = ''
 
         # Visualization #2 (graph)
         items2 = Endpoint.objects.filter(hostname=hostname) \
@@ -572,20 +460,9 @@ def timeline(request):
             .annotate(cumulative_score=Sum('snapshot__query__weighted_relevance')) \
             .order_by('snapshot__date')
 
-    else:
-        hostname = ''
-        username = ''
-        machinedetails = ''
-        apps = ''
-        user_name = ''
-        job_title = ''
-        business_unit = ''
-        location = ''
-    
-    
     
     context = {
-        'S1_THREATS_URL': S1_THREATS_URL.format(hostname),
+        'S1_THREATS_URL': get_connector_conf('sentinelone', 'S1_THREATS_URL').format(hostname),
         'hostname': hostname,
         'username': username,
         'machinedetails': machinedetails,
@@ -604,27 +481,20 @@ def timeline(request):
     return render(request, 'timeline.html', context)
 
 @login_required
-def events(request, endpointname, query_id, eventdate):    
+def events(request, query_id, eventdate=None, endpointname=None):
+    """
+    Redirect to the query link in the connector's data lake.
+    """
     query = get_object_or_404(Query, pk=query_id)
-    if endpointname != 'NULL':
-        customized_query = "{} \n| filter endpoint.name='{}'".format(query.query, endpointname)
-    else:
-        customized_query = query.query
-
-    if query.columns:
-        q = quote('{}\n{}'.format(customized_query, query.columns))
-    else:
-        q = quote(customized_query)
-    
-    return HttpResponseRedirect('{}/query?filter={}&startTime={}&endTime=%2B1+day&{}'.format(XDR_URL, q.replace('%0D', ''), eventdate, XDR_PARAMS))
+    return HttpResponseRedirect(all_connectors.get(query.connector.name).get_redirect_query_link(query, eventdate, endpointname))
 
 @login_required
-def storyline(request, storylineids, eventdate):    
-    if ',' in storylineids:
-        filter = "src.process.storyline.id in {} or tgt.process.storyline.id in {}".format(tuple(storylineids.split(',')), tuple(storylineids.split(',')))
-    else:
-        filter = f"src.process.storyline.id = '{storylineids}' or tgt.process.storyline.id = '{storylineids}'"
-    return HttpResponseRedirect('{}/events?filter={}&startTime={}&endTime=%2B1+day&{}'.format(XDR_URL, quote_plus(filter), eventdate, XDR_PARAMS))
+def storyline(request, storylineids, eventdate):
+    """
+    Redirect to Singularity DataLake in S1 with results related to the queried storyline ID(s).
+    Only relevant for SentinelOne connector.
+    """
+    return HttpResponseRedirect(all_connectors.get('sentinelone').get_redirect_storyline_link(storylineids, eventdate))
 
 @login_required
 @permission_required("qm.delete_campaign")
@@ -674,56 +544,14 @@ def netview(request):
             debug = 'Missing Endpoint and/or Storyline ID'
 
         else:
-            query = "| join ("
-            if hostname:
-                query += "endpoint.name = '{}' and ".format(hostname)
-            if storylineid:
-                query += "src.process.storyline.id = '{}' and ".format(storylineid)
-            query += """
-event.category = 'ip' 
-and dst.ip.address != '127.0.0.1' 
-| group nbevents=count(), dstports=hacklist(dst.port.number) by dst.ip.address 
-), ( 
-| group nbhosts=estimate_distinct(endpoint.name) by dst.ip.address 
-) on dst.ip.address 
-| sort nbhosts
-"""
-            body = {
-                'fromDate': (datetime.now() - timedelta(hours=timerange)).isoformat(),
-                'query': query,
-                'toDate': datetime.now().isoformat(),
-                'limit': 100
-            }
-                    
-            r = requests.post('{}/web/api/v2.1/dv/events/pq'.format(S1_URL),
-                json=body,
-                headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
-                proxies=PROXY)
-            
-            try:
-                query_id = r.json()['data']['queryId']
-                status = r.json()['data']['status']
-            
-                # Ping PowerQuery every second, until it is complete (unless you do that, the PQ will be cancelled)
-                while status == 'RUNNING':
-                    r = requests.get('{}/web/api/v2.1/dv/events/pq-ping'.format(S1_URL),
-                        params = {"queryId": query_id},
-                        headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
-                        proxies=PROXY)
-                        
-                    status = r.json()['data']['status']
-                    progress = r.json()['data']['progress']
-                    
-                    sleep(1)
 
-                if len(r.json()['data']['data']) != 0:
-                    data = r.json()['data']['data']
-                    headers = {
-                        'x-apikey': VT_API_KEY,
-                        'accept': 'application/json'
-                        }
-                    for ip in data:
-                        
+            r = all_connectors.get('sentinelone').get_network_connections(storylineid, hostname, timerange)
+
+            if len(r['data']) != 0:
+                data = r['data']
+                for ip in data:
+                    
+                    if ip[0]:
                         # if private ip, don't scan with VT
                         if ipaddress.ip_address(ip[0]).is_private:
                             iptype = 'PRIV'
@@ -731,14 +559,16 @@ and dst.ip.address != '127.0.0.1'
                         else:
                             iptype = 'PUBL'
                             vt = {}
-                            response = requests.get(
-                                "https://www.virustotal.com/api/v3/ip_addresses/{}".format(ip[0]),
-                                headers=headers,
-                                proxies=PROXY
-                                )
-                            vt['malicious'] = response.json()['data']['attributes']['last_analysis_stats']['malicious']
-                            vt['suspicious'] = response.json()['data']['attributes']['last_analysis_stats']['suspicious']
-                            vt['whois'] = response.json()['data']['attributes']['whois']
+                            response = all_connectors.get('virustotal').check_ip(ip[0])
+                            try:
+                                vt['malicious'] = response['attributes']['last_analysis_stats']['malicious']
+                                vt['suspicious'] = response['attributes']['last_analysis_stats']['suspicious']
+                                vt['whois'] = response['attributes']['whois']
+                            except KeyError:
+                                vt['malicious'] = 0
+                                vt['suspicious'] = 0
+                                vt['whois'] = ''
+                                debug = 'No VT data for IP: {}'.format(ip[0])
                         
                         ips.append({
                             'dstip': ip[0],
@@ -747,11 +577,7 @@ and dst.ip.address != '127.0.0.1'
                             'freq': int(ip[3]),
                             'vt': vt
                             })
-                
-            except:
-                debug = ''
-            #except Exception as e: 
-            #    debug = "***REQUEST FAILED: {}".format(e)
+            
        
     else:
         hostname = ''

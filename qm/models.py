@@ -136,7 +136,7 @@ class Query(models.Model):
         output_field=models.FloatField(),
         db_persist=False
     )
-    connector = models.ForeignKey(Connector, on_delete=models.SET_NULL, null=True, blank=True, help_text="Connector to use for this query")
+    connector = models.ForeignKey(Connector, on_delete=models.CASCADE, help_text="Connector to use for this query")
     query = models.TextField()
     columns = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
@@ -147,7 +147,7 @@ class Query(models.Model):
     vulnerabilities = models.ManyToManyField(Vulnerability, blank=True)
     emulation_validation = models.TextField(blank=True, help_text="Emulation and validation, Markdown syntax")
     references = models.TextField(blank=True, help_text="List of sources, one per line")
-    star_rule = models.BooleanField(default=False)
+    create_rule = models.BooleanField(default=False)
     run_daily = models.BooleanField(default=True)
     run_daily_lock = models.BooleanField(default=False, help_text="Prevents the run_daily flag from being unset and stats from being deleted automatically")
     dynamic_query = models.BooleanField(default=False)
@@ -202,9 +202,6 @@ class Snapshot(models.Model):
     runtime = models.FloatField()
     hits_count = models.IntegerField(default=0)
     hits_endpoints = models.IntegerField(default=0)
-    hits_c1 = models.IntegerField(default=0)
-    hits_c2 = models.IntegerField(default=0)
-    hits_c3 = models.IntegerField(default=0)
     zscore_count = models.FloatField(default=0)
     zscore_endpoints = models.FloatField(default=0)
     anomaly_alert_count = models.BooleanField(default=False)

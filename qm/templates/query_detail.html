@@ -1,10 +1,7 @@
 {% load qm_extras %}
 {% load markup_tags %}
 <div class="m10">
-	<a href="{{ q.id }}/pq/0/" target="_blank" class="button">Run in PQ (all users)</a>
-	{% if c1 %}<a href="{{ q.id }}/pq/1/" target="_blank" class="button">Run in PQ ({{ c1 }})</a>{% endif %}
-	{% if c2 %}<a href="{{ q.id }}/pq/2/" target="_blank" class="button">Run in PQ ({{ c2 }})</a>{% endif %}
-	{% if c3 %}<a href="{{ q.id }}/pq/3/" target="_blank" class="button">Run in PQ ({{ c3 }})</a>{% endif %}
+	<a href="/events/{{ q.id }}/" target="_blank" class="button">Run query</a>
 	<a href="{{ q.id }}/trend/" target="_blank" class="button">See trend</a>
 	<a href="/admin/qm/query/{{ q.id }}/change/" target="_blank" class="button">Edit in admin</a></li>
 	{% if perms.qm.delete_campaign %}
@@ -38,7 +35,7 @@
 <h1>THREAT HUNTING NOTES</h1>
 {% if q.notes %}<div class="description">{{ q.notes|apply_markup:"markdown" }}</div>{% endif %}
 
-<h1>POWERQUERY</h1>
+<h1>QUERY</h1>
 {% if q.query_error %}<div class="{% if 'errors' in q.query_error_message %}errormsg{% else %}warningmsg{% endif %}">{{ q.query_error_message }}</div>{% endif %}
 <div class="w1000 ml40{% if q.query_error %}{% if 'errors' in q.query_error_message %} errorquery{% else %} warningquery{% endif %}{% endif %}"><pre>{{ q.query }}{% if q.columns %}<br />{{ q.columns }}{% endif %}</pre></div>
 

@@ -4,8 +4,10 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('<int:query_id>/trend/', views.trend, name='trend'),
-    path('<int:query_id>/pq/<int:site>/', views.pq, name='pq'),
-    path('events/<str:endpointname>/<int:query_id>/<str:eventdate>/', views.events, name='events'),
+    #path('<int:query_id>/pq/', views.pq, name='pq'),
+    path('events/<int:query_id>/<str:eventdate>/<str:endpointname>/', views.events, name='events'),
+    path('events/<int:query_id>/<str:eventdate>/', views.events, name='events'),
+    path('events/<int:query_id>/', views.events, name='events'),
     path('storyline/<str:storylineids>/<str:eventdate>/', views.storyline, name='storyline'),
     path('<int:query_id>/detail/', views.querydetail, name='querydetail'),
     path('debug', views.debug, name='debug'),

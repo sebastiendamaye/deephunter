@@ -9,9 +9,16 @@ from urllib.parse import quote
 from datetime import datetime, timedelta, date
 from qm.models import Country, Query, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus
 
-# Params for requests API calls
-XDR_URL = settings.XDR_URL
-XDR_PARAMS = settings.XDR_PARAMS
+# Dynamically import all connectors
+import importlib
+import pkgutil
+import plugins
+all_connectors = {}
+for loader, module_name, is_pkg in pkgutil.iter_modules(plugins.__path__):
+    module = importlib.import_module(f"plugins.{module_name}")
+    all_connectors[module_name] = module
+
+
 # Params for MITRE JSON file
 STATIC_PATH = settings.STATIC_ROOT
 # DB retention
@@ -191,23 +198,9 @@ def endpoints(request):
         qdata = []
         for query in queries:
             
-            if '| parse' in query.snapshot.query.query or '| let' in query.snapshot.query.query or '| filter' in query.snapshot.query.query:
-                # if there are embedded functions like "| parse", "| filter", etc... end of parenthesis should be
-                # placed before the "| parse" statement, instead of at the very end of the query.
-                customized_query = "endpoint.name='{}' and (\n{}".format(hostname, query.snapshot.query.query)
-                # replace only the first occurence, not all where pipe is detected
-                customized_query = customized_query.replace("| ", ")\n| ", 1)
-            else:
-                customized_query = "endpoint.name='{}' and (\n{}\n)".format(hostname, query.snapshot.query.query)
-            
-            if query.snapshot.query.columns:
-                q = quote('{}\n{}'.format(customized_query, query.snapshot.query.columns))
-            else:
-                q = quote(customized_query)
-            
             startdate=(datetime.today()-timedelta(days=1)).strftime('%Y-%m-%d')
-            xdrlink = '{}/query?filter={}&{}&startTime={}&endTime=%2B1day'.format(XDR_URL, q.replace('%0D', ''), XDR_PARAMS, startdate)
-            
+            xdrlink = all_connectors.get(query.snapshot.query.connector.name).get_redirect_query_link(query.snapshot.query, date=startdate, endpoint_name=hostname)
+
             qdata.append({
                 "queryid":query.snapshot.query.id,
                 "name":query.snapshot.query.name,

@@ -40,6 +40,11 @@
 	<div class="floatrightpadding">{% if posted_search or posted_filters %}[<a href="/qm/">remove filters</a>]{% endif %}</div>
 	{% if posted_filters %}
 		<div id="divfilters">
+			{% if posted_filters.connectors %}
+				{% for v in posted_filters.connectors %}
+					<button class="button_filter" id="button_checkconnector_{{ v }}">CONNECTOR:{{ v|connectoridtoname }}&nbsp;&nbsp;<b>x</b></button>
+				{% endfor %}
+			{% endif %}
 			{% if posted_filters.categories %}
 				{% for v in posted_filters.categories %}
 					<button class="button_filter" id="button_checkcategory_{{ v }}">CAT:{{ v|categoryidtoname }}&nbsp;&nbsp;<b>x</b></button>
@@ -107,11 +112,11 @@
 					<button class="button_filter" id="button_checkrundaily_0">RUN_DAILY:no&nbsp;&nbsp;<b>x</b></button>
 				{% endif %}
 			{% endif %}
-			{% if posted_filters.star_rule == 0 or posted_filters.star_rule == 1 %}
-				{% if posted_filters.star_rule|slugify == '1' %}
-					<button class="button_filter" id="button_checkstarrule_1">STAR_RULE:yes&nbsp;&nbsp;<b>x</b></button>
+			{% if posted_filters.create_rule == 0 or posted_filters.create_rule == 1 %}
+				{% if posted_filters.create_rule|slugify == '1' %}
+					<button class="button_filter" id="button_checkcreaterule_1">CREATE_RULE:yes&nbsp;&nbsp;<b>x</b></button>
 				{% else %}
-					<button class="button_filter" id="button_checkstarrule_0">STAR_RULE:no&nbsp;&nbsp;<b>x</b></button>
+					<button class="button_filter" id="button_checkcreaterule_0">CREATE_RULE:no&nbsp;&nbsp;<b>x</b></button>
 				{% endif %}
 			{% endif %}
 			{% if posted_filters.dynamic_query == 0 or posted_filters.dynamic_query == 1 %}
@@ -152,6 +157,17 @@
 	<table class="table table-expandable">
 	<tbody>
 	
+		<tr><td><div class="filter">Connectors</div></td></tr>
+		<tr><td>
+			{% for connector in connectors %}
+			<div class="form-check">
+				<input class="form-check-input" type="checkbox" id="checkconnector{{ connector.id }}" name="connectors" value="{{ connector.id }}"
+					{% if connector.id|slugify in posted_filters.connectors %} checked{% endif %}>
+				<label class="form-check-label" for="checkconnector{{ connector.id }}" title="{{ connector.description }}"">{{ connector.name }}</label>
+			</div>
+			{% endfor %}
+		</td></tr>
+
 		<tr><td><div class="filter">Categories</div></td></tr>
 		<tr><td>
 			{% for category in categories %}
@@ -328,16 +344,16 @@
 			</div>
 
 			<br />
-			<h5>STAR rule</h5>
+			<h5>Create rule</h5>
 			<div class="form-check">
-				<input class="form-check-input" type="radio" id="checkstarrule1" name="star_rule" value="1"
-					{% if posted_filters.star_rule|slugify == '1' %} checked{% endif %} />
-				<label class="form-check-label" for="checkstarrule1">yes</label>
+				<input class="form-check-input" type="radio" id="checkcreaterule1" name="create_rule" value="1"
+					{% if posted_filters.create_rule|slugify == '1' %} checked{% endif %} />
+				<label class="form-check-label" for="checkcreaterule1">yes</label>
 			</div>
 			<div class="form-check">
-				<input class="form-check-input" type="radio" id="checkstarrule0" name="star_rule" value="0"
-					{% if posted_filters.star_rule|slugify == '0' %} checked{% endif %} />
-				<label class="form-check-label" for="checkstarrule0">no</label>
+				<input class="form-check-input" type="radio" id="checkcreaterule0" name="create_rule" value="0"
+					{% if posted_filters.create_rule|slugify == '0' %} checked{% endif %} />
+				<label class="form-check-label" for="checkcreaterule0">no</label>
 			</div>
 
 			<br />
@@ -418,20 +434,18 @@
     <tr>
       <th width="50px" data-sort="false"><!--toggle--></th>
         <th>Name</th>
+		<th>Connector</th>
 		<th>Pub status</th>
 		<th>Cat.</th>
 		<th>Confidence</th>
 		<th>Relevance</th>
         <th>Run daily</th>
-        <th>STAR rule</th>
+        <th>Create rule</th>
         <th>Dyn. query</th>
 		<th>Maxhosts count</th>
         <th>Trend</th>
         <th class="aright">#Hits (24h)</th>
 		<th class="aright">#Hosts (24h)</th>
-		{% if custom_fields|length > 0 %}<th class="aright">#{{ custom_fields.0 }} (24h)</th>{% endif %}
-		{% if custom_fields|length > 1 %}<th class="aright">#{{ custom_fields.1 }} (24h)</th>{% endif %}
-		{% if custom_fields|length > 2 %}<th class="aright">#{{ custom_fields.2 }} (24h)</th>{% endif %}
     </tr>
   </thead>
   <tbody>
@@ -439,29 +453,21 @@
     <tr class="row-summary"  data-row-number="{{ q.name }}">
         <td><button id="b_{{ q.id }}" class="btn btn-default toggle-row"><i class="fa fa-chevron-right"></i></button></td>
         <td>{{ q.name }}</td>
+		<td>{{ q.connector.name }}</td>
         <td>{{ q.pub_status }}</td>
         <td>{{ q.category.short_name }}</td>
         <td class="acenter"><div class="confidence_{{ q.confidence }}">{{ q.confidence|confidencelabel }}</div></td>
         <td class="acenter"><div class="confidence_{{ q.relevance }}">{{ q.relevance|confidencelabel }}</div></td>
 		<td class="acenter">{% if q.run_daily %}{% if q.run_daily_lock %}<img src="/static/images/lock.png" width="20" />{% else %}<img src="/static/admin/img/icon-yes.svg" />{% endif %}{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
-		<td class="acenter">{% if q.star_rule %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
+		<td class="acenter">{% if q.create_rule %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
 		<td class="acenter">{% if q.dynamic_query %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
 		<td class="acenter">{{ q.maxhosts_count }}</td>
 		<td class="acenter"><span id="sparkline_{{ q.id }}"></span></td>		
         <td class="aright"><div{% if q.anomaly_alert_count %} class="alert_orange"{% endif %}>{{ q.hits_count }}</div></td>
 		<td class="aright"><div{% if q.anomaly_alert_endpoints %} class="alert_orange"{% endif %}>{{ q.hits_endpoints }}</div></td>
-		{% if custom_fields|length > 0 %}
-			<td class="aright"><div{% if q.hits_c1 > 0 %} class="alert_red"{% endif %}>{{ q.hits_c1 }}</div></td>
-		{% endif %}
-		{% if custom_fields|length > 1 %}
-			<td class="aright"><div{% if q.hits_c2 > 0 %} class="alert_red"{% endif %}>{{ q.hits_c2 }}</div></td>
-		{% endif %}
-		{% if custom_fields|length > 2 %}
-			<td class="aright"><div{% if q.hits_c3 > 0 %} class="alert_red"{% endif %}>{{ q.hits_c3 }}</div></td>
-		{% endif %}
     </tr>
     <tr class="collapse row-expanded panel" data-row-number="{{ q.name }}">
-        <td colspan="{{ custom_fields|length|add:13 }}">
+        <td colspan="14">
 			<div id=d_{{ q.id }}></div>
 	    </td>
       </tr>

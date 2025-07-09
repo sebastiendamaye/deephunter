@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block style %}
+<link rel="stylesheet" href="/static/css/connectors_conf.css" />
+{% endblock %}
+
+{% block body %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Select Connector</button>
+</form>
+
+{% if formset %}
+    <p>{{ connector.description }}</p>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="connector" value="{{ connector.pk }}">
+        {{ formset.management_form }}
+        <table>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+            </tr>
+            {% for conf_form in formset %}
+                <tr>
+                {{ conf_form.id }}
+                {% for field in conf_form.visible_fields %}
+                    <td>
+                    {{ field }}
+                    </td>
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        <button type="submit" name="save_changes" value="1">Save Changes</button>
+    </form>
+{% endif %}
+{% endblock %}

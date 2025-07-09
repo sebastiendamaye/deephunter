@@ -16,4 +16,5 @@ urlpatterns = [
     path('qm/', include('qm.urls')),
     path('extensions/', include('extensions.urls')),
     path('reports/', include('reports.urls')),
+    path('connectors/', include('connectors.urls')),
 ]

@@ -8,8 +8,8 @@ class ConnectorAdmin(admin.ModelAdmin):
     search_fields = ['name', 'description']
 
 class ConnectorConfAdmin(admin.ModelAdmin):
-    list_display = ('connector', 'key', 'value', 'type', 'description')
-    list_filter = ['connector', 'key', 'type']
+    list_display = ('connector', 'key', 'value', 'description')
+    list_filter = ['connector', 'key']
     search_fields = ['key', 'value', 'description']
 
 admin.site.register(Connector, ConnectorAdmin)

@@ -35,22 +35,17 @@
 </div>
 <div class="clear"></div>
 
-<div class="charts_left">
+<div>
 	<div id="chartContainer_runtime"></div>
 	<div id="chartContainer_count"></div>
 	<div id="chartContainer_endpoints"></div>
-</div>
-<div class="charts_right">
-	{% if c1_name %}<div id="chartContainer_c1"></div>{% endif %}
-	{% if c2_name %}<div id="chartContainer_c2"></div>{% endif %}
-	{% if c3_name %}<div id="chartContainer_c3"></div>{% endif %}
 </div>
 
 <script nonce="jvfd35kaz9">
 window.onload = function () {
 
 	var options_runtime = {
-		animationEnabled: true,
+		animationEnabled: false,
 		axisX:{
 			valueFormatString: "DD MMM"
 		},
@@ -83,7 +78,7 @@ window.onload = function () {
 	};
 
 	var options_count = {
-		animationEnabled: true,
+		animationEnabled: false,
 		axisX:{
 			valueFormatString: "DD MMM",
 			stripLines: [
@@ -128,7 +123,7 @@ window.onload = function () {
 	};
 
 	var options_endpoints = {
-		animationEnabled: true,
+		animationEnabled: false,
 		axisX:{
 			valueFormatString: "DD MMM",
 			stripLines: [
@@ -165,123 +160,16 @@ window.onload = function () {
 			yValueFormatString: "#,##0",
 			dataPoints: [
 				{% for s in stats %}
-					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_endpoints }}, click: function(e) { open('/events/NULL/{{ query.id }}/{{ s.date|date:"Y-m-d" }}/', '_blank'); } },
+					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_endpoints }}, click: function(e) { open('/events/{{ query.id }}/{{ s.date|date:"Y-m-d" }}/', '_blank'); } },
 				{% endfor %}
 			]
 		}]
 	};
 
-	{% if c1_name %}
-	var options_c1 = {
-		animationEnabled: true,
-		axisX:{
-			valueFormatString: "DD MMM"
-		},
-		toolTip:{
-			shared:true
-		},  
-		legend:{
-			cursor:"pointer",
-			verticalAlign: "bottom",
-			horizontalAlign: "left",
-			dockInsidePlotArea: true,
-			itemclick: toogleDataSeries
-		},
-		data: [
-		{
-			type: "line",
-			showInLegend: true,
-			name: "#{{ c1_name }}",
-			markerType: "square",
-			xValueFormatString: "DD MMM, YYYY",
-			color: "#2596be",
-			yValueFormatString: "#,##0",
-			dataPoints: [
-				{% for s in stats %}
-					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_c1 }} },
-				{% endfor %}
-			]
-		}
-		]
-	};
-	{% endif %}
-
-	{% if c2_name %}
-	var options_c2 = {
-		animationEnabled: true,
-		axisX:{
-			valueFormatString: "DD MMM"
-		},
-		toolTip:{
-			shared:true
-		},  
-		legend:{
-			cursor:"pointer",
-			verticalAlign: "bottom",
-			horizontalAlign: "left",
-			dockInsidePlotArea: true,
-			itemclick: toogleDataSeries
-		},
-		data: [
-		{
-			type: "line",
-			showInLegend: true,
-			name: "#{{ c2_name }}",
-			markerType: "square",
-			xValueFormatString: "DD MMM, YYYY",
-			color: "#2596be",
-			yValueFormatString: "#,##0",
-			dataPoints: [
-				{% for s in stats %}
-					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_c2 }} },
-				{% endfor %}
-			]
-		}
-		]
-	};
-	{% endif %}
-
-	{% if c3_name %}
-	var options_c3 = {
-		animationEnabled: true,
-		axisX:{
-			valueFormatString: "DD MMM"
-		},
-		toolTip:{
-			shared:true
-		},  
-		legend:{
-			cursor:"pointer",
-			verticalAlign: "bottom",
-			horizontalAlign: "left",
-			dockInsidePlotArea: true,
-			itemclick: toogleDataSeries
-		},
-		data: [
-		{
-			type: "line",
-			showInLegend: true,
-			name: "#{{ c3_name }}",
-			markerType: "square",
-			xValueFormatString: "DD MMM, YYYY",
-			color: "#2596be",
-			yValueFormatString: "#,##0",
-			dataPoints: [
-				{% for s in stats %}
-					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_c3 }} },
-				{% endfor %}
-			]
-		}
-		]
-	};
-	{% endif %}
 
 	$("#chartContainer_runtime").CanvasJSChart(options_runtime);
 	$("#chartContainer_count").CanvasJSChart(options_count);
 	$("#chartContainer_endpoints").CanvasJSChart(options_endpoints);
-	{% if c1_name %}$("#chartContainer_c1").CanvasJSChart(options_c1);{% endif %}
-	{% if c2_name %}$("#chartContainer_c2").CanvasJSChart(options_c2);{% endif %}
-	{% if c3_name %}$("#chartContainer_c3").CanvasJSChart(options_c3);{% endif %}
 
 	function toogleDataSeries(e){
 		if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
