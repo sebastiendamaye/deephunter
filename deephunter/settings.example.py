@@ -80,7 +80,7 @@ CAMPAIGN_MAX_HOSTS_THRESHOLD = 1000
 ON_MAXHOSTS_REACHED = {
     "THRESHOLD": 3,
     "DISABLE_RUN_DAILY": True,
-    "DELETE_STATS": False
+    "DELETE_STATS": True
 }
 # Automatically remove analytic from future campaigns if it failed
 DISABLE_RUN_DAILY_ON_ERROR = True
@@ -90,7 +90,6 @@ PROXY = {
     'http': 'http://proxy:port',
     'https': 'http://proxy:port'
     }
-
 
 # Keep ModelBackend around for per-user permissions and local superuser (admin)
 AUTHENTICATION_BACKENDS = [
