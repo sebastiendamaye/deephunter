@@ -367,6 +367,7 @@ def timeline(request):
                 'start': e.snapshot.date,
                 'end': e.snapshot.date+timedelta(days=1),
                 'description': 'Signature: {}'.format(e.snapshot.query.name),
+                'connector': 'Connector: {}'.format(e.snapshot.query.connector.name),
                 'storylineid': 'StorylineID: {}'.format(e.storylineid.replace('#', ', '))
                 })
             storylineid_json[iid] = e.storylineid.split('#')

@@ -174,7 +174,7 @@ var items = new vis.DataSet([
 		group: {{ item.group }},
 		start: new Date({{ item.start|date:"Y" }},{{ item.start|date:"n-1" }},{{ item.start|date:"j" }}),
 		end: new Date({{ item.end|date:"Y" }},{{ item.end|date:"n-1" }},{{ item.end|date:"j" }}),
-		title: "DATE: {{ item.start|date:"Y-n-j" }}<br />{{ item.description }}<br />{{ item.storylineid }}"
+		title: "DATE: {{ item.start|date:"Y-n-j" }}<br />{{ item.description }}<br />{{ item.connector }}<br />{{ item.storylineid }}"
 	},
 {% endfor %}
 ]);
