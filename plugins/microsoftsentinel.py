@@ -3,6 +3,9 @@ Microsoft Sentine connector
 
 Requirements:
 pip install azure-identity azure-monitor-query
+
+To do:
+Sync rules not implemented yet.
 """
 
 from azure.identity import ClientSecretCredential
@@ -56,7 +59,7 @@ def query(query, from_date=None, to_date=None):
 
     client = authenticate()
     # KQL query
-    q = f"{query.query} | summarize count() by Computer"
+    q = f'{query.query} | summarize count() by Computer = tostring(split(Computer, ".")[0])'
 
     # Execute query
     response = client.query_workspace(
