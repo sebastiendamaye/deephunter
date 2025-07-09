@@ -122,7 +122,7 @@ def get_redirect_query_link(query, date=None, endpoint_name=None):
         timespan = quote(f"{start_date.isoformat()}Z/{end_date.isoformat()}Z", safe='')
     
     if endpoint_name:
-        customized_query = f"{query.query} \n| where Computer=='{endpoint_name}'"
+        customized_query = f'{query.query} \n| where Computer startswith "{endpoint_name}"'
     else:
         customized_query = query.query
 
