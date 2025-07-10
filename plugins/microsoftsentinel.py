@@ -1,10 +1,20 @@
 """
 Microsoft Sentine connector
 
-Requirements:
+Requirements
+------------
 pip install azure-identity azure-monitor-query
 
-To do:
+Description
+-----------
+This connector allows querying Microsoft Sentinel logs using KQL (Kusto Query Language).
+Queries have to return a "Computer" column, corresponding to either a native "Computer" field, or a transformation.
+If a transformation is required, it has to be part of the "query" field (not in the "columns" field).
+You can define "Computer" by copying the value from another field: | project Computer = DstDvcHostname
+You can also truncate the computer name to remove the domain: | project Computer = split(Computer, ".")[0]
+
+To do
+-----
 Sync rules not implemented yet.
 """
 
@@ -69,7 +79,7 @@ def query(query, from_date=None, to_date=None, debug=None):
         return None
 
     try:
-        q = f'{query.query} | summarize count() by Computer = tostring(split(Computer, ".")[0])'
+        q = f'{query.query} | summarize count() by Computer'
 
         # Execute query
         response = client.query_workspace(
@@ -143,6 +153,11 @@ def get_redirect_query_link(query, date=None, endpoint_name=None):
     else:
         customized_query = query.query
 
+    # If the query field contains a "project" statement (used for a transformation),
+    # we need to comment it out in order to avoid conflicts with the "columns" field.
+    if "| project" in customized_query:
+        customized_query = customized_query.replace("| project", "//| project")
+    
     if query.columns:
         q = quote(f'{customized_query}\n{query.columns}')
     else:
