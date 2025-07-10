@@ -1,3 +1,4 @@
+{% load markup_tags %}
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -7,11 +8,15 @@
 </head>
 <body>
 
+<h1>Data for {{ query }}</h1>
 <div class="charts_left">
-	<h1>Data for {{ query }}</h1>
+	<div id="chartContainer_runtime"></div>
+	<div id="chartContainer_count"></div>
+	<div id="chartContainer_endpoints"></div>
 </div>
-<div class="charts_left">
-	<div>
+
+<div class="charts_right">
+	<div class="paragraph">
 		[<a href="/admin/qm/query/{{ query.id }}/change/" target="_blank">edit in admin</a>]
 		[<a href="/admin/qm/endpoint/?snapshot__query__name={{ query.name }}" target="_blank">see endpoints</a>]
 		{% if perms.qm.delete_campaign %}
@@ -20,26 +25,29 @@
 		{% endif %}
 
 	</div>
-	<div><b>#hits z-score threshold:</b> {{ query.anomaly_threshold_count }}</div>
+	<div class="paragraph"><b>#hits z-score threshold:</b> {{ query.anomaly_threshold_count }}</div>
 	<div><b>#endpoints z-score threshold:</b> {{ query.anomaly_threshold_endpoints }}</div>
-	<div><b>Distinct endpoints: </b>{{ distinct_endpoints }}
+	<div class="paragraph"><b>Distinct endpoints: </b>{{ distinct_endpoints }}
+		<br /><b>Top 10 endpoints</b>:
 		{% if endpoints %}
-			({% for endpoint in endpoints|slice:":10" %}
-				<a href="/timeline?hostname={{ endpoint.hostname }}" target="_blank">{{ endpoint.hostname }}</a>
-				{% if not forloop.last %} | {% endif %}
-			{% endfor %}
-			{% if distinct_endpoints > 10 %}| ...{% endif %}
-			)
+			<ul>
+				{% for endpoint in endpoints|slice:":10" %}
+					<li><a href="/timeline?hostname={{ endpoint.hostname }}" target="_blank">{{ endpoint.hostname }}</a></li>
+				{% endfor %}
+				{% if distinct_endpoints > 10 %}<li>...</li>{% endif %}
+			</ul>
 		{% endif %}
-		</div>
+	</div>
+	<div class="paragraph">
+		<b>Description:</b><br />
+		<p>{{ query.description|apply_markup:"markdown" }}</p>
+	</div>
+	<div class="paragraph">
+		<b>Query:</b><br />
+		<pre>{{ query.query }}</pre>
+	</div>
 </div>
-<div class="clear"></div>
-
-<div>
-	<div id="chartContainer_runtime"></div>
-	<div id="chartContainer_count"></div>
-	<div id="chartContainer_endpoints"></div>
-</div>
+<!--div class="clear"></div-->
 
 <script nonce="jvfd35kaz9">
 window.onload = function () {
