@@ -192,12 +192,14 @@ def index(request):
         query.sparkline = [snapshot.hits_endpoints for snapshot in snapshots]
         
     # Check if token is about to expire
-    expires_on = all_connectors.get('sentinelone').get_token_expiration_date()
-    dt = datetime.strptime(expires_on, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
-    now = datetime.now(timezone.utc)
-    delta = dt - now
-    tokenexpires = delta.days + 1
-    
+    tokenexpires = 999
+    if is_connector_enabled('sentinelone'):
+        expires_on = all_connectors.get('sentinelone').get_token_expiration_date()
+        if expires_on:
+            dt = datetime.strptime(expires_on, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
+            now = datetime.now(timezone.utc)
+            delta = dt - now
+            tokenexpires = delta.days + 1    
 
     # Check if new version available
     try:

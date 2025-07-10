@@ -425,5 +425,8 @@ def get_token_expiration_date():
     
     if r.status_code == 200 and 'data' in r.json():
         return r.json()['data']['expiresAt']
-    
-    return None
+    else:
+        if DEBUG:
+            print(f"[ ERROR ] Failed to retrieve token expiration date: {r.text}")
+        logger.error(f"Failed to retrieve token expiration date: {r.text}")
+        return None
