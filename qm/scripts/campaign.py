@@ -21,7 +21,7 @@ CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
 ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
 DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
 
-DEBUG = True
+DEBUG = False
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ def run():
         #  - site name (endpoint name group)
         #  - number of events
         #  - storylineIDs separated by commas
-        data = all_connectors.get(query.connector.name).query(query)
+        data = all_connectors.get(query.connector.name).query(query, debug=DEBUG)
         
         # store current time (used to update snapshot runtime)
         end_runtime = datetime.now()

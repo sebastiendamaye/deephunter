@@ -41,8 +41,12 @@ STAR_RULES_DEFAULTS = {
 }
 
 
-def query(query, from_date=None, to_date=None):
-
+def query(query, from_date=None, to_date=None, debug=None):
+    
+    # Use the global variable if not provided
+    if debug is None:
+        debug = DEBUG
+    
     # Run query with filter for the last 24 hours by default, as the script is run every day, or from the given date range
     # hacklist is used instead of array_agg_distinct to get list of storylineid because
     # array_agg_distinct prevents the powerquery from executing without error
@@ -61,16 +65,16 @@ def query(query, from_date=None, to_date=None):
         'limit': CAMPAIGN_MAX_HOSTS_THRESHOLD
     }
     
-    if DEBUG:
+    if debug or DEBUG:
         print('*** RUNNING QUERY {}: {}'.format(query.name, query.query))
         print('*** BODY: {}'.format(body))
-
-    r = requests.post(f'{S1_URL}/web/api/v2.1/dv/events/pq',
-        json=body,
-        headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
-        proxies=PROXY)
         
     try:
+        r = requests.post(f'{S1_URL}/web/api/v2.1/dv/events/pq',
+            json=body,
+            headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
+            proxies=PROXY)
+
         query_id = r.json()['data']['queryId']
         status = r.json()['data']['status']
 
@@ -84,20 +88,20 @@ def query(query, from_date=None, to_date=None):
             status = r.json()['data']['status']
             progress = r.json()['data']['progress']
             
-            if DEBUG:
+            if debug or DEBUG:
                 print('PROGRESS: {}'.format(progress))
             
             sleep(1)
 
                 
-        if DEBUG:
+        if debug or DEBUG:
             print('***DATA (JSON): {}'.format(r.json()))
         
         return r.json()['data']['data']
     
     
     except:
-        if DEBUG:
+        if debug or DEBUG:
             print(f"[ ERROR ] Query {query.name} failed. Check report for more info.")
         
         manage_query_error(query, r.text)

@@ -20,7 +20,7 @@ from urllib.parse import quote, unquote
 logger = logging.getLogger(__name__)
 
 # Set to True for debugging purposes
-DEBUG = True
+DEBUG = False
 
 # Retrieve connector settings from the database
 TENANT_ID = get_connector_conf('microsoftsentinel', 'TENANT_ID')
@@ -38,7 +38,7 @@ def authenticate():
     return client
 
 
-def query(query, from_date=None, to_date=None):
+def query(query, from_date=None, to_date=None, debug=None):
     """
     API calls to Microsoft Sentinel to query logs. Used by the "campaign" daily cron, and the "regenerate stats" script
     :param query: Query object corresponding to the threat hunting analytic.
@@ -57,28 +57,45 @@ def query(query, from_date=None, to_date=None):
         # Default to the last 24 hours if no dates are provided
         timespan = timedelta(hours=24)
 
-    client = authenticate()
-    # KQL query
-    q = f'{query.query} | summarize count() by Computer = tostring(split(Computer, ".")[0])'
+    try:
+        client = authenticate()
+        # KQL query
+    except:
+        if debug or DEBUG:
+            print(f"[ ERROR ] Query {query.name} failed. Failed to connect to MS Sentinel. Check report for more info.")
+        
+        manage_query_error(query, f"Failed to connect to MS Sentinel while executing the query {query.name}.")
 
-    # Execute query
-    response = client.query_workspace(
-        workspace_id=WORKSPACE_ID,
-        query=q,
-        timespan=timespan
-    )
+        return None
 
-    # Handle response
-    if response.status == LogsQueryStatus.SUCCESS:
-        res = []
-        for table in response.tables:
-            for row in table.rows:
-                res.append([row[0], '', row[1], ''])
-        return res
-    else:
-        if DEBUG:
-            logger.error(f"Query failed: {response.error}")
-        manage_query_error(query, response.error)
+    try:
+        q = f'{query.query} | summarize count() by Computer = tostring(split(Computer, ".")[0])'
+
+        # Execute query
+        response = client.query_workspace(
+            workspace_id=WORKSPACE_ID,
+            query=q,
+            timespan=timespan
+        )
+
+        # Handle response
+        if response.status == LogsQueryStatus.SUCCESS:
+            res = []
+            for table in response.tables:
+                for row in table.rows:
+                    res.append([row[0], '', row[1], ''])
+            return res
+        else:
+            if DEBUG:
+                logger.error(f"Query failed: {response.error}")
+            manage_query_error(query, response.error)
+            return None
+    except:
+        if debug or DEBUG:
+            print(f"[ ERROR ] Query {query.name} failed. Check report for more info.")
+        
+        manage_query_error(query, response.text)
+
         return None
 
 def need_to_sync_rule():
