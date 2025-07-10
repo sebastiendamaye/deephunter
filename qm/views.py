@@ -596,7 +596,7 @@ def netview(request):
 
 @login_required
 def about(request):
-    messages.add_message(request, messages.INFO, "DeepHunter will soon become ARTHIX!")
+    messages.add_message(request, messages.INFO, "DeepHunter will always remain DeepHunter!")
     
     # local version
     with open(f'{STATIC_PATH}/VERSION', 'r') as f:
