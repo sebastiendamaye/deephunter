@@ -11,7 +11,7 @@ This connector allows querying Microsoft Sentinel logs using KQL (Kusto Query La
 Queries have to return a "Computer" column, corresponding to either a native "Computer" field, or a transformation.
 If a transformation is required, it has to be part of the "query" field (not in the "columns" field).
 You can define "Computer" by copying the value from another field: | project Computer = DstDvcHostname
-You can also truncate the computer name to remove the domain: | project Computer = split(Computer, ".")[0]
+You can also truncate the computer name to remove the domain: | project Computer = tostring(split(Computer, ".")[0])
 
 To do
 -----
@@ -54,7 +54,7 @@ def query(query, from_date=None, to_date=None, debug=None):
     :param query: Query object corresponding to the threat hunting analytic.
     :param from_date: Optional start date for the query. Date received in isoformat.
     :param to_date: Optional end date for the query. Date received in isoformat.
-    :return: The result of the query (array with 4 fields: endpoint.name, NULL, number of hits, NULL), or None if the query failed.
+    :return: The result of the query (array with 4 fields: endpoint.name, NULL, number of hits, NULL), or empty array if the query failed.
     """
     
     if from_date and to_date:
@@ -78,9 +78,11 @@ def query(query, from_date=None, to_date=None, debug=None):
 
         return None
 
+    q = f'{query.query} | summarize count() by Computer'
+    if debug or DEBUG:
+        print(f"Query: {q}")
+    
     try:
-        q = f'{query.query} | summarize count() by Computer'
-
         # Execute query
         response = client.query_workspace(
             workspace_id=WORKSPACE_ID,
@@ -97,16 +99,14 @@ def query(query, from_date=None, to_date=None, debug=None):
             return res
         else:
             if DEBUG:
-                logger.error(f"Query failed: {response.error}")
+                logger.error(f"[ ERROR ] Query {query.name} failed. Check report for more info.")
             manage_query_error(query, response.error)
-            return None
+            return []
     except:
+        logger.error(f"[ ERROR ] Query {query.name} failed. Check report for more info.")
         if debug or DEBUG:
             print(f"[ ERROR ] Query {query.name} failed. Check report for more info.")
-        
-        manage_query_error(query, response.text)
-
-        return None
+        return []
 
 def need_to_sync_rule():
     """
