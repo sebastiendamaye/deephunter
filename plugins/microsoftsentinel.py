@@ -29,20 +29,25 @@ from urllib.parse import quote, unquote
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# Set to True for debugging purposes
-DEBUG = False
+_globals_initialized = False
+def init_globals():
+    global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES
+    global _globals_initialized
+    if not _globals_initialized:
+        DEBUG = False
+        TENANT_ID = get_connector_conf('microsoftsentinel', 'TENANT_ID')
+        CLIENT_ID = get_connector_conf('microsoftsentinel', 'CLIENT_ID')
+        CLIENT_SECRET = get_connector_conf('microsoftsentinel', 'CLIENT_SECRET')
+        SUBSCRIPTION_ID = get_connector_conf('microsoftsentinel', 'SUBSCRIPTION_ID')
+        WORKSPACE_ID = get_connector_conf('microsoftsentinel', 'WORKSPACE_ID')
+        WORKSPACE_NAME = get_connector_conf('microsoftsentinel', 'WORKSPACE_NAME').lower()
+        RESOURCE_GROUP = get_connector_conf('microsoftsentinel', 'RESOURCE_GROUP')
+        SYNC_RULES = get_connector_conf('microsoftsentinel', 'SYNC_RULES')
+        _globals_initialized = True
 
-# Retrieve connector settings from the database
-TENANT_ID = get_connector_conf('microsoftsentinel', 'TENANT_ID')
-CLIENT_ID = get_connector_conf('microsoftsentinel', 'CLIENT_ID')
-CLIENT_SECRET = get_connector_conf('microsoftsentinel', 'CLIENT_SECRET')
-SUBSCRIPTION_ID = get_connector_conf('microsoftsentinel', 'SUBSCRIPTION_ID')
-WORKSPACE_ID = get_connector_conf('microsoftsentinel', 'WORKSPACE_ID')
-WORKSPACE_NAME = get_connector_conf('microsoftsentinel', 'WORKSPACE_NAME').lower()
-RESOURCE_GROUP = get_connector_conf('microsoftsentinel', 'RESOURCE_GROUP')
-SYNC_RULES = get_connector_conf('microsoftsentinel', 'SYNC_RULES')
 
 def authenticate():
+    init_globals()
     credential = ClientSecretCredential(TENANT_ID, CLIENT_ID, CLIENT_SECRET)
     client = LogsQueryClient(credential)
     return client
@@ -57,6 +62,7 @@ def query(query, from_date=None, to_date=None, debug=None):
     :return: The result of the query (array with 4 fields: endpoint.name, NULL, number of hits, NULL), or empty array if the query failed.
     """
     
+    init_globals()
     if from_date and to_date:
         start_date = datetime.fromisoformat(from_date)
         start_date_utc = start_date.replace(tzinfo=timezone.utc)
@@ -113,24 +119,28 @@ def need_to_sync_rule():
     Check if the rule needs to be synced with Microsoft Sentinel.
     This is determined by the SYNC_RULES setting.
     """
+    init_globals()
     return SYNC_RULES
 
 def create_rule(query):
     """
     TO BE COMPLETED
     """
+    init_globals()
     return False
 
 def update_rule(query):
     """
     TO BE COMPLETED
     """
+    init_globals()
     return False
 
 def delete_rule(query):
     """
     TO BE COMPLETED
     """
+    init_globals()
     return False
 
 
@@ -139,6 +149,7 @@ def get_redirect_query_link(query, date=None, endpoint_name=None):
     ### pre-filling the KQL query field via URL in the Microsoft Sentinel LogsBlade.
     ###
 
+    init_globals()
     if not date:
         timespan = "P1D"  # Default to 1 day
     else:

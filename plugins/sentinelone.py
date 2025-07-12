@@ -14,34 +14,37 @@ from connectors.utils import manage_query_error
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# Set to True for debugging purposes
-DEBUG = False
-
-# Import settings from Django settings
-PROXY = settings.PROXY
-DB_DATA_RETENTION = settings.DB_DATA_RETENTION
-CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
-DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
-
-# Retrieve connector settings from the database
-S1_URL = get_connector_conf('sentinelone', 'S1_URL')
-S1_TOKEN = get_connector_conf('sentinelone', 'S1_TOKEN')
-S1_THREATS_URL = get_connector_conf('sentinelone', 'S1_THREATS_URL')
-XDR_URL = get_connector_conf('sentinelone', 'XDR_URL')
-XDR_PARAMS = get_connector_conf('sentinelone', 'XDR_PARAMS')
-SYNC_STAR_RULES = get_connector_conf('sentinelone', 'SYNC_STAR_RULES')
-STAR_RULES_PREFIX = get_connector_conf('sentinelone', 'STAR_RULES_PREFIX')
-STAR_RULES_DEFAULTS = {
-    'severity': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_SEVERITY'), # Low|Medium|High|Critical
-    'status': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_STATUS'), # Active|Draft
-    'expiration': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_EXPIRATION'), # Integer. Will automatically consider expirationMode is "Temporary" and define an expiration (in days). Empty string to ignore
-    'coolOffPeriod': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_COOLOFFPERIOD'), # String. Cool Off Period (in minutes). Empty string to ignore
-    'treatAsThreat': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_TREATASTHREAT'), # Undefined(or empty)|Suspicious|Malicious.
-    'networkQuarantine': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_NETWORKQUARANTINE') # true|false
-}
+_globals_initialized = False
+def init_globals():
+    global DEBUG, PROXY, DB_DATA_RETENTION, CAMPAIGN_MAX_HOSTS_THRESHOLD, DISABLE_RUN_DAILY_ON_ERROR
+    global S1_URL, S1_TOKEN, S1_THREATS_URL, XDR_URL, XDR_PARAMS, SYNC_STAR_RULES, STAR_RULES_PREFIX, STAR_RULES_DEFAULTS
+    global _globals_initialized
+    if not _globals_initialized:
+        DEBUG = False
+        PROXY = settings.PROXY
+        DB_DATA_RETENTION = settings.DB_DATA_RETENTION
+        CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
+        DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
+        S1_URL = get_connector_conf('sentinelone', 'S1_URL')
+        S1_TOKEN = get_connector_conf('sentinelone', 'S1_TOKEN')
+        S1_THREATS_URL = get_connector_conf('sentinelone', 'S1_THREATS_URL')
+        XDR_URL = get_connector_conf('sentinelone', 'XDR_URL')
+        XDR_PARAMS = get_connector_conf('sentinelone', 'XDR_PARAMS')
+        SYNC_STAR_RULES = get_connector_conf('sentinelone', 'SYNC_STAR_RULES')
+        STAR_RULES_PREFIX = get_connector_conf('sentinelone', 'STAR_RULES_PREFIX')
+        STAR_RULES_DEFAULTS = {
+            'severity': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_SEVERITY'), # Low|Medium|High|Critical
+            'status': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_STATUS'), # Active|Draft
+            'expiration': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_EXPIRATION'), # Integer. Will automatically consider expirationMode is "Temporary" and define an expiration (in days). Empty string to ignore
+            'coolOffPeriod': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_COOLOFFPERIOD'), # String. Cool Off Period (in minutes). Empty string to ignore
+            'treatAsThreat': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_TREATASTHREAT'), # Undefined(or empty)|Suspicious|Malicious.
+            'networkQuarantine': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_NETWORKQUARANTINE') # true|false
+        }
+        _globals_initialized = True
 
 
 def query(query, from_date=None, to_date=None, debug=None):
+    init_globals()
     
     # Use the global variable if not provided
     if debug is None:
@@ -113,6 +116,7 @@ def need_to_sync_rule():
     Check if the rule needs to be synced with SentinelOne.
     This is determined by the SYNC_STAR_RULES setting.
     """
+    init_globals()
     return SYNC_STAR_RULES
 
 def build_rule_body(query):
@@ -123,6 +127,7 @@ def build_rule_body(query):
     :return: Dictionary containing the body for the rule query.
     """
     
+    init_globals()
     body = {
         "data": {
             "queryLang": "2.0",
@@ -168,6 +173,7 @@ def create_rule(query):
     :param query: Query object corresponding to the analytic.
     :return: JSON object containing the response from SentinelOne API.
     """
+    init_globals()
     body = build_rule_body(query)
     r = requests.post(f'{S1_URL}/web/api/v2.1/cloud-detection/rules',
         json=body,
@@ -183,6 +189,7 @@ def update_rule(query):
     :return: JSON object containing the response from SentinelOne API.
     """
 
+    init_globals()
     # check if STAR rule already exists (STAR rule flag was previously set)
     r = requests.get(f'{S1_URL}/web/api/v2.1/cloud-detection/rules?name__contains={STAR_RULES_PREFIX}{query.name}',
         headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
@@ -249,6 +256,7 @@ def delete_rule(query):
     :param query: Query object corresponding to the analytic.
     :return: None
     """
+    init_globals()
     body = {
         "filter": {
             "name__contains": f"{STAR_RULES_PREFIX}{query.name}"
@@ -267,6 +275,7 @@ def get_threats(hostname, created_at):
     :param created_at: Date in ISO format to filter threats created after this date.
     :return: List of threats (array) or None if not found.
     """
+    init_globals()
     r = requests.get(
         f'{S1_URL}/web/api/v2.1/threats?computerName__contains={hostname}&createdAt__gte={created_at}',
         params = {"limit": 100},
@@ -281,6 +290,7 @@ def get_machine_details(hostname):
     :param hostname: Hostname of the machine to retrieve details for.
     :return: Dictionary containing machine details or None if not found.
     """
+    init_globals()
     r = requests.get(
         '{}/web/api/v2.1/agents?computerName={}'.format(S1_URL, hostname),
         headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
@@ -294,6 +304,7 @@ def get_last_logged_in_user(agent_id):
     :param agent_id: S1 Agent ID of the machine to retrieve last logged in user from.
     :return: String containing the machine owner or None if not found.
     """
+    init_globals()
     r = requests.get(
         '{}/web/api/v2.1/agents?ids={}'.format(S1_URL, agent_id),
         headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
@@ -309,6 +320,7 @@ def get_applications(agent_id):
     :param agent_id: S1 Agent ID of the machine to retrieve applications for.
     :return: List of applications (array) or None if not found.
     """
+    init_globals()
     r = requests.get(
         f'{S1_URL}/web/api/v2.1/agents/applications?ids={agent_id}',
         headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
@@ -325,6 +337,7 @@ def get_redirect_query_link(query, date=None, endpoint_name=None):
     :param date: Date to filter the query by, in ISO format (range will be date-date+1day).
     :return: String containing the redirect link for the query.
     """
+    init_globals()
     if not date:
         date = (datetime.today()-timedelta(days=1)).strftime('%Y-%m-%d')
     
@@ -348,6 +361,7 @@ def get_redirect_storyline_link(storyline_ids, date):
     :param date: Date to filter the query by, in ISO format (range will be date-date+1day).
     :return: String containing the redirect link for the storyline.
     """
+    init_globals()
     if ',' in storyline_ids:
         filter = "src.process.storyline.id in {} or tgt.process.storyline.id in {}".format(tuple(storyline_ids.split(',')), tuple(storyline_ids.split(',')))
     else:
@@ -365,6 +379,7 @@ def get_network_connections(storyline_id, endpoint_name, timerange):
     :return: List of network connections (array) or None if not found.
     """
     
+    init_globals()
     query = "| join ("
     if endpoint_name:
         query += "endpoint.name = '{}' and ".format(endpoint_name)
@@ -418,6 +433,7 @@ def get_token_expiration_date():
     Get the expiration date of the SentinelOne API token.
     :return: String containing the expiration date in ISO format or None if not found.
     """
+    init_globals()
     r = requests.post(f'{S1_URL}/web/api/v2.1/users/api-token-details',
         headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
         json={ "data": { "apiToken": S1_TOKEN } },

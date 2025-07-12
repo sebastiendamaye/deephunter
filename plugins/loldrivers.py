@@ -11,17 +11,21 @@ from bs4 import BeautifulSoup
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# Set to True for debugging purposes
-DEBUG = False
-
-# Import settings from Django settings
-PROXY = settings.PROXY
+_globals_initialized = False
+def init_globals():
+    global DEBUG, PROXY
+    global _globals_initialized
+    if not _globals_initialized:
+        DEBUG = False
+        PROXY = settings.PROXY
+        _globals_initialized = True
 
 def get_sha256_hashes():
     """
     Fetches SHA256 hashes of LOLDrivers from the website.
     :return: A list of SHA256 hashes found on the LOLDrivers website.
     """
+    init_globals()
     lol_hashes = []
     response = requests.get(
         'https://www.loldrivers.io/',

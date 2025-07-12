@@ -11,11 +11,14 @@ from bs4 import BeautifulSoup
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# Set to True for debugging purposes
-DEBUG = False
-
-# Import settings from Django settings
-PROXY = settings.PROXY
+_globals_initialized = False
+def init_globals():
+    global DEBUG, PROXY
+    global _globals_initialized
+    if not _globals_initialized:
+        DEBUG = False
+        PROXY = settings.PROXY
+        _globals_initialized = True
 
 def whois(ip):
     """
@@ -24,6 +27,7 @@ def whois(ip):
     :param ip: The IP address to look up.
     :return: WHOIS data as a string or an error message
     """
+    init_globals()
     if is_valid_ip(ip):
         response = requests.get(
             'https://www.whois.com/whois/{}/'.format(ip),

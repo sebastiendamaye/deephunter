@@ -11,14 +11,15 @@ import vt
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# Set to True for debugging purposes
-DEBUG = False
-
-# Import settings from Django settings
-PROXY = settings.PROXY
-
-# Retrieve connector settings from the database
-API_KEY = get_connector_conf('virustotal', 'API_KEY')
+_globals_initialized = False
+def init_globals():
+    global DEBUG, PROXY, API_KEY
+    global _globals_initialized
+    if not _globals_initialized:
+        DEBUG = False
+        PROXY = settings.PROXY
+        API_KEY = get_connector_conf('virustotal', 'API_KEY')
+        _globals_initialized = True
 
 def check_hash(hash):
     """
@@ -27,6 +28,7 @@ def check_hash(hash):
     :param hash: The hash to check.
     :return: Array with hash results if the hash exists, None otherwise.
     """
+    init_globals()
     if is_valid_md5(hash) or is_valid_sha1(hash) or is_valid_sha256(hash):        
 
         client = vt.Client(
@@ -51,6 +53,7 @@ def check_ip(ip):
     :param ip: The IP address to check.
     :return: Array with IP results if the IP exists, None otherwise.
     """
+    init_globals()
     if is_valid_ip(ip):
 
         headers = {

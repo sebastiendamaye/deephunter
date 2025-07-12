@@ -9,23 +9,27 @@ from ldap3 import Server, Connection, ALL
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
-# Set to True for debugging purposes
-DEBUG = False
-
-# Retrieve connector settings from the database
-LDAP_SERVER = get_connector_conf('activedirectory', 'LDAP_SERVER')
-LDAP_PORT = int(get_connector_conf('activedirectory', 'LDAP_PORT'))
-LDAP_SSL = get_connector_conf('activedirectory', 'LDAP_SSL')
-LDAP_USER = get_connector_conf('activedirectory', 'LDAP_USER')
-LDAP_PWD = get_connector_conf('activedirectory', 'LDAP_PWD')
-LDAP_SEARCH_BASE = get_connector_conf('activedirectory', 'LDAP_SEARCH_BASE')
-LDAP_ATTRIBUTES = {
-	'USER_NAME': get_connector_conf('activedirectory', 'LDAP_ATTRIBUTES_USER_NAME'),
-	'JOB_TITLE': get_connector_conf('activedirectory', 'LDAP_ATTRIBUTES_JOB_TITLE'),
-	'BUSINESS_UNIT': get_connector_conf('activedirectory', 'LDAP_ATTRIBUTES_BUSINESS_UNIT'),
-	'OFFICE': get_connector_conf('activedirectory', 'LDAP_ATTRIBUTES_OFFICE'),
-	'COUNTRY': get_connector_conf('activedirectory', 'LDAP_ATTRIBUTES_COUNTRY')
-}
+_globals_initialized = False
+def init_globals():
+    global DEBUG, LDAP_SERVER, LDAP_PORT, LDAP_SSL, LDAP_USER, LDAP_PWD, LDAP_SEARCH_BASE, LDAP_ATTRIBUTES
+    global _globals_initialized
+    if not _globals_initialized:
+        # Retrieve connector settings from the database
+        DEBUG = False
+        LDAP_SERVER = get_connector_conf('activedirectory', 'LDAP_SERVER')
+        LDAP_PORT = int(get_connector_conf('activedirectory', 'LDAP_PORT'))
+        LDAP_SSL = get_connector_conf('activedirectory', 'LDAP_SSL')
+        LDAP_USER = get_connector_conf('activedirectory', 'LDAP_USER')
+        LDAP_PWD = get_connector_conf('activedirectory', 'LDAP_PWD')
+        LDAP_SEARCH_BASE = get_connector_conf('activedirectory', 'LDAP_SEARCH_BASE')
+        LDAP_ATTRIBUTES = {
+            'USER_NAME': get_connector_conf('activedirectory', 'LDAP_ATTRIBUTES_USER_NAME'),
+            'JOB_TITLE': get_connector_conf('activedirectory', 'LDAP_ATTRIBUTES_JOB_TITLE'),
+            'BUSINESS_UNIT': get_connector_conf('activedirectory', 'LDAP_ATTRIBUTES_BUSINESS_UNIT'),
+            'OFFICE': get_connector_conf('activedirectory', 'LDAP_ATTRIBUTES_OFFICE'),
+            'COUNTRY': get_connector_conf('activedirectory', 'LDAP_ATTRIBUTES_COUNTRY')
+        }
+        _globals_initialized = True
 
 def ldap_search(username):
     """
@@ -34,7 +38,7 @@ def ldap_search(username):
     :param username: The username to search for in the LDAP directory.
     :return: An LDAP entry if found, otherwise None.
     """
-
+    init_globals()
     server = Server(LDAP_SERVER, port=LDAP_PORT, use_ssl=LDAP_SSL, get_info=ALL)
     conn = Connection(server, LDAP_USER, LDAP_PWD, auto_bind=True)
     conn.search(
