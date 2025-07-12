@@ -29,6 +29,7 @@ DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
+
 @shared_task()
 def regenerate_stats(query_id):
     query = get_object_or_404(Query, pk=query_id)
@@ -48,13 +49,9 @@ def regenerate_stats(query_id):
         )
     campaign.save()
 
-    # Create task in CeleryStatus object
-    celery_status = CeleryStatus(
-        query=query,
-        progress=0
-        )
-    celery_status.save()
-    
+    # Get task in CeleryStatus object
+    celery_status = get_object_or_404(CeleryStatus, query=query)
+
     # Delete all snapshots for this query
     # (related Endpoint object will automatically cascade delete)
     Snapshot.objects.filter(query=query).delete()
@@ -174,5 +171,5 @@ def regenerate_stats(query_id):
     campaign.date_end = datetime.now()
     campaign.save()
 
-    # Delete Celery task
+    # Delete Celery task in DB
     celery_status.delete()

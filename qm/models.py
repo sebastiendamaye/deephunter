@@ -223,6 +223,7 @@ class CeleryStatus(models.Model):
     query = models.ForeignKey(Query, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     progress = models.FloatField()
+    taskid = models.CharField(max_length=36)
 
     def __str__(self):
         return self.query.name

@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q, Sum
 from datetime import datetime, timedelta, timezone
+import logging
 import numpy as np
 from scipy import stats
 from .models import Country, Query, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus, Category
@@ -14,6 +15,7 @@ from connectors.models import Connector
 from .tasks import regenerate_stats
 import ipaddress
 from connectors.utils import is_connector_enabled, get_connector_conf
+from celery import current_app
 
 # Dynamically import all connectors
 import importlib
@@ -33,6 +35,8 @@ DB_DATA_RETENTION = settings.DB_DATA_RETENTION
 GITHUB_LATEST_RELEASE_URL = settings.GITHUB_LATEST_RELEASE_URL
 GITHUB_COMMIT_URL = settings.GITHUB_COMMIT_URL
 
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -503,8 +507,36 @@ def storyline(request, storylineids, eventdate):
 @permission_required("qm.delete_campaign")
 def regen(request, query_id):
     query = get_object_or_404(Query, pk=query_id)
-    id = regenerate_stats.delay(query_id)
-    return HttpResponse('Celery Task ID: {}'.format(id))
+    
+    # Create task in CeleryStatus object
+    celery_status = CeleryStatus(
+        query=query,
+        progress=0
+        )
+    celery_status.save()    
+    
+    # start the celery task (defined in qm/tasks.py)
+    taskid = regenerate_stats.delay(query_id)
+
+    # Update CeleryStatus with the task ID
+    celery_status.taskid = taskid
+    celery_status.save()
+
+    return HttpResponse('Celery Task ID: {}'.format(taskid))
+
+@login_required
+@permission_required("qm.delete_campaign")
+def cancelregen(request, taskid):
+    try:
+        # without signal='SIGKILL', the task is not cancelled immediately
+        current_app.control.revoke(taskid, terminate=True, signal='SIGKILL')
+        # delete task in DB
+        celery_status = get_object_or_404(CeleryStatus, taskid=taskid)
+        celery_status.delete()
+        return HttpResponse('Celery Task terminated')
+    except Exception as e:
+        logging.error(f"Revoke failed: {e}")
+        return HttpResponse('Error terminating Celery Task: {}'.format(e))
 
 @login_required
 @permission_required("qm.delete_campaign")
@@ -512,7 +544,7 @@ def progress(request, query_id):
     try:
         query = get_object_or_404(Query, pk=query_id)
         celery_status = get_object_or_404(CeleryStatus, query=query)
-        return HttpResponse('<span><b>Task progress:</b> {}%</span>'.format(round(celery_status.progress)))
+        return HttpResponse('<span><b>Task progress:</b> {}% | <a href="/cancelregen/{}/" target="_blank">CANCEL</a></span>'.format(round(celery_status.progress), celery_status.taskid))
     except:
         return HttpResponse('<a href="/{}/regen/" target="_blank" class="buttonred">Regenerate stats</a>'.format(query_id))
 
