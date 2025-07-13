@@ -155,7 +155,7 @@ $( "#tabs" ).tabs();
 
 var mygroups = []
 {% for group in groups %}
-	mygroups.push('{{ group.qid }}');
+	mygroups.push('{{ group.analyticid }}');
 {% endfor %}
 
 var groups = new vis.DataSet([
@@ -275,7 +275,7 @@ timeline.on('doubleClick', function (properties) {
 			$('#link_storylineid').addClass('disabled');
 		}
 		
-		$('#link_admin').attr('href', '/admin/qm/query/'+mygroups[properties['group']]+'/change/');
+		$('#link_admin').attr('href', '/admin/qm/analytic/'+mygroups[properties['group']]+'/change/');
 		$('#link_trend').attr('href', '/'+mygroups[properties['group']]+'/trend/');
 
 		var x = properties.pageX;

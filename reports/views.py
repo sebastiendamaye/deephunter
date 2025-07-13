@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.db.models import Q, Sum, Count
 from urllib.parse import quote
 from datetime import datetime, timedelta, date
-from qm.models import Country, Query, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus
+from qm.models import Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus
 
 # Dynamically import all connectors
 import importlib
@@ -112,7 +112,7 @@ def mitre(request):
     
     t = []
     for technique in MitreTechnique.objects.all():
-        score = Query.objects.filter(mitre_techniques=technique).count()
+        score = Analytic.objects.filter(mitre_techniques=technique).count()
         t.append({
             "techniqueID": technique.mitre_id,
             "score": score
@@ -158,14 +158,14 @@ def mitre(request):
         tmp = []
         for technique in techniques:
             # how many analytics are using each technique or subtechniques related to the technique
-            numqueries = Query.objects.filter(
+            numanalytics = Analytic.objects.filter(
                 Q(mitre_techniques__mitre_id = technique.mitre_id)
                 | Q(mitre_techniques__mitre_technique__mitre_id = technique.mitre_id)
             ).distinct().count()
             tmp.append({
                 'mitre_id': technique.mitre_id,
                 'name': technique.name,
-                'numqueries': numqueries
+                'numanalytics': numanalytics
                 })
             
         ttp.append({
@@ -185,27 +185,27 @@ def endpoints(request):
     # select TOP 20 endpoints for today's campaign
     endpoints = Endpoint.objects.filter(
         snapshot__date=datetime.today()-timedelta(days=1)
-        ).values('hostname', 'site').annotate(total=Sum('snapshot__query__weighted_relevance')).order_by('-total')[:20]
+        ).values('hostname', 'site').annotate(total=Sum('snapshot__analytic__weighted_relevance')).order_by('-total')[:20]
     data = []
     for endpoint in endpoints:
         hostname = endpoint['hostname']
         site = endpoint['site']
-        queries = Endpoint.objects.filter(
+        analytics = Endpoint.objects.filter(
             snapshot__date=datetime.today()-timedelta(days=1),
             hostname=hostname
-            ).order_by('-snapshot__query__weighted_relevance')
+            ).order_by('-snapshot__analytic__weighted_relevance')
         
         qdata = []
-        for query in queries:
+        for analytic in analytics:
             
             startdate=(datetime.today()-timedelta(days=1)).strftime('%Y-%m-%d')
-            xdrlink = all_connectors.get(query.snapshot.query.connector.name).get_redirect_query_link(query.snapshot.query, date=startdate, endpoint_name=hostname)
+            xdrlink = all_connectors.get(analytic.snapshot.analytic.connector.name).get_redirect_analytic_link(analytic.snapshot.analytic, date=startdate, endpoint_name=hostname)
 
             qdata.append({
-                "queryid":query.snapshot.query.id,
-                "name":query.snapshot.query.name,
-                "confidence":query.snapshot.query.confidence,
-                "relevance":query.snapshot.query.relevance,
+                "analyticid":analytic.snapshot.analytic.id,
+                "name":analytic.snapshot.analytic.name,
+                "confidence":analytic.snapshot.analytic.confidence,
+                "relevance":analytic.snapshot.analytic.relevance,
                 "xdrlink":xdrlink
                 })
         
@@ -213,7 +213,7 @@ def endpoints(request):
             "hostname":hostname,
             "site":site,
             "total":endpoint['total'],
-            "queries":qdata
+            "analytics":qdata
             })
     context = {
         'endpoints': data
@@ -225,11 +225,11 @@ def endpoints(request):
 @login_required
 def missing_mitre(request):
     # Number of analytics with unmapped MITRE techniques
-    q_unmapped = Query.objects.filter(mitre_techniques=None)
+    q_unmapped = Analytic.objects.filter(mitre_techniques=None)
     q_unmapped_count = q_unmapped.count()
 
     # Number of analytics with MITRE techniques mapped
-    q_mapped_count = Query.objects.filter(~Q(mitre_techniques=None)).count()
+    q_mapped_count = Analytic.objects.filter(~Q(mitre_techniques=None)).count()
 
     context = {
         'q_unmapped': q_unmapped,
@@ -243,72 +243,72 @@ def missing_mitre(request):
 def analytics_perfs(request):
     yesterday = datetime.now() - timedelta(days=1)
     snapshots = Snapshot.objects.filter(date=yesterday).order_by('-runtime')
-    queries = []
+    analytics = []
     
     for snapshot in snapshots:
-        query_snapshots = Snapshot.objects.filter(query=snapshot.query, date__gt=datetime.today()-timedelta(days=20)).order_by('date')
-        queries.append({
-                'id': snapshot.query.id,
-                'name': snapshot.query.name,
+        analytic_snapshots = Snapshot.objects.filter(analytic=snapshot.analytic, date__gt=datetime.today()-timedelta(days=20)).order_by('date')
+        analytics.append({
+                'id': snapshot.analytic.id,
+                'name': snapshot.analytic.name,
                 'runtime': snapshot.runtime,
-                'sparkline': [query_snapshot.runtime for query_snapshot in query_snapshots]
+                'sparkline': [analytic_snapshot.runtime for analytic_snapshot in analytic_snapshots]
             })
     
     context = {
-        'queries': queries
+        'analytics': analytics
         }
     
     return render(request, 'perfs.html', context)
 
 @login_required
 def disabled_analytics(request):
-    queries = Query.objects.filter(
+    analytics = Analytic.objects.filter(
         run_daily = False,
         maxhosts_count__gte = ON_MAXHOSTS_REACHED['THRESHOLD']
     )
     context = {
-        'queries': queries
+        'analytics': analytics
         }
     
     return render(request, 'disabled_analytics.html', context)
 
 @login_required
 def query_error(request):
-    queries = Query.objects.filter(query_error = True)
+    analytics = Analytic.objects.filter(query_error = True)
     context = {
-        'queries': queries
+        'analytics': analytics
         }
     
     return render(request, 'query_error.html', context)
 
 @login_required
 def rare_occurrences(request):
-    queries = (
+    analytics = (
         Endpoint.objects
-        .values('snapshot__query__id', 'snapshot__query__name', 'snapshot__query__confidence', 'snapshot__query__relevance', 'snapshot__query__description', 'snapshot__query__query')
+        .values('snapshot__analytic__id', 'snapshot__analytic__name', 'snapshot__analytic__confidence', 'snapshot__analytic__relevance', 'snapshot__analytic__description', 'snapshot__analytic__query')
         .annotate(distinct_hostnames=Count('hostname', distinct=True))
         .filter(distinct_hostnames__lt=RARE_OCCURRENCES_THRESHOLD)
         .order_by('distinct_hostnames')
         )
     
     data = []
-    for query in queries:
-        q = get_object_or_404(Query, pk=query['snapshot__query__id'])
-        endpoints = Endpoint.objects.filter(snapshot__query=q).values('hostname').distinct()
+    for analytic in analytics:
+        q = get_object_or_404(Analytic, pk=analytic['snapshot__analytic__id'])
+        endpoints = Endpoint.objects.filter(snapshot__analytic=q).values('hostname').distinct()
 
         data.append({
-            'id': query['snapshot__query__id'],
-            'name': query['snapshot__query__name'],
-            'confidence': query['snapshot__query__confidence'],
-            'relevance': query['snapshot__query__relevance'],
-            'description': query['snapshot__query__description'],
-            'query': query['snapshot__query__query'],
-            'distinct_hostnames': query['distinct_hostnames'],
+            'id': analytic['snapshot__analytic__id'],
+            'name': analytic['snapshot__analytic__name'],
+            'confidence': analytic['snapshot__analytic__confidence'],
+            'relevance': analytic['snapshot__analytic__relevance'],
+            'description': analytic['snapshot__analytic__description'],
+            'query': analytic['snapshot__analytic__query'],
+            'distinct_hostnames': analytic['distinct_hostnames'],
             'endpoints': [endpoint['hostname'] for endpoint in endpoints]
             })        
 
     context = {
-        'queries': data
+        'analytics': data
         }
     
     return render(request, 'rare_occurrences.html', context)
@@ -316,9 +316,9 @@ def rare_occurrences(request):
 
 @login_required
 def zero_occurrence(request):
-    queries_without_endpoints = Query.objects.filter(run_daily=True).annotate(
+    analytics_without_endpoints = Analytic.objects.filter(run_daily=True).annotate(
         endpoint_count=Count('snapshot__endpoint')).filter(endpoint_count=0)
     context = {
-        'queries': queries_without_endpoints
+        'analytics': analytics_without_endpoints
         }
     return render(request, 'zero_occurrence.html', context)

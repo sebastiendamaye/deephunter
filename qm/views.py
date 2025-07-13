@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 import logging
 import numpy as np
 from scipy import stats
-from .models import Country, Query, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus, Category
+from .models import Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus, Category
 from connectors.models import Connector
 from .tasks import regenerate_stats
 import ipaddress
@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def index(request):
-    queries = Query.objects.all()
+    analytics = Analytic.objects.all()
     
     posted_search = ''
     posted_filters = {}
@@ -49,7 +49,7 @@ def index(request):
     if request.POST:
         
         if 'search' in request.POST:
-            queries = queries.filter(
+            analytics = analytics.filter(
                 Q(name__icontains=request.POST['search'])
                 | Q(description__icontains=request.POST['search'])
                 | Q(notes__icontains=request.POST['search'])
@@ -57,27 +57,27 @@ def index(request):
             posted_search = request.POST['search']
             
         if 'connectors' in request.POST:
-            queries = queries.filter(connector__pk__in=request.POST.getlist('connectors'))
+            analytics = analytics.filter(connector__pk__in=request.POST.getlist('connectors'))
             posted_filters['connectors'] = request.POST.getlist('connectors')
 
         if 'categories' in request.POST:
-            queries = queries.filter(category__pk__in=request.POST.getlist('categories'))
+            analytics = analytics.filter(category__pk__in=request.POST.getlist('categories'))
             posted_filters['categories'] = request.POST.getlist('categories')
 
         if 'target_os' in request.POST:
-            queries = queries.filter(target_os__pk__in=request.POST.getlist('target_os'))
+            analytics = analytics.filter(target_os__pk__in=request.POST.getlist('target_os'))
             posted_filters['target_os'] = request.POST.getlist('target_os')
         
         if 'vulnerabilities' in request.POST:
-            queries = queries.filter(vulnerabilities__pk__in=request.POST.getlist('vulnerabilities'))
+            analytics = analytics.filter(vulnerabilities__pk__in=request.POST.getlist('vulnerabilities'))
             posted_filters['vulnerabilities'] = request.POST.getlist('vulnerabilities')
         
         if 'tags' in request.POST:
-            queries = queries.filter(tags__pk__in=request.POST.getlist('tags'))
+            analytics = analytics.filter(tags__pk__in=request.POST.getlist('tags'))
             posted_filters['tags'] = request.POST.getlist('tags')
         
         if 'actors' in request.POST:
-            queries = queries.filter(actors__pk__in=request.POST.getlist('actors'))
+            analytics = analytics.filter(actors__pk__in=request.POST.getlist('actors'))
             posted_filters['actors'] = request.POST.getlist('actors')
         
         if 'source_countries' in request.POST:
@@ -87,55 +87,55 @@ def index(request):
                 country = get_object_or_404(Country, pk=countryid)
                 for i in ThreatActor.objects.filter(source_country=country):
                     apt.append(i.id)
-            queries = queries.filter(actors__pk__in=apt)
+            analytics = analytics.filter(actors__pk__in=apt)
             posted_filters['source_countries'] = request.POST.getlist('source_countries')
         
         if 'threats' in request.POST:
-            queries = queries.filter(threats__pk__in=request.POST.getlist('threats'))
+            analytics = analytics.filter(threats__pk__in=request.POST.getlist('threats'))
             posted_filters['threats'] = request.POST.getlist('threats')
         
         if 'mitre_techniques' in request.POST:
-            queries = queries.filter(mitre_techniques__pk__in=request.POST.getlist('mitre_techniques'))
+            analytics = analytics.filter(mitre_techniques__pk__in=request.POST.getlist('mitre_techniques'))
             posted_filters['mitre_techniques'] = request.POST.getlist('mitre_techniques')
         
         if 'mitre_tactics' in request.POST:
-            queries = queries.filter(mitre_techniques__mitre_tactic__pk__in=request.POST.getlist('mitre_tactics'))
+            analytics = analytics.filter(mitre_techniques__mitre_tactic__pk__in=request.POST.getlist('mitre_tactics'))
             posted_filters['mitre_tactics'] = request.POST.getlist('mitre_tactics')
         
         if 'confidence' in request.POST:
-            queries = queries.filter(confidence__in=request.POST.getlist('confidence'))
+            analytics = analytics.filter(confidence__in=request.POST.getlist('confidence'))
             posted_filters['confidence'] = request.POST.getlist('confidence')
         
         if 'relevance' in request.POST:
-            queries = queries.filter(relevance__in=request.POST.getlist('relevance'))
+            analytics = analytics.filter(relevance__in=request.POST.getlist('relevance'))
             posted_filters['relevance'] = request.POST.getlist('relevance')
 
         if 'status' in request.POST:
-            queries = queries.filter(pub_status__in=request.POST.getlist('status'))
+            analytics = analytics.filter(pub_status__in=request.POST.getlist('status'))
             posted_filters['status'] = request.POST.getlist('status')
             
         if 'run_daily' in request.POST:
             if request.POST['run_daily'] == '1':
-                queries = queries.filter(run_daily=True)
+                analytics = analytics.filter(run_daily=True)
                 posted_filters['run_daily'] = 1
             else:
-                queries = queries.filter(run_daily=False)
+                analytics = analytics.filter(run_daily=False)
                 posted_filters['run_daily'] = 0
             
         if 'create_rule' in request.POST:
             if request.POST['create_rule'] == '1':
-                queries = queries.filter(create_rule=True)
+                analytics = analytics.filter(create_rule=True)
                 posted_filters['create_rule'] = 1
             else:
-                queries = queries.filter(create_rule=False)
+                analytics = analytics.filter(create_rule=False)
                 posted_filters['create_rule'] = 0
 
         if 'dynamic_query' in request.POST:
             if request.POST['dynamic_query'] == '1':
-                queries = queries.filter(dynamic_query=True)
+                analytics = analytics.filter(dynamic_query=True)
                 posted_filters['dynamic_query'] = 1
             else:
-                queries = queries.filter(dynamic_query=False)
+                analytics = analytics.filter(dynamic_query=False)
                 posted_filters['dynamic_query'] = 0
 
         if 'hits' in request.POST:
@@ -145,14 +145,14 @@ def index(request):
 
             if request.POST['hits'] == '1':
                 # Filter queries where related Snapshot has hits_count > 0 and date is yesterday
-                queries = queries.filter(
+                analytics = analytics.filter(
                     snapshot__hits_count__gt=0,
                     snapshot__date=yesterday_date
                 ).distinct()
                 posted_filters['hits'] = 1
             else:
-                # Filter queries where related Snapshot has hits_count = 0 and date is yesterday
-                queries = queries.filter(
+                # Filter analytics where related Snapshot has hits_count = 0 and date is yesterday
+                analytics = analytics.filter(
                     snapshot__hits_count=0,
                     snapshot__date=yesterday_date
                 ).distinct()
@@ -160,40 +160,39 @@ def index(request):
 
         if 'maxhosts' in request.POST:
             if request.POST['maxhosts'] == '1':
-                queries = queries.filter(maxhosts_count__gt=0)
+                analytics = analytics.filter(maxhosts_count__gt=0)
                 posted_filters['maxhosts'] = 1
             else:
-                queries = queries.filter(maxhosts_count=0)
+                analytics = analytics.filter(maxhosts_count=0)
                 posted_filters['maxhosts'] = 0
 
         if 'queryerror' in request.POST:
             if request.POST['queryerror'] == '1':
-                queries = queries.filter(query_error=True)
+                analytics = analytics.filter(query_error=True)
                 posted_filters['queryerror'] = 1
             else:
-                queries = queries.filter(query_error=False)
+                analytics = analytics.filter(query_error=False)
                 posted_filters['queryerror'] = 0
 
         if 'created_by' in request.POST:
-            queries = queries.filter(created_by__pk__in=request.POST.getlist('created_by'))
+            analytics = analytics.filter(created_by__pk__in=request.POST.getlist('created_by'))
             posted_filters['created_by'] = request.POST.getlist('created_by')
 
-    for query in queries:
-        #snapshot = Snapshot.objects.filter(query=query, date__gt=datetime.today()-timedelta(days=1)).order_by('date')
-        snapshot = Snapshot.objects.filter(query=query, date=datetime.today()-timedelta(days=1)).order_by('date')
+    for analytic in analytics:
+        snapshot = Snapshot.objects.filter(analytic=analytic, date=datetime.today()-timedelta(days=1)).order_by('date')
         if len(snapshot) > 0:
             snapshot = snapshot[0]
-            query.hits_endpoints = snapshot.hits_endpoints
-            query.hits_count = snapshot.hits_count
-            query.anomaly_alert_count = snapshot.anomaly_alert_count
-            query.anomaly_alert_endpoints = snapshot.anomaly_alert_endpoints
+            analytic.hits_endpoints = snapshot.hits_endpoints
+            analytic.hits_count = snapshot.hits_count
+            analytic.anomaly_alert_count = snapshot.anomaly_alert_count
+            analytic.anomaly_alert_endpoints = snapshot.anomaly_alert_endpoints
         else:
-            query.hits_endpoints = 0
-            query.hits_count = 0
+            analytic.hits_endpoints = 0
+            analytic.hits_count = 0
         
         # Sparkline: show sparkline only for last 20 days event count
-        snapshots = Snapshot.objects.filter(query=query, date__gt=datetime.today()-timedelta(days=20))
-        query.sparkline = [snapshot.hits_endpoints for snapshot in snapshots]
+        snapshots = Snapshot.objects.filter(analytic=analytic, date__gt=datetime.today()-timedelta(days=20))
+        analytic.sparkline = [snapshot.hits_endpoints for snapshot in snapshots]
         
     # Check if token is about to expire
     tokenexpires = 999
@@ -239,7 +238,7 @@ def index(request):
         update_available = False
 
     context = {
-        'queries': queries,
+        'analytics': analytics,
         'connectors': Connector.objects.filter(visible_in_analytics=True),
         'target_os': TargetOs.objects.all(),
         'vulnerabilities': Vulnerability.objects.all(),
@@ -250,19 +249,19 @@ def index(request):
         'mitre_tactics': MitreTactic.objects.all(),
         'mitre_techniques': MitreTechnique.objects.all(),
         'categories': Category.objects.all(),
-        'created_by': User.objects.filter(id__in=Query.objects.exclude(created_by__isnull=True).values('created_by').distinct()),
+        'created_by': User.objects.filter(id__in=Analytic.objects.exclude(created_by__isnull=True).values('created_by').distinct()),
         'posted_search': posted_search,
         'posted_filters': posted_filters,
         'tokenexpires': tokenexpires,
         'update_available': update_available
     }
-    return render(request, 'list_queries.html', context)
+    return render(request, 'list_analytics.html', context)
     
 @login_required
-def trend(request, query_id):
-    query = get_object_or_404(Query, pk=query_id)
+def trend(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
     # show graph for last 90 days only
-    snapshots = Snapshot.objects.filter(query = query, date__gt=datetime.today()-timedelta(days=90))
+    snapshots = Snapshot.objects.filter(analytic=analytic, date__gt=datetime.today()-timedelta(days=90))
     
     stats_vals = []
     date = [snapshot.date for snapshot in snapshots]
@@ -286,10 +285,10 @@ def trend(request, query_id):
             'anomaly_alert_endpoints': a_anomaly_alert_endpoints[i]
             } )
 
-    endpoints = Endpoint.objects.filter(snapshot__query=query).values('hostname').distinct()
+    endpoints = Endpoint.objects.filter(snapshot__analytic=analytic).values('hostname').distinct()
 
     context = {
-        'query': query,
+        'analytic': analytic,
         'stats': stats_vals,
         'distinct_endpoints': endpoints.count(),
         'endpoints': endpoints,
@@ -297,13 +296,12 @@ def trend(request, query_id):
     return render(request, 'trend.html', context)
 
 @login_required
-def querydetail(request, query_id):
-    query = get_object_or_404(Query, pk=query_id)    
+def analyticdetail(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)    
     
-    # Populate the list of endpoints (top 10) that matched the query for the last campaign
+    # Populate the list of endpoints (top 10) that matched the analytic for the last campaign
     try:
-        #snapshots = Snapshot.objects.filter(query=query, date__gt=datetime.today()-timedelta(days=1))
-        snapshots = Snapshot.objects.filter(query=query, date=datetime.today()-timedelta(days=1))
+        snapshots = Snapshot.objects.filter(analytic=analytic, date=datetime.today()-timedelta(days=1))
         endpoints = []
         for snapshot in snapshots:
             for e in Endpoint.objects.filter(snapshot=snapshot):
@@ -313,19 +311,19 @@ def querydetail(request, query_id):
     except:
         endpoints = []
 
-    # get celery status for the selected query
+    # get celery status for the selected analytic
     try:
-        celery_status = get_object_or_404(CeleryStatus, query=query)
+        celery_status = get_object_or_404(CeleryStatus, analytic=analytic)
         progress = round(celery_status.progress)
     except:
         progress = 999
             
     context = {
-        'q': query,
+        'analytic': analytic,
         'endpoints': endpoints,
         'progress': progress
         }
-    return render(request, 'query_detail.html', context)
+    return render(request, 'analytic_detail.html', context)
 
 @login_required
 @permission_required("qm.delete_campaign")
@@ -357,12 +355,12 @@ def timeline(request):
         endpoints = Endpoint.objects.filter(hostname=hostname).order_by('snapshot__date')
         for e in endpoints:
             # search if group already exists
-            g = next((group for group in groups if group['content'] == e.snapshot.query.name), None)
+            g = next((group for group in groups if group['content'] == e.snapshot.analytic.name), None)
             # if group does not exist yet, create it
             if g:
                 g = g['id']
             else:
-                groups.append({'id':gid, 'qid':e.snapshot.query.id, 'content':e.snapshot.query.name})
+                groups.append({'id':gid, 'analyticid':e.snapshot.analytic.id, 'content':e.snapshot.analytic.name})
                 g = gid
                 gid += 1
                 
@@ -372,8 +370,8 @@ def timeline(request):
                 'group': g,
                 'start': e.snapshot.date,
                 'end': e.snapshot.date+timedelta(days=1),
-                'description': 'Signature: {}'.format(e.snapshot.query.name),
-                'connector': 'Connector: {}'.format(e.snapshot.query.connector.name),
+                'description': 'Signature: {}'.format(e.snapshot.analytic.name),
+                'connector': 'Connector: {}'.format(e.snapshot.analytic.connector.name),
                 'storylineid': 'StorylineID: {}'.format(e.storylineid.replace('#', ', '))
                 })
             storylineid_json[iid] = e.storylineid.split('#')
@@ -464,7 +462,7 @@ def timeline(request):
         # Visualization #2 (graph)
         items2 = Endpoint.objects.filter(hostname=hostname) \
             .values('snapshot__date') \
-            .annotate(cumulative_score=Sum('snapshot__query__weighted_relevance')) \
+            .annotate(cumulative_score=Sum('snapshot__analytic__weighted_relevance')) \
             .order_by('snapshot__date')
 
     
@@ -488,12 +486,12 @@ def timeline(request):
     return render(request, 'timeline.html', context)
 
 @login_required
-def events(request, query_id, eventdate=None, endpointname=None):
+def events(request, analytic_id, eventdate=None, endpointname=None):
     """
-    Redirect to the query link in the connector's data lake.
+    Redirect to the analytic link in the connector's data lake.
     """
-    query = get_object_or_404(Query, pk=query_id)
-    return HttpResponseRedirect(all_connectors.get(query.connector.name).get_redirect_query_link(query, eventdate, endpointname))
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    return HttpResponseRedirect(all_connectors.get(analytic.connector.name).get_redirect_analytic_link(analytic, eventdate, endpointname))
 
 @login_required
 def storyline(request, storylineids, eventdate):
@@ -505,18 +503,18 @@ def storyline(request, storylineids, eventdate):
 
 @login_required
 @permission_required("qm.delete_campaign")
-def regen(request, query_id):
-    query = get_object_or_404(Query, pk=query_id)
+def regen(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
     
     # Create task in CeleryStatus object
     celery_status = CeleryStatus(
-        query=query,
+        analytic=analytic,
         progress=0
         )
     celery_status.save()    
     
     # start the celery task (defined in qm/tasks.py)
-    taskid = regenerate_stats.delay(query_id)
+    taskid = regenerate_stats.delay(analytic_id)
 
     # Update CeleryStatus with the task ID
     celery_status.taskid = taskid
@@ -540,19 +538,19 @@ def cancelregen(request, taskid):
 
 @login_required
 @permission_required("qm.delete_campaign")
-def progress(request, query_id):
+def progress(request, analytic_id):
     try:
-        query = get_object_or_404(Query, pk=query_id)
-        celery_status = get_object_or_404(CeleryStatus, query=query)
+        analytic = get_object_or_404(Analytic, pk=analytic_id)
+        celery_status = get_object_or_404(CeleryStatus, analytic=analytic)
         return HttpResponse('<span><b>Task progress:</b> {}% | <a href="/cancelregen/{}/" target="_blank">CANCEL</a></span>'.format(round(celery_status.progress), celery_status.taskid))
     except:
-        return HttpResponse('<a href="/{}/regen/" target="_blank" class="buttonred">Regenerate stats</a>'.format(query_id))
+        return HttpResponse('<a href="/{}/regen/" target="_blank" class="buttonred">Regenerate stats</a>'.format(analytic_id))
 
 @login_required
 @permission_required("qm.delete_campaign")
-def deletestats(request, query_id):
-    query = get_object_or_404(Query, pk=query_id)
-    Snapshot.objects.filter(query=query).delete()
+def deletestats(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    Snapshot.objects.filter(analytic=analytic).delete()
     return HttpResponseRedirect('/')
 
 @login_required

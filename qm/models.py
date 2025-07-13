@@ -104,7 +104,7 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = "categories"
 
-class Query(models.Model):
+class Analytic(models.Model):
     STATUS_CHOICES = [
         ('DRAFT', 'Draft'),
         ('DIST', 'Production'),
@@ -136,7 +136,7 @@ class Query(models.Model):
         output_field=models.FloatField(),
         db_persist=False
     )
-    connector = models.ForeignKey(Connector, on_delete=models.CASCADE, help_text="Connector to use for this query")
+    connector = models.ForeignKey(Connector, on_delete=models.CASCADE, help_text="Connector to use for this analytic")
     query = models.TextField()
     columns = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
@@ -161,16 +161,13 @@ class Query(models.Model):
     def __str__(self):
         return self.name
     
-    class Meta:
-        verbose_name_plural = "queries"
-
     def has_changed(self):
         if not self.pk:
             return True  # New object, definitely changed (being created)
         
         try:
-            old = Query.objects.get(pk=self.pk)
-        except Query.DoesNotExist:
+            old = Analytic.objects.get(pk=self.pk)
+        except Analytic.DoesNotExist:
             return True  # New object
 
         for field in self._meta.fields:
@@ -197,7 +194,7 @@ class Campaign(models.Model):
    
 class Snapshot(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
-    query = models.ForeignKey(Query, on_delete=models.CASCADE)
+    analytic = models.ForeignKey(Analytic, on_delete=models.CASCADE)
     date = models.DateField()
     runtime = models.FloatField()
     hits_count = models.IntegerField(default=0)
@@ -208,7 +205,7 @@ class Snapshot(models.Model):
     anomaly_alert_endpoints = models.BooleanField(default=False)
     
     def __str__(self):
-        return '{} - {}'.format(self.date, self.query.name)
+        return '{} - {}'.format(self.date, self.analytic.name)
 
 class Endpoint(models.Model):
     hostname = models.CharField(max_length=253)
@@ -217,16 +214,16 @@ class Endpoint(models.Model):
     storylineid = models.CharField(max_length=255, blank=True)
     
     def __str__(self):
-        return '{} - {} - {}'.format(self.snapshot.date, self.hostname, self.snapshot.query.name)
+        return '{} - {} - {}'.format(self.snapshot.date, self.hostname, self.snapshot.analytic.name)
 
 class CeleryStatus(models.Model):
-    query = models.ForeignKey(Query, on_delete=models.CASCADE)
+    analytic = models.ForeignKey(Analytic, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     progress = models.FloatField()
     taskid = models.CharField(max_length=36)
 
     def __str__(self):
-        return self.query.name
+        return self.analytic.name
     
     class Meta:
         verbose_name_plural = "celery status"

@@ -1,12 +1,12 @@
 {% load qm_extras %}
 {% load markup_tags %}
 <div class="m10">
-	<a href="/events/{{ q.id }}/" target="_blank" class="button">Run query</a>
-	<a href="{{ q.id }}/trend/" target="_blank" class="button">See trend</a>
-	<a href="/admin/qm/query/{{ q.id }}/change/" target="_blank" class="button">Edit in admin</a></li>
+	<a href="/events/{{ analytic.id }}/" target="_blank" class="button">Run query</a>
+	<a href="{{ analytic.id }}/trend/" target="_blank" class="button">See trend</a>
+	<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank" class="button">Edit in admin</a></li>
 	{% if perms.qm.delete_campaign %}
-		<div id="progress_{{ q.id }}" class="progress">...</div>&nbsp;
-		<div class="progress"><a href="{{ q.id }}/deletestats/" target="_blank" class="buttonred">Delete stats</a></div>
+		<div id="progress_{{ analytic.id }}" class="progress">...</div>&nbsp;
+		<div class="progress"><a href="{{ analytic.id }}/deletestats/" target="_blank" class="buttonred">Delete stats</a></div>
 	{% endif %}
 </div>
 
@@ -16,39 +16,39 @@
 	{% for endpoint in endpoints %}
 		<a href="/timeline?hostname={{ endpoint }}" target="_blank">{{ endpoint }}</a> |
 	{% endfor %}
-	<a href="/admin/qm/endpoint/?snapshot__query__name={{ q.name }}" target="_blank">See all endpoints...</a>
+	<a href="/admin/qm/endpoint/?snapshot__analytic__name={{ analytic.name }}" target="_blank">See all endpoints...</a>
 </div>
 {% endif %}
 
 <div class="ml40">
-	<b>Created by: </b>{% if q.created_by %}{{ q.created_by }}{% else %}-{% endif %}
-	&nbsp;|&nbsp;<b>Created on: </b>{{ q.pub_date }}
-	&nbsp;|&nbsp;<b>Last modified: </b>{{ q.update_date }}
-	&nbsp;[<a href="/admin/qm/query/{{ q.id }}/history/" target="_blank">history</a>]
+	<b>Created by: </b>{% if analytic.created_by %}{{ analytic.created_by }}{% else %}-{% endif %}
+	&nbsp;|&nbsp;<b>Created on: </b>{{ analytic.pub_date }}
+	&nbsp;|&nbsp;<b>Last modified: </b>{{ analytic.update_date }}
+	&nbsp;[<a href="/admin/qm/analytic/{{ analytic.id }}/history/" target="_blank">history</a>]
 </div>
 <div class="ml40">
-	<b>Tags: </b>{% if q.tags %}{% for tag in q.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
+	<b>Tags: </b>{% if analytic.tags %}{% for tag in analytic.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
 </div>
 
 <h1>DESCRIPTION</h1>
-{% if q.description %}<div class="description">{{ q.description|apply_markup:"markdown" }}</div>{% endif %}
+{% if analytic.description %}<div class="description">{{ analytic.description|apply_markup:"markdown" }}</div>{% endif %}
 <h1>THREAT HUNTING NOTES</h1>
-{% if q.notes %}<div class="description">{{ q.notes|apply_markup:"markdown" }}</div>{% endif %}
+{% if analytic.notes %}<div class="description">{{ analytic.notes|apply_markup:"markdown" }}</div>{% endif %}
 
 <h1>QUERY</h1>
-{% if q.query_error %}<div class="{% if 'errors' in q.query_error_message %}errormsg{% else %}warningmsg{% endif %}">{{ q.query_error_message }}</div>{% endif %}
-<div class="w1000 ml40{% if q.query_error %}{% if 'errors' in q.query_error_message %} errorquery{% else %} warningquery{% endif %}{% endif %}"><pre>{{ q.query }}{% if q.columns %}<br />{{ q.columns }}{% endif %}</pre></div>
+{% if analytic.query_error %}<div class="{% if 'errors' in analytic.query_error_message %}errormsg{% else %}warningmsg{% endif %}">{{ analytic.query_error_message }}</div>{% endif %}
+<div class="w1000 ml40{% if analytic.query_error %}{% if 'errors' in analytic.query_error_message %} errorquery{% else %} warningquery{% endif %}{% endif %}"><pre>{{ analytic.query }}{% if analytic.columns %}<br />{{ analytic.columns }}{% endif %}</pre></div>
 
 <h1>THREAT COVERAGE</h1>
 <ul>
 	<li><b>Target OS: </b>
-		{% for os in q.target_os.all %}
+		{% for os in analytic.target_os.all %}
 			<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><path d="{{ os.name|os2icon }}"/></svg>
 		{% endfor %}
 	</li>
 	<li><b>Vulnerabilities: </b>
 		<ul>
-		{% for vulnerability in q.vulnerabilities.all %}
+		{% for vulnerability in analytic.vulnerabilities.all %}
 			<li><div class="floatleft" title="{{ vulnerability.description }}">{{ vulnerability.name }}</div>
 			<div class="vuln cve_{{ vulnerability.base_score|cvecolor }}">{{ vulnerability.base_score }}</div>
 			{% if vulnerability.references %}&nbsp;&nbsp;{% for link in vulnerability.references|links %} [<a href="{{ link }}" target="_blank">link</a>]{% endfor %}{% endif %}
@@ -58,7 +58,7 @@
 	</li>
 	<li><b>Associated Threat Actors: </b>
 		<ul>
-		{% for actor in q.actors.all %}
+		{% for actor in analytic.actors.all %}
 			<li>{{ actor.name }}{% if actor.aka_name %} ({{ actor.aka_name }}){% endif %} | Source country: {{ actor.source_country }}
 			{% if actor.references %}{% for link in actor.references|links %} [<a href="{{ link }}" target="_blank">link</a>]{% endfor %}{% endif %}
 			</li>
@@ -67,7 +67,7 @@
 	</li>
 	<li><b>Associated Threats: </b>
 		<ul>
-		{% for threat in q.threats.all %}
+		{% for threat in analytic.threats.all %}
 			<li>{{ threat.name }}{% if threat.aka_name %} ({{ threat.aka_name }}){% endif %}
 			{% if threat.references %}{% for link in threat.references|links %} [<a href="{{ link }}" target="_blank">link</a>]{% endfor %}{% endif %}
 			</li>
@@ -79,7 +79,7 @@
 <h1>MITRE INFORMATION</h1>
 	<table class="mitre ml40">
 		<tr><th>Tactic</th><th>Technique</th><th>Sub-technique</th></tr>
-			{% for t in q.mitre_techniques.all %}
+			{% for t in analytic.mitre_techniques.all %}
 				<tr>
 					<td>
 					{% for tac in t.mitre_tactic.all %}
@@ -98,16 +98,16 @@
 	</table>
 
 <h1>EMULATION & VALIDATION</h1>
-{% if q.emulation_validation %}<div class="description">{{ q.emulation_validation|apply_markup:"markdown" }}</div>{% endif %}
+{% if analytic.emulation_validation %}<div class="description">{{ analytic.emulation_validation|apply_markup:"markdown" }}</div>{% endif %}
 
 <h1>REFERENCES</h1>
-{% if q.references %}<ul>{% for link in q.references|links %}<li><a href="{{ link }}" target="_blank">{{ link }}</a></li>{% endfor %}</ul>{% endif %}
+{% if analytic.references %}<ul>{% for link in analytic.references|links %}<li><a href="{{ link }}" target="_blank">{{ link }}</a></li>{% endfor %}</ul>{% endif %}
 
 {% if perms.qm.delete_campaign %}
 <script type="text/javascript" nonce="jg6kl5z3v2">
 $(document).ready(function() {
 	setInterval(function() {
-		$("#progress_{{ q.id }}").load('{{ q.id }}/progress/')
+		$("#progress_{{ analytic.id }}").load('{{ analytic.id }}/progress/')
 	}, 2000);
 });
 </script>

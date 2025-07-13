@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 import requests
-from qm.models import Query
+from qm.models import Analytic
 
 DEBUG = False
 
@@ -47,6 +47,6 @@ def run():
       {}
     )""".format(s1ql)
 
-    query = get_object_or_404(Query, name='vulnerable_driver_name_detected_loldriver')
-    query.query = dynamic_query
-    query.save()
+    analytic = get_object_or_404(Analytic, name='vulnerable_driver_name_detected_loldriver')
+    analytic.query = dynamic_query
+    analytic.save()

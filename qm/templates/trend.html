@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<h1>Data for {{ query }}</h1>
+<h1>Data for {{ analytic }}</h1>
 <div class="charts_left">
 	<div id="chartContainer_runtime"></div>
 	<div id="chartContainer_count"></div>
@@ -17,16 +17,16 @@
 
 <div class="charts_right">
 	<div class="paragraph">
-		[<a href="/admin/qm/query/{{ query.id }}/change/" target="_blank">edit in admin</a>]
-		[<a href="/admin/qm/endpoint/?snapshot__query__name={{ query.name }}" target="_blank">see endpoints</a>]
+		[<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank">edit in admin</a>]
+		[<a href="/admin/qm/endpoint/?snapshot__analytic__name={{ analytic.name }}" target="_blank">see endpoints</a>]
 		{% if perms.qm.delete_campaign %}
-			<div id="progress_{{ query.id }}" class="progress">...</div>&nbsp;
-			<div class="progress"><a href="/{{ query.id }}/deletestats/" target="_blank" class="buttonred">Delete stats</a></div>
+			<div id="progress_{{ analytic.id }}" class="progress">...</div>&nbsp;
+			<div class="progress"><a href="/{{ analytic.id }}/deletestats/" target="_blank" class="buttonred">Delete stats</a></div>
 		{% endif %}
 
 	</div>
-	<div class="paragraph"><b>#hits z-score threshold:</b> {{ query.anomaly_threshold_count }}</div>
-	<div><b>#endpoints z-score threshold:</b> {{ query.anomaly_threshold_endpoints }}</div>
+	<div class="paragraph"><b>#hits z-score threshold:</b> {{ analytic.anomaly_threshold_count }}</div>
+	<div><b>#endpoints z-score threshold:</b> {{ analytic.anomaly_threshold_endpoints }}</div>
 	<div class="paragraph"><b>Distinct endpoints: </b>{{ distinct_endpoints }}
 		<br /><b>Top 10 endpoints</b>:
 		{% if endpoints %}
@@ -40,11 +40,11 @@
 	</div>
 	<div class="paragraph">
 		<b>Description:</b><br />
-		<p>{{ query.description|apply_markup:"markdown" }}</p>
+		<p>{{ analytic.description|apply_markup:"markdown" }}</p>
 	</div>
 	<div class="paragraph">
 		<b>Query:</b><br />
-		<pre>{{ query.query }}</pre>
+		<pre>{{ analytic.query }}</pre>
 	</div>
 </div>
 <!--div class="clear"></div-->
@@ -168,7 +168,7 @@ window.onload = function () {
 			yValueFormatString: "#,##0",
 			dataPoints: [
 				{% for s in stats %}
-					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_endpoints }}, click: function(e) { open('/events/{{ query.id }}/{{ s.date|date:"Y-m-d" }}/', '_blank'); } },
+					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_endpoints }}, click: function(e) { open('/events/{{ analytic.id }}/{{ s.date|date:"Y-m-d" }}/', '_blank'); } },
 				{% endfor %}
 			]
 		}]
@@ -195,7 +195,7 @@ window.onload = function () {
 <script type="text/javascript" nonce="jg6kl5z3v2">
 $(document).ready(function() {
 	setInterval(function() {
-		$("#progress_{{ query.id }}").load('/{{ query.id }}/progress/')
+		$("#progress_{{ analytic.id }}").load('/{{ analytic.id }}/progress/')
 	}, 2000);
 });
 </script>

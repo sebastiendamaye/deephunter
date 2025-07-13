@@ -81,24 +81,24 @@ def gzip_base64_urlencode(input_string):
     
     return url_encoded
 
-def manage_query_error(query, error_message):
+def manage_analytic_error(analytic, error_message):
     """
-    Manage query errors by logging the error, updating the query status and saving the error message.
-    :param query: Query object that failed.
+    Manage analytic errors by logging the error, updating the query status and saving the error message.
+    :param analytic: Analytic object that failed.
     :param error_message: Error message to log and save.
     """
 
-    logger.error(f"[ ERROR ] Query {query.name} failed. Check report for more info.")
+    logger.error(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
     
     # if error, we set the query_error flag and save the error message
-    query.query_error = True
+    analytic.query_error = True
     if len(error_message) > 500:
         error_message = "{} [...] {}".format(error_message[:250], error_message[-250:])
 
-    query.query_error_message = error_message
-    # if "error" message, and configured to auto-disable query,
-    # remove query from future campaigns (until query is updated)
+    analytic.query_error_message = error_message
+    # if "error" message, and configured to auto-disable analytic,
+    # remove analytic from future campaigns (until query field is updated)
     if "error" in error_message.lower() and DISABLE_RUN_DAILY_ON_ERROR:
-        query.run_daily = False
-    # we save query
-    query.save()
+        analytic.run_daily = False
+    # we save analytic
+    analytic.save()

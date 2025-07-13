@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName, ThreatActor, Query, Snapshot, Campaign, Endpoint, Tag, CeleryStatus, Category
+from .models import Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName, ThreatActor, Analytic, Snapshot, Campaign, Endpoint, Tag, CeleryStatus, Category
 from connectors.models import Connector
 from django.contrib.admin.models import LogEntry
 from simple_history.admin import SimpleHistoryAdmin
@@ -9,7 +9,7 @@ admin.site.site_title = 'DeepHunter_'
 admin.site.site_header = 'DeepHunter_'
 admin.site.index_title = 'DeepHunter_'
 
-class QueryHistoryAdmin(SimpleHistoryAdmin):
+class AnalyticHistoryAdmin(SimpleHistoryAdmin):
     list_display = ('name', 'update_date', 'created_by', 'pub_status', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'maxhosts_count', 'connector', 'query')
     list_filter = ['pub_status', 'created_by', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'maxhosts_count', 'dynamic_query', 'query_error', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name', 'target_os', 'tags__name', 'connector']
     search_fields = ['name', 'description', 'notes', 'emulation_validation']
@@ -31,8 +31,8 @@ class QueryHistoryAdmin(SimpleHistoryAdmin):
         return super().save_model(request, obj, form, change)
 
 class SnapshotAdmin(admin.ModelAdmin):
-    list_display = ('get_campaign', 'query', 'date', 'runtime', 'hits_count', 'hits_endpoints','zscore_count', 'zscore_endpoints', 'anomaly_alert_count', 'anomaly_alert_endpoints',)
-    list_filter = ['campaign__name', 'query', 'date', 'anomaly_alert_count', 'anomaly_alert_endpoints']
+    list_display = ('get_campaign', 'analytic', 'date', 'runtime', 'hits_count', 'hits_endpoints','zscore_count', 'zscore_endpoints', 'anomaly_alert_count', 'anomaly_alert_endpoints',)
+    list_filter = ['campaign__name', 'analytic', 'date', 'anomaly_alert_count', 'anomaly_alert_endpoints']
     
     @admin.display(description='campaign')
     def get_campaign(self, obj):
@@ -67,21 +67,21 @@ class ThreatActorAdmin(admin.ModelAdmin):
     search_fields = ['name', 'aka_name']
 
 class EndpointAdmin(admin.ModelAdmin):
-    list_display = ('hostname', 'site', 'get_query', 'get_confidence', 'get_relevance', 'get_date', 'storylineid')
-    list_filter = ['snapshot__date', 'site', 'snapshot__query__confidence', 'snapshot__query__relevance', 'snapshot__query__name']
-    search_fields = ['hostname', 'snapshot__query__name', 'storylineid']
+    list_display = ('hostname', 'site', 'get_analytic_name', 'get_confidence', 'get_relevance', 'get_date', 'storylineid')
+    list_filter = ['snapshot__date', 'site', 'snapshot__analytic__confidence', 'snapshot__analytic__relevance', 'snapshot__analytic__name']
+    search_fields = ['hostname', 'snapshot__analytic__name', 'storylineid']
 
-    @admin.display(description='query')
-    def get_query(self, obj):
-        return obj.snapshot.query
+    @admin.display(description='analytic')
+    def get_analytic_name(self, obj):
+        return obj.snapshot.analytic.name
     
     @admin.display(description='confidence')
     def get_confidence(self, obj):
-        return obj.snapshot.query.confidence
+        return obj.snapshot.analytic.confidence
     
     @admin.display(description='relevance')
     def get_relevance(self, obj):
-        return obj.snapshot.query.relevance
+        return obj.snapshot.analytic.relevance
     
     @admin.display(description='date')
     def get_date(self, obj):
@@ -92,7 +92,7 @@ class LogEntryAdmin(admin.ModelAdmin):
     list_filter = ['user', 'content_type', 'action_flag']
 
 class CeleryStatusAdmin(admin.ModelAdmin):
-    list_display = ('query', 'date', 'progress')
+    list_display = ('analytic', 'date', 'progress')
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'short_name', 'description')
@@ -106,7 +106,7 @@ admin.site.register(MitreTactic, MitreTacticAdmin)
 admin.site.register(MitreTechnique, MitreTechniqueAdmin)
 admin.site.register(ThreatName, ThreatNameAdmin)
 admin.site.register(ThreatActor, ThreatActorAdmin)
-admin.site.register(Query, QueryHistoryAdmin)
+admin.site.register(Analytic, AnalyticHistoryAdmin)
 admin.site.register(Snapshot, SnapshotAdmin)
 admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Endpoint, EndpointAdmin)

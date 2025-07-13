@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from scipy import stats
 from math import isnan
-from qm.models import Query, Snapshot, Campaign, Endpoint, CeleryStatus
+from qm.models import Analytic, Snapshot, Campaign, Endpoint, CeleryStatus
 import logging
 import requests
 from celery import shared_task
@@ -31,32 +31,32 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task()
-def regenerate_stats(query_id):
-    query = get_object_or_404(Query, pk=query_id)
+def regenerate_stats(analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
 
-    # we assume that query won't fail (flag will be set later if query fails)
-    query.query_error = False
-    query.query_error_message = ''
-    query.save()
+    # we assume that analytic won't fail (flag will be set later if analytic fails)
+    analytic.query_error = False
+    analytic.query_error_message = ''
+    analytic.save()
     
     # Create Campaign
     # Date of campaign is when the script runs (today) while snapshot date is the day before (detection date)
     campaign = Campaign(
-        name='regenerate_stats_{}_{}'.format(query.name, datetime.now().strftime("%Y-%m-%d-%H-%M")),
-        description='Regenerate stats for {}'.format(query.name),
+        name='regenerate_stats_{}_{}'.format(analytic.name, datetime.now().strftime("%Y-%m-%d-%H-%M")),
+        description='Regenerate stats for {}'.format(analytic.name),
         date_start=datetime.now(),
         nb_queries=1
         )
     campaign.save()
 
     # Get task in CeleryStatus object
-    celery_status = get_object_or_404(CeleryStatus, query=query)
+    celery_status = get_object_or_404(CeleryStatus, analytic=analytic)
 
-    # Delete all snapshots for this query
+    # Delete all snapshots for this analytic
     # (related Endpoint object will automatically cascade delete)
-    Snapshot.objects.filter(query=query).delete()
+    Snapshot.objects.filter(analytic=analytic).delete()
     
-    # Rebuild campaigns for last DB_DATA_RETENTION (90 days by default) for the query
+    # Rebuild campaigns for last DB_DATA_RETENTION (90 days by default) for the analytic
     for days in reversed(range(DB_DATA_RETENTION)):
         
         # store current time (used to update snapshot runtime)
@@ -66,7 +66,7 @@ def regenerate_stats(query_id):
         # (no date range provided, so it will use the last 24 hours by default)
         todate = datetime.combine((datetime.now() - timedelta(days=days)), datetime.min.time())
         fromdate = (todate - timedelta(days=1))
-        data = all_connectors.get(query.connector.name).query(query, fromdate.isoformat(), todate.isoformat())
+        data = all_connectors.get(analytic.connector.name).query(analytic, fromdate.isoformat(), todate.isoformat())
 
         # store current time (used to update snapshot runtime)
         end_runtime = datetime.now()
@@ -76,7 +76,7 @@ def regenerate_stats(query_id):
         # the date of the snapshot is the day before the campaign (detection date)
         snapshot = Snapshot(
             campaign=campaign,
-            query=query,
+            analytic=analytic,
             date=todate - timedelta(days=1),
             runtime = (end_runtime-start_runtime).total_seconds()
             )
@@ -117,29 +117,29 @@ def regenerate_stats(query_id):
         # When the max_hosts threshold is reached (by default 1000)
         if hits_endpoints >= CAMPAIGN_MAX_HOSTS_THRESHOLD:
             # Update the maxhost counter if reached
-            query.maxhosts_count += 1
+            analytic.maxhosts_count += 1
             # if threshold is reached
-            if query.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
-                # If DISABLE_RUN_DAILY is set and run_daily_lock is not set, we disable the run_daily flag for the query
-                if ON_MAXHOSTS_REACHED['DISABLE_RUN_DAILY'] and not query.run_daily_lock:
-                    query.run_daily = False
-                # If DELETE_STATS is set and run_daily_lock is not set, we delete all stats for the query
-                if ON_MAXHOSTS_REACHED['DELETE_STATS'] and not query.run_daily_lock:
-                    Snapshot.objects.filter(query=query).delete()
-            # we update the query (counter updated, and flags updated)
-            query.save()
+            if analytic.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
+                # If DISABLE_RUN_DAILY is set and run_daily_lock is not set, we disable the run_daily flag for the analytic
+                if ON_MAXHOSTS_REACHED['DISABLE_RUN_DAILY'] and not analytic.run_daily_lock:
+                    analytic.run_daily = False
+                # If DELETE_STATS is set and run_daily_lock is not set, we delete all stats for the analytic
+                if ON_MAXHOSTS_REACHED['DELETE_STATS'] and not analytic.run_daily_lock:
+                    Snapshot.objects.filter(analytic=analytic).delete()
+            # we update the analytic (counter updated, and flags updated)
+            analytic.save()
             # if threshold is reached, we exit the for loop
-            if query.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
+            if analytic.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
                 break
 
         # Anomaly detection for hits_count (compute zscore against all snapshots available in DB)
-        snapshots = Snapshot.objects.filter(query = query)
+        snapshots = Snapshot.objects.filter(analytic=analytic)
         a = np.array([c.hits_count for c in snapshots])
         z = stats.zscore(a)
         zscore_count = z[-1]
         if isnan(zscore_count):
             zscore_count = -9999
-        if zscore_count > query.anomaly_threshold_count:
+        if zscore_count > analytic.anomaly_threshold_count:
             anomaly_alert_count = True
         else:
             anomaly_alert_count = False
@@ -150,7 +150,7 @@ def regenerate_stats(query_id):
         zscore_endpoints = z[-1]
         if isnan(zscore_endpoints):
             zscore_endpoints = -9999
-        if zscore_endpoints > query.anomaly_threshold_endpoints:
+        if zscore_endpoints > analytic.anomaly_threshold_endpoints:
             anomaly_alert_endpoints = True
         else:
             anomaly_alert_endpoints = False

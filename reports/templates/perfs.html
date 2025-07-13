@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/css/list_queries.css" />
+<link rel="stylesheet" href="/static/css/list_analytics.css" />
 <script src="/static/jquery/jquery.min.js"></script>
 <script src="/static/jquery_sparkline/jquery.sparkline.min.js"></script>
 {% endblock %}
@@ -16,22 +16,22 @@
 		<th>Admin/Stats</th>
 		<th>Analytic</th>
 	</tr>
-{% for query in queries %}
+{% for analytic in analytics %}
 	<tr>
-		<td class="acenter">{{ query.runtime|floatformat }} sec</td>
-		<td><span id="sparkline_{{ query.id }}"></span></td>
+		<td class="acenter">{{ analytic.runtime|floatformat }} sec</td>
+		<td><span id="sparkline_{{ analytic.id }}"></span></td>
 		<td>
-			[<a target="_blank" href="/admin/qm/query/{{ query.id }}/change/">admin</a>]
-			[<a target="_blank" href="/{{ query.id }}/trend/">stats</a>]
+			[<a target="_blank" href="/admin/qm/analytic/{{ analytic.id }}/change/">admin</a>]
+			[<a target="_blank" href="/{{ analytic.id }}/trend/">stats</a>]
 		</td>
-		<td>{{ query.name }}</td>
+		<td>{{ analytic.name }}</td>
 	</tr>	
 {% endfor %}
 </table>
 <script type="text/javascript" nonce="hf7hgo1ilm">
 $(function() {
-	{% for query in queries %}
-		$('#sparkline_{{ query.id }}').sparkline({{ query.sparkline }});
+	{% for analytic in analytics %}
+		$('#sparkline_{{ analytic.id }}').sparkline({{ analytic.sparkline }});
 	{% endfor %}
 });
 </script>

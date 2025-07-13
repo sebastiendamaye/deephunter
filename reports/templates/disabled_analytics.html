@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/css/list_queries.css" />
+<link rel="stylesheet" href="/static/css/list_analytics.css" />
 {% endblock %}
 
 {% block body %}
@@ -15,21 +15,21 @@
 		<th>Run daily</th>
 		<th>Analytic</th>
 	</tr>
-{% for query in queries %}
+{% for analytic in analytics %}
 	<tr>
 		<td>
-			[<a target="_blank" href="/admin/qm/query/{{ query.id }}/change/">admin</a>]
-			[<a target="_blank" href="/{{ query.id }}/trend/">stats</a>]
-			[<a target="_blank" href="/events/{{ query.id }}/">run query</a>]
+			[<a target="_blank" href="/admin/qm/analytic/{{ analytic.id }}/change/">admin</a>]
+			[<a target="_blank" href="/{{ analytic.id }}/trend/">stats</a>]
+			[<a target="_blank" href="/events/{{ analytic.id }}/">run query</a>]
 		</td>
-		<td class="acenter">{{ query.maxhosts_count }}</td>
+		<td class="acenter">{{ analytic.maxhosts_count }}</td>
 		<td class="acenter">
-			{% if query.run_daily %}
+			{% if analytic.run_daily %}
 				<img src="/static/admin/img/icon-yes.svg" alt="yes" />
 			{% else %}
 				<img src="/static/admin/img/icon-no.svg" alt="no" />
 			{% endif %}
-		<td title="DESCRIPTION:&#013;===========&#013;{{ query.description }}&#013;&#013;QUERY:&#013;===========&#013;{{query.query}}">{{ query.name }}</td>
+		<td title="DESCRIPTION:&#013;===========&#013;{{ analytic.description }}&#013;&#013;QUERY:&#013;===========&#013;{{analytic.query}}">{{ analytic.name }}</td>
 	</tr>	
 {% endfor %}
 </table>

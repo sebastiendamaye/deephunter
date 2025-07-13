@@ -2,7 +2,7 @@
 {% load qm_extras %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/css/list_queries.css" />
+<link rel="stylesheet" href="/static/css/list_analytics.css" />
 {% endblock %}
 {% block body %}
 <h1>Analytics with rare occurences</h1>
@@ -16,19 +16,19 @@
 		<th># distinct endpoints</th>
 		<th>Endpoints</th>
 	</tr>
-	{% for query in queries %}
+	{% for analytic in analytics %}
 	<tr>
-		<td title="DESCRIPTION:&#013;===========&#013;{{ query.description }}&#013;&#013;QUERY:&#013;===========&#013;{{query.query}}">{{ query.name }}</td>
-        <td class="acenter"><div class="confidence_{{ query.confidence }}">{{ query.confidence|confidencelabel }}</div></td>
-        <td class="acenter"><div class="confidence_{{ query.relevance }}">{{ query.relevance|confidencelabel }}</div></td>
+		<td title="DESCRIPTION:&#013;===========&#013;{{ analytic.description }}&#013;&#013;QUERY:&#013;===========&#013;{{analytic.query}}">{{ analytic.name }}</td>
+        <td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
+        <td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>
 		<td class="acenter">
-			[<a href="/admin/qm/query/{{ query.id }}/change/" target="_blank">admin</a>]
-			[<a href="/{{ query.id }}/trend/" target="_blank">stats</a>]
+			[<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank">admin</a>]
+			[<a href="/{{ analytic.id }}/trend/" target="_blank">stats</a>]
 		</td>
-		<td class="acenter">{{ query.distinct_hostnames }}</td>
+		<td class="acenter">{{ analytic.distinct_hostnames }}</td>
 		<td>
-			{% if query.endpoints %}
-				{% for endpoint in query.endpoints %}
+			{% if analytic.endpoints %}
+				{% for endpoint in analytic.endpoints %}
 					<a href="/timeline?hostname={{ endpoint }}" target="_blank">{{ endpoint }}</a> |
 				{% endfor %}
 			{% endif %}

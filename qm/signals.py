@@ -1,7 +1,7 @@
 from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 from django.conf import settings
-from .models import Query
+from .models import Analytic
 
 # Dynamically import all connectors
 import importlib
@@ -15,14 +15,14 @@ for loader, module_name, is_pkg in pkgutil.iter_modules(plugins.__path__):
 
 PROXY = settings.PROXY
 
-# This handler is triggered before a "Query" object is saved (pre_save when created or updated)
-@receiver(pre_save, sender=Query)
+# This handler is triggered before an "Analytic" object is saved (pre_save when created or updated)
+@receiver(pre_save, sender=Analytic)
 def pre_save_handler(sender, instance, **kwargs):
     
     # Check if the instance is being updated (i.e., it's not a new object)
     if instance.pk:
         # Retrieve the current value of the field from the database
-        original_instance = Query.objects.get(pk=instance.pk)
+        original_instance = Analytic.objects.get(pk=instance.pk)
 
         ### Reset counters and error flag when the "query" field of the analytic is updated
         if original_instance.query != instance.query:
@@ -57,31 +57,8 @@ def pre_save_handler(sender, instance, **kwargs):
             if instance.create_rule:
                 all_connectors.get(instance.connector.name).create_rule(instance)
 
-
-"""
-# This handler is triggered after a "Query" object is saved (created or updated)
-@receiver(post_save, sender=Query)
-def post_save_handler(sender, instance, created, **kwargs):
-
-    # Only apply if "need_to_sync_rule" function returns True (defined in the connector settings)
-    if all_connectors.get(instance.connector.name).need_to_sync_rule():
-
-        # only apply if create_rule flag set
-        if instance.create_rule:
-
-            # For "newly" created analytic
-            if created:
-                # call the "create_rule" function of the connector
-                all_connectors.get(instance.connector.name).create_rule(instance)
-                    
-            # When analytic is updated
-            else:
-                # call the "update_rule" function of the connector
-                all_connectors.get(instance.connector.name).update_rule(instance)
-"""
-
-# This handler is triggered after a "Query" object is deleted
-@receiver(post_delete, sender=Query)
+# This handler is triggered after an "Analytic" object is deleted
+@receiver(post_delete, sender=Analytic)
 def post_delete_handler(sender, instance, **kwargs):
 
     # Only apply if "need_to_sync_rule" function returns True, for the connector of the analytic

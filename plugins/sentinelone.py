@@ -9,7 +9,7 @@ import requests
 from time import sleep
 from datetime import datetime, timedelta
 from urllib.parse import quote, quote_plus
-from connectors.utils import manage_query_error
+from connectors.utils import manage_analytic_error
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -43,17 +43,17 @@ def init_globals():
         _globals_initialized = True
 
 
-def query(query, from_date=None, to_date=None, debug=None):
+def query(analytic, from_date=None, to_date=None, debug=None):
     init_globals()
     
     # Use the global variable if not provided
     if debug is None:
         debug = DEBUG
     
-    # Run query with filter for the last 24 hours by default, as the script is run every day, or from the given date range
+    # Run analytic with filter for the last 24 hours by default, as the script is run every day, or from the given date range
     # hacklist is used instead of array_agg_distinct to get list of storylineid because
     # array_agg_distinct prevents the powerquery from executing without error
-    q = f"{query.query} | group nb=count(), storylineid=hacklist(src.process.storyline.id) by endpoint.name, site.name"
+    q = f"{analytic.query} | group nb=count(), storylineid=hacklist(src.process.storyline.id) by endpoint.name, site.name"
     
     if not from_date:
         # if date range is not provided, we use the last 24 hours
@@ -69,7 +69,7 @@ def query(query, from_date=None, to_date=None, debug=None):
     }
     
     if debug or DEBUG:
-        print('*** RUNNING QUERY {}: {}'.format(query.name, query.query))
+        print('*** RUNNING QUERY {}: {}'.format(analytic.name, analytic.query))
         print('*** BODY: {}'.format(body))
         
     try:
@@ -105,9 +105,9 @@ def query(query, from_date=None, to_date=None, debug=None):
     
     except:
         if debug or DEBUG:
-            print(f"[ ERROR ] Query {query.name} failed. Check report for more info.")
+            print(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
         
-        manage_query_error(query, r.text)
+        manage_analytic_error(analytic, r.text)
 
         return None
 
@@ -119,11 +119,11 @@ def need_to_sync_rule():
     init_globals()
     return SYNC_STAR_RULES
 
-def build_rule_body(query):
+def build_rule_body(analytic):
     """
     Build the body for the SentinelOne rule query.
     Used for rule creation and update.
-    :param query: Query object corresponding to the analytic.
+    :param analytic: Analytic object corresponding to the analytic.
     :return: Dictionary containing the body for the rule query.
     """
     
@@ -133,8 +133,8 @@ def build_rule_body(query):
             "queryLang": "2.0",
             "severity": STAR_RULES_DEFAULTS['severity'],
             "description": "Rule Sync from DeepHunter",
-            "s1ql": query.query,
-            "name": f"{STAR_RULES_PREFIX}{query.name}",
+            "s1ql": analytic.query,
+            "name": f"{STAR_RULES_PREFIX}{analytic.name}",
             "queryType": "events",
             "status": STAR_RULES_DEFAULTS['status']
         },
@@ -167,14 +167,14 @@ def build_rule_body(query):
 
     return body
 
-def create_rule(query):
+def create_rule(analytic):
     """
     Create a STAR rule in SentinelOne based on the query field of the analytic passed as argument.
-    :param query: Query object corresponding to the analytic.
+    :param analytic: Analytic object corresponding to the analytic.
     :return: JSON object containing the response from SentinelOne API.
     """
     init_globals()
-    body = build_rule_body(query)
+    body = build_rule_body(analytic)
     r = requests.post(f'{S1_URL}/web/api/v2.1/cloud-detection/rules',
         json=body,
         headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
@@ -182,16 +182,16 @@ def create_rule(query):
         )
     return r.json()
 
-def update_rule(query):
+def update_rule(analytic):
     """
     Update a STAR rule in SentinelOne based on the query field of the analytic passed as argument.
-    :param query: Query object corresponding to the analytic.
+    :param analytic: Analytic object corresponding to the analytic.
     :return: JSON object containing the response from SentinelOne API.
     """
 
     init_globals()
     # check if STAR rule already exists (STAR rule flag was previously set)
-    r = requests.get(f'{S1_URL}/web/api/v2.1/cloud-detection/rules?name__contains={STAR_RULES_PREFIX}{query.name}',
+    r = requests.get(f'{S1_URL}/web/api/v2.1/cloud-detection/rules?name__contains={STAR_RULES_PREFIX}{analytic.name}',
         headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
         proxies=PROXY
         )
@@ -206,8 +206,8 @@ def update_rule(query):
                 "data": {
                     "queryLang": "2.0",
                     "severity": severity,
-                    "s1ql": query.query,
-                    "name": f"{STAR_RULES_PREFIX}{query.name}",
+                    "s1ql": analytic.query,
+                    "name": f"{STAR_RULES_PREFIX}{analytic.name}",
                     "queryType": "events",
                     "expirationMode": "Permanent",
                     "status": STAR_RULES_DEFAULTS['status']
@@ -221,8 +221,8 @@ def update_rule(query):
                 "data": {
                     "queryLang": "2.0",
                     "severity": severity,
-                    "s1ql": query.query,
-                    "name": f"{STAR_RULES_PREFIX}{query.name}",
+                    "s1ql": analytic.query,
+                    "name": f"{STAR_RULES_PREFIX}{analytic.name}",
                     "queryType": "events",
                     "expirationMode": "Temporary",
                     "expiration": r.json()['data'][0]['expiration'],
@@ -240,7 +240,7 @@ def update_rule(query):
             )
     else:
         # if it does not exist (STAR rule flag was not set), create it
-        body_new = build_rule_body(query)
+        body_new = build_rule_body(analytic)
         r = requests.post(f'{S1_URL}/web/api/v2.1/cloud-detection/rules',
             json=body_new,
             headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
@@ -249,17 +249,17 @@ def update_rule(query):
 
     return r.json()
 
-def delete_rule(query):
+def delete_rule(analytic):
     """
     Delete a STAR rule in SentinelOne based on the query field of the analytic passed as argument.
     
-    :param query: Query object corresponding to the analytic.
+    :param analytic: Analytic object corresponding to the analytic.
     :return: None
     """
     init_globals()
     body = {
         "filter": {
-            "name__contains": f"{STAR_RULES_PREFIX}{query.name}"
+            "name__contains": f"{STAR_RULES_PREFIX}{analytic.name}"
         }
     }
     r = requests.delete(f'{S1_URL}/web/api/v2.1/cloud-detection/rules',
@@ -328,26 +328,26 @@ def get_applications(agent_id):
         )
     return r.json()['data'] if r.status_code == 200 and r.json()['data'] else None
 
-def get_redirect_query_link(query, date=None, endpoint_name=None):
+def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
     """
-    Get the redirect link to run the query in SentinelOne.
+    Get the redirect link to run the analytic in SentinelOne.
     
-    :param endpoint_name: Name of the endpoint to filter the query by.
-    :param query: Query object containing the query string and columns.
-    :param date: Date to filter the query by, in ISO format (range will be date-date+1day).
-    :return: String containing the redirect link for the query.
+    :param endpoint_name: Name of the endpoint to filter the analytic by.
+    :param analytic: Analytic object containing the query string and columns.
+    :param date: Date to filter the analytic by, in ISO format (range will be date-date+1day).
+    :return: String containing the redirect link for the analytic.
     """
     init_globals()
     if not date:
         date = (datetime.today()-timedelta(days=1)).strftime('%Y-%m-%d')
     
     if endpoint_name:
-        customized_query = f"{query.query} \n| filter endpoint.name='{endpoint_name}'"
+        customized_query = f"{analytic.query} \n| filter endpoint.name='{endpoint_name}'"
     else:
-        customized_query = query.query
+        customized_query = analytic.query
 
-    if query.columns:
-        q = quote(f'{customized_query}\n{query.columns}')
+    if analytic.columns:
+        q = quote(f'{customized_query}\n{analytic.columns}')
     else:
         q = quote(customized_query)
     
@@ -358,7 +358,7 @@ def get_redirect_storyline_link(storyline_ids, date):
     Get the redirect link to run the storyline in SentinelOne.
     
     :param storyline_id: ID (or list of IDs) of the storyline(s).
-    :param date: Date to filter the query by, in ISO format (range will be date-date+1day).
+    :param date: Date to filter the analytic by, in ISO format (range will be date-date+1day).
     :return: String containing the redirect link for the storyline.
     """
     init_globals()
@@ -374,8 +374,8 @@ def get_network_connections(storyline_id, endpoint_name, timerange):
     Get network connections for a specific storyline ID and endpoint name.
     
     :param storyline_id: ID of the storyline to retrieve network connections for.
-    :param endpoint_name: Name of the endpoint to filter the query by.
-    :param timerange: Time range in hours to filter the query by.
+    :param endpoint_name: Name of the endpoint to filter the analytic by.
+    :param timerange: Time range in hours to filter the analytic by.
     :return: List of network connections (array) or None if not found.
     """
     

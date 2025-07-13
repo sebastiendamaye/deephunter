@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/css/list_queries.css" />
+<link rel="stylesheet" href="/static/css/list_analytics.css" />
 {% endblock %}
 
 {% block body %}
@@ -18,29 +18,29 @@
 		<th>Category</th>
 		<th>Message</th>
 	</tr>
-{% for query in queries %}
+{% for analytic in analytics %}
 	<tr>
 		<td>
-			[<a target="_blank" href="/admin/qm/query/{{ query.id }}/change/">admin</a>]
-			[<a target="_blank" href="/{{ query.id }}/trend/">stats</a>]
-			[<a target="_blank" href="/events/{{ query.id }}/">run query</a>]
+			[<a target="_blank" href="/admin/qm/analytic/{{ analytic.id }}/change/">admin</a>]
+			[<a target="_blank" href="/{{ analytic.id }}/trend/">stats</a>]
+			[<a target="_blank" href="/events/{{ analytic.id }}/">run query</a>]
 		</td>
-		<td>{{ query.name }}</td>
-		<td><pre>{{ query.query }}</pre></td>
-		<td class="acenter">{{ query.maxhosts_count }}</td>
+		<td>{{ analytic.name }}</td>
+		<td><pre>{{ analytic.query }}</pre></td>
+		<td class="acenter">{{ analytic.maxhosts_count }}</td>
 		<td class="acenter">
-			{% if query.run_daily %}
+			{% if analytic.run_daily %}
 				<img src="/static/admin/img/icon-yes.svg" alt="yes" />
 			{% else %}
 				<img src="/static/admin/img/icon-no.svg" alt="no" />
 			{% endif %}
 		</td>
-		<td>{% if 'error' in query.query_error_message %}
+		<td>{% if 'error' in analytic.query_error_message %}
 			<div class="msg_error">ERROR</div>
 		{% else %}
 			<div class="msg_warning">INFO</div>
 		{% endif %}</td>
-		<td><pre>{{ query.query_error_message }}</pre></td>
+		<td><pre>{{ analytic.query_error_message }}</pre></td>
 	</tr>	
 {% endfor %}
 </table>

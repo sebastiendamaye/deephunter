@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from scipy import stats
 from math import isnan
-from qm.models import Query, Snapshot, Campaign, Endpoint
+from qm.models import Analytic, Snapshot, Campaign, Endpoint
 import logging
 
 # Dynamically import all connectors
@@ -42,13 +42,13 @@ def run():
         )
     campaign.save()
     
-    # Filter query with the "run_daily" flag set
-    for query in Query.objects.filter(run_daily=True):
+    # Filter analytic with the "run_daily" flag set
+    for analytic in Analytic.objects.filter(run_daily=True):
         
-        # we assume that query won't fail (flag will be set later if query fails)
-        query.query_error = False
-        query.query_error_message = ''
-        query.save()
+        # we assume that analytic won't fail (flag will be set later if analytic fails)
+        analytic.query_error = False
+        analytic.query_error_message = ''
+        analytic.save()
                 
         # store current time (used to update snapshot runtime)
         start_runtime = datetime.now()
@@ -60,7 +60,7 @@ def run():
         #  - site name (endpoint name group)
         #  - number of events
         #  - storylineIDs separated by commas
-        data = all_connectors.get(query.connector.name).query(query, debug=DEBUG)
+        data = all_connectors.get(analytic.connector.name).query(analytic, debug=DEBUG)
         
         # store current time (used to update snapshot runtime)
         end_runtime = datetime.now()
@@ -70,7 +70,7 @@ def run():
         # the date of the snapshot is the day before the campaign (detection date)
         snapshot = Snapshot(
             campaign=campaign,
-            query=query,
+            analytic=analytic,
             date=datetime.now()-timedelta(days=1),
             runtime = (end_runtime-start_runtime).total_seconds()
             )
@@ -122,24 +122,24 @@ def run():
         # When the max_hosts threshold is reached (by default 1000)
         if hits_endpoints >= CAMPAIGN_MAX_HOSTS_THRESHOLD:
             # Update the maxhost counter if reached
-            query.maxhosts_count += 1
+            analytic.maxhosts_count += 1
             # if threshold is reached
-            if query.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
-                # If DISABLE_RUN_DAILY is set and run_daily_lock is not set, we disable the run_daily flag for the query
-                if ON_MAXHOSTS_REACHED['DISABLE_RUN_DAILY'] and not query.run_daily_lock:
-                    query.run_daily = False
-                # If DELETE_STATS is set and run_daily_lock is not set, we delete all stats for the query
-                if ON_MAXHOSTS_REACHED['DELETE_STATS'] and not query.run_daily_lock:
-                    Snapshot.objects.filter(query=query).delete()
-            # we update the query (counter updated, and flags updated)
-            query.save()
+            if analytic.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
+                # If DISABLE_RUN_DAILY is set and run_daily_lock is not set, we disable the run_daily flag for the analytic
+                if ON_MAXHOSTS_REACHED['DISABLE_RUN_DAILY'] and not analytic.run_daily_lock:
+                    analytic.run_daily = False
+                # If DELETE_STATS is set and run_daily_lock is not set, we delete all stats for the analytic
+                if ON_MAXHOSTS_REACHED['DELETE_STATS'] and not analytic.run_daily_lock:
+                    Snapshot.objects.filter(analytic=analytic).delete()
+            # we update the analytic (counter updated, and flags updated)
+            analytic.save()
             if DEBUG:
                 print("Max hosts threshold reached. Counter updated")            
         
         # Anomaly detection for hits_count (compute zscore against all snapshots available in DB)
         if DEBUG:
             print("Anomaly detection for hits_count")
-        snapshots = Snapshot.objects.filter(query = query)
+        snapshots = Snapshot.objects.filter(analytic=analytic)
         a = np.array([c.hits_count for c in snapshots])
         z = stats.zscore(a)
         if DEBUG:
@@ -148,7 +148,7 @@ def run():
         zscore_count = z[-1]
         if isnan(zscore_count):
             zscore_count = -9999
-        if zscore_count > query.anomaly_threshold_count:
+        if zscore_count > analytic.anomaly_threshold_count:
             anomaly_alert_count = True
         else:
             anomaly_alert_count = False
@@ -164,7 +164,7 @@ def run():
         zscore_endpoints = z[-1]
         if isnan(zscore_endpoints):
             zscore_endpoints = -9999
-        if zscore_endpoints > query.anomaly_threshold_endpoints:
+        if zscore_endpoints > analytic.anomaly_threshold_endpoints:
             anomaly_alert_endpoints = True
         else:
             anomaly_alert_endpoints = False
@@ -189,5 +189,5 @@ def run():
 
     # Close Campaign
     campaign.date_end = datetime.now()
-    campaign.nb_queries = Query.objects.filter(run_daily=True).count()
+    campaign.nb_queries = Analytic.objects.filter(run_daily=True).count()
     campaign.save()

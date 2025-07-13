@@ -21,7 +21,7 @@ Sync rules not implemented yet.
 from azure.identity import ClientSecretCredential
 from azure.monitor.query import LogsQueryClient
 from azure.monitor.query import LogsQueryStatus
-from connectors.utils import get_connector_conf, gzip_base64_urlencode, manage_query_error
+from connectors.utils import get_connector_conf, gzip_base64_urlencode, manage_analytic_error
 import logging
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote
@@ -53,10 +53,10 @@ def authenticate():
     return client
 
 
-def query(query, from_date=None, to_date=None, debug=None):
+def query(analytic, from_date=None, to_date=None, debug=None):
     """
     API calls to Microsoft Sentinel to query logs. Used by the "campaign" daily cron, and the "regenerate stats" script
-    :param query: Query object corresponding to the threat hunting analytic.
+    :param analytic: Analytic object corresponding to the threat hunting analytic.
     :param from_date: Optional start date for the query. Date received in isoformat.
     :param to_date: Optional end date for the query. Date received in isoformat.
     :return: The result of the query (array with 4 fields: endpoint.name, NULL, number of hits, NULL), or empty array if the query failed.
@@ -78,13 +78,13 @@ def query(query, from_date=None, to_date=None, debug=None):
         # KQL query
     except:
         if debug or DEBUG:
-            print(f"[ ERROR ] Query {query.name} failed. Failed to connect to MS Sentinel. Check report for more info.")
+            print(f"[ ERROR ] Analytic {analytic.name} failed. Failed to connect to MS Sentinel. Check report for more info.")
         
-        manage_query_error(query, f"Failed to connect to MS Sentinel while executing the query {query.name}.")
+        manage_analytic_error(analytic, f"Failed to connect to MS Sentinel while executing the analytic {analytic.name}.")
 
         return None
 
-    q = f'{query.query} | summarize count() by Computer'
+    q = f'{analytic.query} | summarize count() by Computer'
     if debug or DEBUG:
         print(f"Query: {q}")
     
@@ -105,13 +105,13 @@ def query(query, from_date=None, to_date=None, debug=None):
             return res
         else:
             if DEBUG:
-                logger.error(f"[ ERROR ] Query {query.name} failed. Check report for more info.")
-            manage_query_error(query, response.error)
+                logger.error(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
+            manage_analytic_error(analytic, response.error)
             return []
     except:
-        logger.error(f"[ ERROR ] Query {query.name} failed. Check report for more info.")
+        logger.error(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
         if debug or DEBUG:
-            print(f"[ ERROR ] Query {query.name} failed. Check report for more info.")
+            print(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
         return []
 
 def need_to_sync_rule():
@@ -122,21 +122,21 @@ def need_to_sync_rule():
     init_globals()
     return SYNC_RULES
 
-def create_rule(query):
+def create_rule(analytic):
     """
     TO BE COMPLETED
     """
     init_globals()
     return False
 
-def update_rule(query):
+def update_rule(analytic):
     """
     TO BE COMPLETED
     """
     init_globals()
     return False
 
-def delete_rule(query):
+def delete_rule(analytic):
     """
     TO BE COMPLETED
     """
@@ -144,7 +144,7 @@ def delete_rule(query):
     return False
 
 
-def get_redirect_query_link(query, date=None, endpoint_name=None):
+def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
 
     ### pre-filling the KQL query field via URL in the Microsoft Sentinel LogsBlade.
     ###
@@ -160,20 +160,21 @@ def get_redirect_query_link(query, date=None, endpoint_name=None):
         timespan = quote(f"{start_date.isoformat()}Z/{end_date.isoformat()}Z", safe='')
     
     if endpoint_name:
-        customized_query = f'{query.query} \n| where Computer startswith "{endpoint_name}"'
+        customized_query = f'{analytic.query} \n| where Computer startswith "{endpoint_name}"'
     else:
-        customized_query = query.query
+        customized_query = analytic.query
 
     # If the query field contains a "project" statement (used for a transformation),
     # we need to comment it out in order to avoid conflicts with the "columns" field.
     if "| project" in customized_query:
         customized_query = customized_query.replace("| project", "//| project")
     
-    if query.columns:
-        q = quote(f'{customized_query}\n{query.columns}')
+    if analytic.columns:
+        q = quote(f'{customized_query}\n{analytic.columns}')
     else:
         q = quote(customized_query)
 
+    # Query needs to be encoded using gzip and base64 URL encoding
     encoded_query = gzip_base64_urlencode(unquote(q))
 
     # Build the full URL

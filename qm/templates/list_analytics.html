@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="/static/jquery_table_sorter/theme.materialize.min.css" />
 <link rel="stylesheet" href="/static/jquery_table_sorter/theme.default.min.css" />
 <!--link rel="stylesheet" href="/static/fontawesome/font-awesome.min.css" /-->
-<link rel="stylesheet" href="/static/css/list_queries.css" />
+<link rel="stylesheet" href="/static/css/list_analytics.css" />
 
 <script src="/static/jquery/jquery.min.js"></script>
 <script src="/static/jquery_table_sorter/jquery.tablesorter.min.js"></script>
@@ -34,7 +34,7 @@
 		<input type="text" placeholder="Search..." name="search" id="search" value="{{ posted_search }}" />
 		<button type="submit"><i class="fa fa-search"></i></button>
 	</div>
-	<div>Currently {{ queries.count }} threat hunting analytics</div>
+	<div>Currently {{ analytics.count }} threat hunting analytics</div>
 	
 	<div class="floatleft"><h4>FILTERS</h4></div>
 	<div class="floatrightpadding">{% if posted_search or posted_filters %}[<a href="/qm/">remove filters</a>]{% endif %}</div>
@@ -449,26 +449,26 @@
     </tr>
   </thead>
   <tbody>
-	  {% for q in queries %}
-    <tr class="row-summary"  data-row-number="{{ q.name }}">
-        <td><button id="b_{{ q.id }}" class="btn btn-default toggle-row"><i class="fa fa-chevron-right"></i></button></td>
-        <td>{{ q.name }}</td>
-		<td>{{ q.connector.name }}</td>
-        <td>{{ q.pub_status }}</td>
-        <td>{{ q.category.short_name }}</td>
-        <td class="acenter"><div class="confidence_{{ q.confidence }}">{{ q.confidence|confidencelabel }}</div></td>
-        <td class="acenter"><div class="confidence_{{ q.relevance }}">{{ q.relevance|confidencelabel }}</div></td>
-		<td class="acenter">{% if q.run_daily %}{% if q.run_daily_lock %}<img src="/static/images/lock.png" width="20" />{% else %}<img src="/static/admin/img/icon-yes.svg" />{% endif %}{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
-		<td class="acenter">{% if q.create_rule %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
-		<td class="acenter">{% if q.dynamic_query %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
-		<td class="acenter">{{ q.maxhosts_count }}</td>
-		<td class="acenter"><span id="sparkline_{{ q.id }}"></span></td>		
-        <td class="aright"><div{% if q.anomaly_alert_count %} class="alert_orange"{% endif %}>{{ q.hits_count }}</div></td>
-		<td class="aright"><div{% if q.anomaly_alert_endpoints %} class="alert_orange"{% endif %}>{{ q.hits_endpoints }}</div></td>
+	  {% for analytic in analytics %}
+    <tr class="row-summary"  data-row-number="{{ analytic.name }}">
+        <td><button id="b_{{ analytic.id }}" class="btn btn-default toggle-row"><i class="fa fa-chevron-right"></i></button></td>
+        <td>{{ analytic.name }}</td>
+		<td>{{ analytic.connector.name }}</td>
+        <td>{{ analytic.pub_status }}</td>
+        <td>{{ analytic.category.short_name }}</td>
+        <td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
+        <td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>
+		<td class="acenter">{% if analytic.run_daily %}{% if analytic.run_daily_lock %}<img src="/static/images/lock.png" width="20" />{% else %}<img src="/static/admin/img/icon-yes.svg" />{% endif %}{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
+		<td class="acenter">{% if analytic.create_rule %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
+		<td class="acenter">{% if analytic.dynamic_query %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
+		<td class="acenter">{{ analytic.maxhosts_count }}</td>
+		<td class="acenter"><span id="sparkline_{{ analytic.id }}"></span></td>		
+        <td class="aright"><div{% if analytic.anomaly_alert_count %} class="alert_orange"{% endif %}>{{ analytic.hits_count }}</div></td>
+		<td class="aright"><div{% if analytic.anomaly_alert_endpoints %} class="alert_orange"{% endif %}>{{ analytic.hits_endpoints }}</div></td>
     </tr>
-    <tr class="collapse row-expanded panel" data-row-number="{{ q.name }}">
+    <tr class="collapse row-expanded panel" data-row-number="{{ analytic.name }}">
         <td colspan="14">
-			<div id=d_{{ q.id }}></div>
+			<div id=d_{{ analytic.id }}></div>
 	    </td>
       </tr>
 	  {% endfor %}
@@ -476,11 +476,11 @@
   </table>
 </div>
 </div>
-<script src="/static/js/list_queries.js"></script>
+<script src="/static/js/list_analytics.js"></script>
 <script type="text/javascript" nonce="hf7hgo1ilm">
 $(function() {
-	{% for q in queries %}
-		$('#sparkline_{{ q.id }}').sparkline({{ q.sparkline }});
+	{% for analytic in analytics %}
+		$('#sparkline_{{ analytic.id }}').sparkline({{ analytic.sparkline }});
 	{% endfor %}
 });
 </script>

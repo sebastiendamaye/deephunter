@@ -21,7 +21,7 @@
 <h2>List of unmapped analytics</h2>
 <ul>
 {% for q in q_unmapped %}
-	<li><a href="/admin/qm/query/{{ q.id }}/change/" target="_blank">{{ q.name }}</a></li>
+	<li><a href="/admin/qm/analytic/{{ q.id }}/change/" target="_blank">{{ q.name }}</a></li>
 {% endfor %}
 </ul>
 {% endif %}
