@@ -47,8 +47,9 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_title = "DeepHunter"
 html_copy_source = True
+"""
 html_theme_options = {
     "repository_url": "https://github.com/sebastiendamaye/deephunter",
     "use_repository_button": True,
 }
-
+"""

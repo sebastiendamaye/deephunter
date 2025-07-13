@@ -20,5 +20,6 @@ Contents
    usage/index
    reports/index
    tools/index
+   plugins/index
    admin
    support

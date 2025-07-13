@@ -3,6 +3,11 @@ Settings
 
 This is the settings page. Only relevant settings for DeepHunter are reported. For details about Django settings, please refer to the official Django documentation.
 
+SECRET_KEY
+**********
+- **Type**: String
+- **Description**: A secret key for a particular Django installation. This is used to provide cryptographic signing, and should be set to a unique, unpredictable value.
+
 DEBUG
 *****
 - **Type**: Boolean
@@ -50,6 +55,11 @@ SHOW_LOGIN_FORM
 - **Possible values**: ``True`` or ``False``
 - **Description**: If set to ``True``, a login form with username/password fields will be shown to authenticate. If authentication is exclusively based on AD or PingID, it can be set to ``False``.
 - **Example**: ``SHOW_LOGIN_FORM = True``
+
+ALLOWED_HOSTS
+*************
+- **Type**: List of strings
+- **Description**: A list of strings representing the host/domain names that this Django site can serve. This is a security measure to prevent HTTP Host header attacks, which are possible even under many seemingly-safe web server configurations.
 
 AUTHLIB_OAUTH_CLIENTS
 *********************
@@ -135,108 +145,25 @@ GITHUB_URL
 
 	GITHUB_URL = "https://token@github.com/myuser/deephunter.git"
 
-LDAP_SERVER
-***********
+GITHUB_LATEST_RELEASE_URL
+*************************
 - **Type**: string
-- **Description**: LDAP server. Used to connect to the LDAP to gather additional information about a user based on a username (previously gathered by S1 using last logged in user), in the timeline view. To ignore the LDAP connection, set ``LDAP_SERVER`` to an empty string.
-- **Example**:
+- **Description**: GitHub URL to get the latest release.
+- **Example**: 
 
 .. code-block:: python
 
-	# Set to empty string if you don't want to get additional user info from AD
-	# LDAP_SERVER = ''
-	LDAP_SERVER = 'gc.domain.com'
-	
-LDAP_PORT
-*********
-- **Type**: integer
-- **Description**: LDAP port. Used to connect to the LDAP to gather additional information about a user based on a username (previously gathered by S1 using last logged in user), in the timeline view.
-- **Example**:
+	GITHUB_LATEST_RELEASE_URL = 'https://api.github.com/repos/sebastiendamaye/deephunter/releases/latest'
 
-.. code-block:: python
-	
-	LDAP_PORT = 636
-
-LDAP_SSL
-*********
-- **Type**: boolean
-- **Possible values**: ``True`` or ``False``
-- **Description**: Force the LDAP connection to use SSL. Used to connect to the LDAP to gather additional information about a user based on a username (previously gathered by S1 using last logged in user), in the timeline view.
-- **Example**:
-
-.. code-block:: python
-	
-	LDAP_SSL = True
-
-LDAP_USER
-*********
+GITHUB_COMMIT_URL
+*****************
 - **Type**: string
-- **Format**: ``user@domain``
-- **Description**: LDAP user (e.g., a service account). Used to connect to the LDAP to gather additional information about a username (previously gathered by S1 using last logged in user), in the timeline view.
-- **Example**:
+- **Description**: GitHub URL to get the latest commit ID.
+- **Example**: 
 
 .. code-block:: python
 
-	LDAP_USER = 'SRV12345@gad.domain.com'
-
-LDAP_PWD
-********
-- **Type**: string
-- **Description**: LDAP password associated to ``LDAP_USER``. Used to connect to the LDAP to gather additional information about a user based on a machine name, in the timeline view.
-- **Example**:
-
-.. code-block:: python
-
-	LDAP_PWD = 'Awes0m3#P455w9rD'
-
-LDAP_SEARCH_BASE
-****************
-- **Type**: string
-- **Description**: LDAP search base used to query the LDAP when searching for a user from a machine name. Usually composed of a serie of nested DC values.
-- **Example**:
-
-.. code-block:: python
-
-	LDAP_SEARCH_BASE = 'DC=gad,DC=domain,DC=com'
-
-LDAP_ATTRIBUTES
-***************
-- **Type**: string
-- **Description**: LDAP attributes mapping. Expected values returned by the LDAP search should include the username, job title, business unit, office location, country. Depending on your LDAP architecture, fields could have different names. Use this mapping table to specify the corresponding fields.
-- **Example**:
-
-.. code-block:: python
-
-	LDAP_ATTRIBUTES = {
-		'USER_NAME': 'displayName',
-		'JOB_TITLE': 'title',
-		'BUSINESS_UNIT': 'division',
-		'OFFICE': 'physicalDeliveryOfficeName',
-		'COUNTRY': 'co'
-	}
-
-CUSTOM_FIELDS
-*************
-- **Type**: dictionary
-- **Description**: The main dashboard of DeepHunter shows a table with statistics from the last campaign (number of matching events, number of machines, etc.). It is possible to add custom fields (additional columns), that are filtered values to make a break down of the number of matching hosts. For example, if you have defined a specific population for VP in your SentinelOne EDR, you may want to display the corresponding number in a dedicated column. There are up to 3 custom fields. For each, you define a ``name``, a ``description`` and the ``filter`` to apply to the query.
-- **Example**:
-
-.. code-block:: python
-
-	CUSTOM_FIELDS = {
-		"c1": {
-			"name": "VIP",
-			"description": "VP",
-			"filter": "site.name contains:anycase ('VP', 'Exec')"
-			},
-		"c2": {
-			"name": "GSC",
-			"description": "GSC",
-			"filter": "site.name contains:anycase 'GSC'"
-			},
-		"c3": {
-			}
-		}
+	GITHUB_COMMIT_URL = 'https://raw.githubusercontent.com/sebastiendamaye/deephunter/refs/heads/main/static/commit_id.txt'
 
 DB_DATA_RETENTION
 *****************
@@ -247,6 +174,16 @@ DB_DATA_RETENTION
 .. code-block:: python
 
 	DB_DATA_RETENTION = 90
+
+RARE_OCCURRENCES_THRESHOLD
+**************************
+- **Type**: integer
+- **Description**: Used to define the threshold for rare occurrences. If a threat hunting analytic matches less than the defined number of distinct hosts (in the full retention), it is considered a rare occurrence.
+- **Example**:
+
+.. code-block:: python
+
+	RARE_OCCURRENCES_THRESHOLD = 5
 
 CAMPAIGN_MAX_HOSTS_THRESHOLD
 ****************************
@@ -290,26 +227,30 @@ DISABLE_RUN_DAILY_ON_ERROR
 
 	DISABLE_RUN_DAILY_ON_ERROR = True
 
-VT_API_KEY
-**********
-- **Type**: string
-- **Description**: VirusTotal API key used for the VirusTotal Hash Checker tool, available from the "Tools" menu. Also used by the "Netview" module to scan the reputation of the public IP addresses.
+PROXY
+*****
+- **Type**: dictionary
+- **Description**: Proxy settings for any Internet communication from DeepHunter, including API calls to S1.
 - **Example**: 
 
 .. code-block:: python
 
-	VT_API_KEY = 'r8h84wc9d2v6fj1n5ya7b0qf32kz3p62m14xd9s75boa01u75c6t8s5l3e9a0f7g'
+	PROXY = {
+		'http': 'http://proxy:port',
+		'https': 'http://proxy:port'
+		}
 
-
-MALWAREBAZAAR_API_KEY
-*********************
-- **Type**: string
-- **Description**: Malware Bazaar API key used for the Malware Bazaar Hash Checker tool, available from the "Tools" menu.
+AUTHENTICATION_BACKENDS
+***********************
+- **Type**: list
+- **Description**: Keep ModelBackend around for per-user permissions and local superuser (admin).
 - **Example**: 
 
 .. code-block:: python
 
-	MALWAREBAZAAR_API_KEY  = 'bffgwLSmWs9cmnkhqsGei0TMHw7RmjaW3nsBJZZWg03yEFsImA'
+	AUTHENTICATION_BACKENDS = [
+    	'django.contrib.auth.backends.ModelBackend',
+	]
 
 INSTALLED_APPS
 **************
@@ -328,12 +269,33 @@ INSTALLED_APPS
 		'django.contrib.messages',
 		'django.contrib.staticfiles',
 		'django_extensions',
-		'dbbackup',
+		'dbbackup', # django-dbbackup
 		'django_markup',
 		'simple_history',
 		'qm',
 		'extensions',
 		'reports',
+		'connectors',
+	]
+
+MIDDLEWARE
+**********
+- **Type**: list
+- **Description**: List of middleware to use. Make sure to keep the default ones.
+- **Example**:
+
+.. code-block:: python
+
+	MIDDLEWARE = [
+		'django.middleware.security.SecurityMiddleware',
+		'django.contrib.sessions.middleware.SessionMiddleware',
+		'django.middleware.common.CommonMiddleware',
+		'django.middleware.csrf.CsrfViewMiddleware',
+		'django.contrib.auth.middleware.AuthenticationMiddleware',
+		'django.contrib.messages.middleware.MessageMiddleware',
+		'django.middleware.clickjacking.XFrameOptionsMiddleware',
+		'simple_history.middleware.HistoryRequestMiddleware',
+		'django_auto_logout.middleware.auto_logout',
 	]
 
 ROOT_URLCONF
@@ -345,6 +307,41 @@ ROOT_URLCONF
 .. code-block:: python
 	
 	ROOT_URLCONF = 'deephunter.urls'
+
+TEMPLATES
+*********
+- **Type**: list
+- **Description**: List of templates to use. Make sure to keep the default ones.
+- **Example**:
+
+.. code-block:: python
+	
+	TEMPLATES = [
+		{
+			'BACKEND': 'django.template.backends.django.DjangoTemplates',
+			'DIRS': [],
+			'APP_DIRS': True,
+			'OPTIONS': {
+				'context_processors': [
+					'django.template.context_processors.debug',
+					'django.template.context_processors.request',
+					'django.contrib.auth.context_processors.auth',
+					'django.contrib.messages.context_processors.messages',
+					'django_auto_logout.context_processors.auto_logout_client',
+				],
+			},
+		},
+	]
+
+WSGI_APPLICATION
+****************
+- **Type**: string
+- **Description**: WSGI application used by Django. Default value: ``deephunter.wsgi.application``. Do not modify this value.
+- **Example**:
+
+.. code-block:: python
+
+	WSGI_APPLICATION = 'deephunter.wsgi.application'
 
 DATABASES
 *********
@@ -365,19 +362,43 @@ DATABASES
 		}
 	}
 
-TIME_ZONE
-*********
-- **Type**: string (``TIME_ZONE``), boolean (``USE_TZ``)
-- **Description**: Timezone. Modify depending on where you are located.
-- **Example**: 
+AUTH_PASSWORD_VALIDATORS
+************************
+- **Type**: list of dictionaries
+- **Description**: Password validation settings. These validators are used to enforce password complexity and security. https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
+- **Example**:
 
 .. code-block:: python
 
+	AUTH_PASSWORD_VALIDATORS = [
+		{
+			'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+		},
+		{
+			'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+		},
+		{
+			'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+		},
+		{
+			'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+		},
+	]
+
+Internationalization settings
+*****************************
+- **Description**: https://docs.djangoproject.com/en/4.1/topics/i18n/
+- **Example**:
+
+.. code-block:: python
+
+	LANGUAGE_CODE = 'en-us'
 	TIME_ZONE = 'Europe/Paris'
+	USE_I18N = True
 	USE_TZ = True
 
-STATIC_URL
-**********
+STATIC_URL and STATIC_ROOT
+**************************
 - **Type**: string
 - **Description**: Related and absolute path for the static content (images, documentation, etc.).
 - **Example**: 
@@ -387,51 +408,14 @@ STATIC_URL
 	STATIC_URL = 'static/'
 	STATIC_ROOT = '/data/deephunter/static'
 
-
-SentinelOne API
-***************
-- **Type**: string
-- **Description**: ``S1_URL`` is the SentinelOne URL for your tenant and is used for any API call to SentinelOne. ``S1_TOKEN`` is the token associated to your API. Notice that tokens expire every month (``S1_TOKEN_EXPIRATION`` is set to 30 days by default) and the new token value should be updated (please use the ``update_s1_token.sh`` script to update your token, because it will take care of updating the renewal date).
-- **Example**: 
+DEFAULT_AUTO_FIELD
+******************
+- **Description**: Default primary key field type (https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field).
+- **Example**:
 
 .. code-block:: python
 
-	S1_URL = 'https://yourtenant.sentinelone.net'
-	S1_TOKEN_EXPIRATION = 30
-	S1_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
-
-PROXY
-*****
-- **Type**: dictionary
-- **Description**: Proxy settings for any Internet communication from DeepHunter, including API calls to S1.
-- **Example**: 
-
-.. code-block:: python
-
-	PROXY = {
-		'http': 'http://proxy:port',
-		'https': 'http://proxy:port'
-		}
-
-SentinelOne frontend URL
-************************
-- **Type**: string
-- **Description**: Address and parameters to use to point to SentinelOne frontend from the timeline view. Depending on the interface you have enabled (legacy frontend of new frontend), the URL and parameters are different. Make sure to uncomment the correct settings and comment out the ones to ignore. Notice that ``S1_THREATS_URL`` is dnyamically rendered by the Django view using ``format`` to evaluate the correct hostname. This is why the ``{}`` string appears in the URL.
-- **Example**: 
-
-.. code-block:: python
-	
-	### Legacy frontend
-	XDR_URL = 'https://xdr.eu1.sentinelone.net'
-	XDR_PARAMS = 'view=edr'
-	### New frontend
-	#XDR_URL = 'https://tenant.sentinelone.net'
-	#XDR_PARAMS = '_categoryId=eventSearch'
-	
-	### Legacy URL for threats
-	#S1_THREATS_URL = #'https://tenant.sentinelone.net/incidents/threats?filter={"computerName__contains":"{}","timeTitle":"Last%203%20Months"}'
-	### New URL for threats
-	S1_THREATS_URL = 'https://tenant.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS'
+	DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL
 *********
@@ -513,57 +497,3 @@ CELERY
 
 	CELERY_BROKER_URL = "redis://localhost:6379"
 	CELERY_RESULT_BACKEND = "redis://localhost:6379"
-
-STAR rules sync
-***************
-
-SYNC_STAR_RULES
-===============
-
-- **Type**: Boolean
-- **Possible values**: ``True`` or ``False``
-- **Description**: if ``SYNC_STAR_RULES`` is set to ``True``, STAR rules will be synchronized in SentinelOne when the STAR rule flag is set in DeepHunter queries and threat hunting analytics are created, updated or deleted. It can be set to ``False`` if you only want to use this flag in DeepHunter as information.
-- **Example**: 
-
-.. code-block:: python
-	
-	SYNC_STAR_RULES = True # True|False
-
-STAR_RULES_PREFIX
-=================
-
-- **Type**: string
-- **Description**: Prefix used to name STAR rules in SentinelOne. For example, if the prefix is ``TH_`` and you create a threat hunting analytic in DeepHunter named ``test_threat_hunting``, the STAR rule in SentinelOne will be named ``TH_test_threat_hunting``.
-- **Example**: 
-
-.. code-block:: python
-	
-	STAR_RULES_PREFIX = '' # example: "TH_"
-
-STAR_RULES_DEFAULTS
-===================
-
-- **Type**: dictionary of strings.
-- **Description**: default values for the creation of STAR rules. Notice that modifications about severity, expiration, cool off settings and response actions you may have applied to STAR rules in SentinelOne are preserved when threat hunting analytics are updated.
-- **Example**: 
-
-.. code-block:: python
-	
-	STAR_RULES_DEFAULTS = {
-		'severity': 'High', # Low|Medium|High|Critical
-		'status': 'Active', # Active|Draft
-		'expiration': '', # String. Expiration in days. Only if expirationMode set to 'Temporary'. Empty string to ignore
-		'coolOffPeriod': '', # String. Cool Off Period (in minutes). Empty string to ignore
-		'treatAsThreat': '', # Undefined(or empty)|Suspicious|Malicious.
-		'networkQuarantine': 'false' # true|false
-	}
-
-RARE_OCCURRENCES
-================
-
-- **Type**: integer
-- **Description**: Used to define the threshold for rare occurrences. If a threat hunting analytic matches less than the defined number of distinct hosts (in the full retention), it is considered a rare occurrence.
-- **Example**:
-.. code-block:: python
-
-	RARE_OCCURRENCES = 5

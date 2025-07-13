@@ -41,17 +41,15 @@ DeepHunter is a Threat Hunting platform that features:
 
 Who is DeepHunter for?
 **********************
-DeepHunter is an application developed by threat hunters for threat hunters, in order to automate the execution of threat hunting queries, and prioritize threat hunts. It is not intended to replace the EDR itself. Targeted populations are:
+DeepHunter is an application developed by threat hunters for threat hunters, in order to automate the execution of threat hunting queries, and prioritize threat hunts. It is not intended to replace the EDR or the SDL, but it will dramatically help threat hunters organize their threat hunting campaigns. Targeted populations are:
 
 - **Threat Hunters**: DeepHunter may quickly become your day-to-day threat hunting platform.
 - **SOC analysts**: DeepHunter timeline module can help you triage incidents, or correlate a reported incident with other artifacts.
 - **Incident Responder/Analyst**: DeepHunter timeline can show you since when a particular behavior exists, whether it has been identified as a threat by your EDR, whether it could be linked to an installed application, etc..
 
-What EDR are supported?
-***********************
-DeepHunter has been designed to connect to the `SentinelOne <https://www.sentinelone.com/>`_ EDR, and queries associated to the analytics are expected to be using the **PowerQuery** language.
-
-However, DeepHunter may be able to connect to other EDR, provided you adapt the code. You are very welcome to contribute.
+What data lakes are supported?
+******************************
+DeepHunter (from v2.0) has been designed to connect to the any data lake, provided there is a connector, or you develop one. There are already connectors for `SentinelOne <https://www.sentinelone.com/>`_ EDR and for Microsoft Sentinel, but this list is expected to grow. You are very welcome to contribute.
 
 Architecture
 ************
@@ -66,7 +64,7 @@ Campaigns
 *********
 The purpose of DeepHunter is to automate the execution of threat hunting analytics (the ones with the ``run_daily`` flag set) each day. This is done through campaigns.
 
-Campaigns are cron jobs running every day at the same time. They execute the analytics, and collect statistics (number of matching events, number of endpoints, etc.) for each analytic every day for the last 24 hours, creating a baseline (trend analysis) for each analytic. A model based on z-score is then applied to these statistics to identify statistical anomalies.
+A Campaign is a cron job running every day at the same time. It executes the analytics, and collects statistics (number of matching events, number of endpoints, etc.) for each analytic every day for the last 24 hours, creating a baseline (trend analysis) for each analytic. A z-score based model is then applied on these statistics to identify potential statistical anomalies.
 
 Statistics regeneration
 ***********************
@@ -105,7 +103,7 @@ Modules
 *******
 DeepHunter comes with several modules that are particularly useful for threat hunters and incident responders:
 
-- the `timeline view <usage_timeline.html>`_ shows the distribution of matching analytics accross campaigns for a particular host. For each match, a box will be shown for the given date, and double clicking on it will replay the query directly in your EDR, for the selected date. Each day, campaigns will also gather the storylineID information (a special information collected by SentinelOne), which is used to highlight analytics with the same storylineID in the timeline.
+- the `timeline view <usage_timeline.html>`_ shows the distribution of matching analytics accross campaigns for a particular host. For each match, a box will be shown for the given date, and double clicking on it will replay the query directly in the appropriate data lake, for the selected date. If you have enabled the sentinelone plugin, campaigns will also gather the storylineID information (a special information collected by SentinelOne), which is used to highlight analytics with the same storylineID in the timeline.
 - the `trend analysis <usage_trend.html>`_ module is composed of graphs showing the distribution of the number of hits, and number of endpoints, with various filters (defined by the `CUSTOM_FIELDS <settings.html#custom-fields>`_ property) over time. It quickly allows the threat hunter to understand how frequent a threat hunting analytic triggers. A mathematical model is applied to the series to highlight potential statistical anomalies.
 - the `netview (network view) <usage_netview.html>`_ module shows the list of network outbound connections for a particular host or storylineID. For each IP address, the popularity (number of endpoints in your environment where this destination is contacted) is shown, and for public IPs, a whois information is available, as well as the VirusTotal IP reputation.
 

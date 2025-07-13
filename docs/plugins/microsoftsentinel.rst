@@ -1,0 +1,6 @@
+Plugins: Microsoft Sentinel
+###########################
+
+Settings
+********
+
