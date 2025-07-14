@@ -1,5 +1,9 @@
-Plugins: Active Directory
-#########################
+Active Directory
+################
+
+Description
+***********
+The Active Directory plugin allows DeepHunter to connect to an LDAP server to gather additional information about users based on usernames previously gathered by other plugins (e.g., SentinelOne).
 
 Settings
 ********
@@ -76,10 +80,8 @@ LDAP_ATTRIBUTES
 
 .. code-block:: python
 
-	LDAP_ATTRIBUTES = {
-		'USER_NAME': 'displayName',
-		'JOB_TITLE': 'title',
-		'BUSINESS_UNIT': 'division',
-		'OFFICE': 'physicalDeliveryOfficeName',
-		'COUNTRY': 'co'
-	}
+	LDAP_ATTRIBUTES_USER_NAME = 'displayName'
+	LDAP_ATTRIBUTES_JOB_TITLE = 'title',
+	LDAP_ATTRIBUTES_BUSINESS_UNIT = 'division',
+	LDAP_ATTRIBUTES_OFFICE = 'physicalDeliveryOfficeName',
+	LDAP_ATTRIBUTES_COUNTRY = 'co'

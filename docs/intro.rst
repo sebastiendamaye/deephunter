@@ -114,3 +114,14 @@ Besides the modules, there are also some tools, and it's easy to `develop your o
 - `VirusTotal Hash Checker <tools_vt_hash_checker.html>`_: takes a list of file hashes and compares each against the VirusTotal database.
 - `LOLDriver Hash Checker <tools_lol_drivers_hash_checker.html>`_: check a list of hashes against the LOLDriver database to confirm whether they correspond to vulnerable drivers.
 - `Whois <tools_whois.html>`_: Whois module developed in Python.
+
+Rules synchronization
+#####################
+
+DeepHunter can synchronize its threat hunting analytics with a remote data lake, such as SentinelOne (i.e. STAR rules) or Microsoft Sentinel. This is done per connector, with the ``need_to_sync()`` method.
+
+Modifications on analytics (creation, modification, deletion) are monitored via the *signals*. It triggers pre-save and post-save controls, with the following logic:
+
+.. image:: img/sync_rule_logic.jpg
+  :width: 800
+  :alt: Sync rule logic

@@ -32,7 +32,6 @@ This shows the list of threat hunting analytics available in the DeepHunter data
 - **Trend**: sparkline showing the trend (based on statistics collected by the campaigns) for the last 20 days.
 - **Hits (24h)**: Number of matching events for the last 24h, according to the last campaign.
 - **Hosts (24h)**: Number of matching unique endpoints for the last 24h, according to the last campaign.
-- **Custom fields**: Number of matching unique endpoints for the last 24h, according to the last campaign, with specific filters defined for up to 3 custom fields (defined in the `settings <settings.html#custom-fields>`_).
 
 Threat hunting analytic details 
 *******************************
@@ -42,8 +41,7 @@ Details of each analytic can be viewed by clicking on the arrow on the left of e
 Actions buttons
 ===============
 
-- **Run in PQ (all users)**: Plays the corresponding query in a new window (configured to run a PowerQuery in the SentinelOne EDR). Depending on the interface you use in SentinelOne (legacy or new frontend), you may want to change ``S1_URL`` in the `settings <settings.html#sentinelone-api>`_.
-- **Run in PQ (custom_filter)**: Same as the previous button, but with a custom filter, defined in the custom fields (see ``CUSTOM_FIELDS`` property in the `settings <settings.html#custom-fields>`_).
+- **Run query**: Plays the corresponding query in a new window.
 - **See trend**: Opens the `trend analysis page <usage_trend.html>`_.
 - **Edit in admin**: Opens the threat hunting in edit mode using the Django admin backend.
 - **Delete stats**: Deletes the statistics of the selected threat hunting analytic for the entire retention. This can be used when the analytic is not relevant enough to be scheduled in the campaigns, but existing statistics are present in the database (from previous campaigns).
@@ -84,58 +82,6 @@ The list of all possible filters, broken down into sections. Expand a section an
 
 .. image:: ../img/analytics_filters_available.png
   :alt: analytics filters available
-
-Star rules synchronization
-**************************
-DeepHunter synchronizes the query of threat hunting analytics with STAR rules in SentinelOne, when the STAR rule flag is set.
-
-STAR rules are created with the following default properties:
-
-.. list-table::
-   :widths: 25 50 50
-   :header-rows: 1
-
-   * - 
-     - Creation
-     - Update
-   * - Scope
-     - Global
-     - Global
-   * - PowerQuery version
-     - 2.0
-     - 2.0
-   * - Severity
-     - Defined in the settings
-     - (existing value preserved)
-   * - Description
-     - "Rule sync from DeeHunter"
-     - (existing value preserved)
-   * - Rule Type
-     - Single Event
-     - Single Event
-   * - Status
-     - Active
-     - Active
-   * - expirationMode
-     - Defined in the settings
-     - (existing value preserved)
-   * - coolOffSettings
-     - Defined in the settings
-     - (existing value preserved)
-   * - treatAsThreat
-     - Defined in the settings
-     - (existing value preserved)
-   * - networkQuarantine
-     - Defined in the settings
-     - (existing value preserved)
-
-The following logic is applied:
-
-- if a new threat hunting analytic is created with the STAR rule flag set in DeepHunter, a STAR rule will be created in SentinelOne
-- if a threat hunting analytic with the STAR rule flag set is deleted in DeepHunter, the associated STAR rule will be deleted in SentinelOne
-- if a threat hunting analytic is updated in DeepHunter, with the STAR rule flag newly set, a corresponding STAR rule will be created in SentinelOne
-- if a threat hunting analytic is updated in DeepHunter, with the STAR rule flag removed (previously set), the associated STAR rule will be deleted in SentinelOne
-- if a threat hunting analytic is updated in DeepHunter, with the STAR rule flag set (previously set), the associated STAR rule will be updated in SentinelOne (see above table for updated fields)
 
 Create/Modify/Clone analytics
 *****************************

@@ -1,5 +1,9 @@
-Plugins: VirusTotal
-###################
+VirusTotal
+##########
+
+Description
+***********
+Used to get IP reputation information or scores for hash values from VirusTotal.
 
 Settings
 ********

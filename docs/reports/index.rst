@@ -2,15 +2,14 @@ Reports
 #######
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Reports
+   :maxdepth: 1
   
-   reports_stats
-   reports_perfs
-   reports_endpoints
-   reports_mitre_coverage
-   reports_missing_mitre
-   reports_disabled_analytics
-   reports_query_error
-   reports_rare_occurrences
-   reports_zero_occurrence
+   stats
+   perfs
+   endpoints
+   mitre_coverage
+   missing_mitre
+   disabled_analytics
+   query_error
+   rare_occurrences
+   zero_occurrence

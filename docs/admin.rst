@@ -15,13 +15,14 @@ The database model
 
 * **Qm**
 
+  * **Analytics**: List of threat hunting analytics.
   * **Campaigns**: List of `campaigns <intro.html#campaigns>`_ (daily jobs) and `stats regeneration jobs <usage_analytics.html#actions-buttons>`_.
+  * **Categories**: Used to assign threat hunting analytics to categories (e.g. detect, triage, threat hunting).
   * **Celery status**: 	Table used to monitor background celery jobs (when a user regenerates statistics).
   * **Countries**: List of countries, associated to threat actors.
   * **Endpoints**: List of endpoints matching threat hunting queries ran by campaigns.
   * **Mitre tactics**: List of MITRE tactics (DeepHunter comes with a fixture to load this table).
   * **Mitre techniques**: List of MITRE techniques (DeepHunter comes with a fixture to load this table).
-  * **Queries**: List of threat hunting analytics.
   * **Snapshots**: Table linking Campaigns and Endpoints.
   * **Tags**: List of tags for threat hunting analytics.
   * **Target OS**: List of Operating Systems for threat hunting analytics coverage.
@@ -53,7 +54,7 @@ To create a new threat hunting analytic, go to the Django backend (``/admin`` UR
 
 Fields should be quite explicit, and it shouldn't be too complicated for you to create new threat hunting analytics. There are some points you should consider though:
 
-- **Query vs Columns**: A PowerQuery is generally composed of the query itself and some columns (optionnaly grouped). In DeepHunter, you should split both. Anything that is modifying the number of results (e.g., filters) should be in the ``Query`` field, while presentation parameters (e.g., ``| columns``, ``| group``) should appear in the ``Columns`` field. See the examples of threat hunting analytics shipped with the installation package for more details.
+- **Query vs Columns**: The query field is composed of the query itself and some columns (optionnaly grouped). In DeepHunter, you should split both. Anything that is modifying the number of results (e.g., filters) should be in the ``Query`` field, while presentation parameters (e.g., ``| columns``, ``| group``) should appear in the ``Columns`` field. See the examples of threat hunting analytics shipped with the installation package for more details.
 - **Markdown syntax**: Some fields (e.g., description, notes, emulation validation) use the markdown syntax.
 - The **reference** field accepts URL directly (1 URL per line)
 - You can create threat actors, threat names or vulnerabilities directly from a threat hunting analytic, by using the ``+`` icon on the right side of these fields.

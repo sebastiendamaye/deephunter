@@ -1,9 +1,7 @@
 Write your own plugin
 #####################
 
-This section provides a guide on how to write your own plugin for DeepHunter. Plugins are a powerful way to extend the functionality of DeepHunter, allowing you to customize its behavior to suit your specific needs. 
-
-A plugin is the abstraction layer that allows DeepHunter to interact with different data sources (e.g. SentinelOne, Microsoft Sentinel, etc.).
+This section provides a guide on how to write your own plugin for DeepHunter.
 
 Requirements
 ************
@@ -18,8 +16,8 @@ Python file
 
 The python file should be stored in the `plugins` folder. It should contain at least mandatory methods. You can also add additional methods to enhance the functionality of your plugin.
 
-Temmplate
-*********
+Template
+********
 
 You can use the following template to create your own plugin:
 
