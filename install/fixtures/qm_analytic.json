@@ -1,0 +1,182 @@
+[
+    {
+        "model": "qm.analytic",
+        "pk": 1,
+        "fields": {
+            "name": "psexec_connect",
+            "description": "Detect psexec network connections",
+            "notes": "- To move around freely without attracting too much attention, attackers often use reliable software (one of the favorites is psexec) that looks normal in an enterprise environment.\r\n- Use the following aggregate to easily group by endpoint: `| group array_agg_distinct(dst.ip.address) by endpoint.name, src.process.cmdline`",
+            "created_by": 1,
+            "pub_date": "2023-03-16T08:02:46.204Z",
+            "update_date": "2025-06-27T06:32:40.837Z",
+            "pub_status": "DIST",
+            "confidence": 2,
+            "relevance": 3,
+            "category": 2,
+            "weighted_relevance": 1.5,
+            "connector": 1,
+            "query": "endpoint.os = 'windows'\r\nand event.type = 'IP Connect'\r\nand src.process.name matches 'psexec\\\\.exe'",
+            "columns": "| columns event.time, event.type, site.name, agent.uuid, src.process.storyline.id, src.process.user, src.process.uid, src.process.cmdline, src.ip.address, src.port.number, dst.ip.address, dst.port.number, src.process.parent.cmdline, tgt.process.cmdline",
+            "emulation_validation": "",
+            "references": "https://theitbros.com/using-psexec-to-run-commands-remotely/\r\nhttps://redcanary.com/blog/threat-hunting-psexec-lateral-movement/",
+            "create_rule": false,
+            "run_daily": true,
+            "run_daily_lock": false,
+            "dynamic_query": false,
+            "anomaly_threshold_count": 2,
+            "anomaly_threshold_endpoints": 2,
+            "maxhosts_count": 0,
+            "query_error": false,
+            "query_error_message": "",
+            "tags": [
+                1,
+                4
+            ],
+            "mitre_techniques": [
+                99,
+                9
+            ],
+            "threats": [],
+            "actors": [],
+            "target_os": [
+                1
+            ],
+            "vulnerabilities": []
+        }
+    },
+    {
+        "model": "qm.analytic",
+        "pk": 2,
+        "fields": {
+            "name": "wsl_kali",
+            "description": "Detect Kali Linux distribution via wsl.exe",
+            "notes": "",
+            "created_by": 1,
+            "pub_date": "2023-03-16T05:57:24.277Z",
+            "update_date": "2025-06-27T06:32:40.853Z",
+            "pub_status": "DIST",
+            "confidence": 4,
+            "relevance": 1,
+            "category": 2,
+            "weighted_relevance": 1,
+            "connector": 1,
+            "query": "endpoint.os = 'windows'\r\nand src.process.name matches 'wsl\\\\.exe' \r\nand src.process.parent.name matches 'kali'",
+            "columns": "| columns event.time, event.type, site.name, agent.uuid, src.process.user, src.process.storyline.id, src.process.uid, src.process.cmdline, src.process.parent.cmdline",
+            "emulation_validation": "",
+            "references": "",
+            "create_rule": false,
+            "run_daily": true,
+            "run_daily_lock": false,
+            "dynamic_query": false,
+            "anomaly_threshold_count": 1,
+            "anomaly_threshold_endpoints": 1,
+            "maxhosts_count": 0,
+            "query_error": false,
+            "query_error_message": "",
+            "tags": [
+                1
+            ],
+            "mitre_techniques": [
+                72
+            ],
+            "threats": [],
+            "actors": [],
+            "target_os": [
+                1
+            ],
+            "vulnerabilities": []
+        }
+    },
+    {
+        "model": "qm.analytic",
+        "pk": 3,
+        "fields": {
+            "name": "zip_archive_temp_files",
+            "description": "Uncompress activities of zip archives in the user temp folder.",
+            "notes": "To be used with additional filters to analyze some extensions (e.g. vbs, js, etc)",
+            "created_by": 1,
+            "pub_date": "2023-03-16T05:57:37.305Z",
+            "update_date": "2025-06-27T06:32:40.864Z",
+            "pub_status": "DIST",
+            "confidence": 1,
+            "relevance": 2,
+            "category": null,
+            "weighted_relevance": 0.5,
+            "connector": 1,
+            "query": "endpoint.os = 'windows' \r\nand event.type = 'File Creation' \r\nand tgt.file.path matches '\\\\\\\\Users\\\\\\\\.*?\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\Temp1_'",
+            "columns": "| columns event.time, event.type, endpoint.name, src.process.user, src.process.name, src.process.image.sha1, src.process.cmdline, src.process.parent.name, src.process.parent.image.sha1, src.process.parent.cmdline, tgt.file.path, tgt.process.image.sha1, tgt.file.oldPath, tgt.process.image.path, tgt.process.cmdline, tgt.file.size, tgt.file.type, src.process.storyline.id",
+            "emulation_validation": "",
+            "references": "https://www.crowdstrike.com/blog/duck-hunting-with-falcon-complete-qakbot-countermeasures/",
+            "create_rule": false,
+            "run_daily": false,
+            "run_daily_lock": false,
+            "dynamic_query": false,
+            "anomaly_threshold_count": 1,
+            "anomaly_threshold_endpoints": 1,
+            "maxhosts_count": 0,
+            "query_error": false,
+            "query_error_message": "",
+            "tags": [],
+            "mitre_techniques": [
+                114
+            ],
+            "threats": [
+                7
+            ],
+            "actors": [],
+            "target_os": [
+                1
+            ],
+            "vulnerabilities": []
+        }
+    },
+    {
+        "model": "qm.analytic",
+        "pk": 598,
+        "fields": {
+            "name": "suspicious_http_request_methods",
+            "description": "##Description\r\nBased on Akamai WAF logs",
+            "notes": "",
+            "created_by": 1,
+            "pub_date": "2025-07-10T07:26:04.756Z",
+            "update_date": "2025-07-10T08:25:35.542Z",
+            "pub_status": "DRAFT",
+            "confidence": 2,
+            "relevance": 4,
+            "category": 2,
+            "weighted_relevance": 2,
+            "connector": 5,
+            "query": "AkamaiSIEMEvent\r\n| where HttpRequestMethod in (\"CONNECT\", \"TRACK\", \"MOVE\", \"COPY\", \"MKCOL\", \"LOCK\", \"UNLOCK\", \"SEARCH\")\r\n| project Computer = DstDvcHostname",
+            "columns": "//| summarize count() by HttpRequestMethod",
+            "emulation_validation": "",
+            "references": "",
+            "create_rule": false,
+            "run_daily": true,
+            "run_daily_lock": false,
+            "dynamic_query": false,
+            "anomaly_threshold_count": 2,
+            "anomaly_threshold_endpoints": 2,
+            "maxhosts_count": 0,
+            "query_error": false,
+            "query_error_message": "",
+            "tags": [
+                17
+            ],
+            "mitre_techniques": [
+                18,
+                26,
+                260,
+                546
+            ],
+            "threats": [],
+            "actors": [],
+            "target_os": [
+                1,
+                2,
+                3,
+                4
+            ],
+            "vulnerabilities": []
+        }
+    }
+]

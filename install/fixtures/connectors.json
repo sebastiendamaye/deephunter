@@ -1,0 +1,412 @@
+[
+    {
+        "model": "connectors.connector",
+        "pk": 1,
+        "fields": {
+            "name": "sentinelone",
+            "description": "SentinelOne EDR",
+            "enabled": true,
+            "visible_in_analytics": true
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 2,
+        "fields": {
+            "name": "activedirectory",
+            "description": "The Active Directory connector is used in the timeline view to get additional information about the owner of an endpoint.",
+            "enabled": true,
+            "visible_in_analytics": false
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 3,
+        "fields": {
+            "name": "virustotal",
+            "description": "Used to consolidate IP reputation in the netview module, and used by the VT hash checker and VT IP checker tools.",
+            "enabled": true,
+            "visible_in_analytics": false
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 4,
+        "fields": {
+            "name": "malwarebazaar",
+            "description": "MalwareBazaar is a platform from abuse.ch and Spamhaus, dedicated to sharing malware samples with the infosec community, antivirus vendors, and threat intelligence providers.",
+            "enabled": true,
+            "visible_in_analytics": false
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 5,
+        "fields": {
+            "name": "microsoftsentinel",
+            "description": "Microsoft Sentinel data lake",
+            "enabled": true,
+            "visible_in_analytics": true
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 6,
+        "fields": {
+            "name": "loldrivers",
+            "description": "Living Off The Land Drivers is a curated list of Windows drivers used by adversaries to bypass security controls and carry out attacks. The project helps security professionals stay informed and mitigate potential threats.",
+            "enabled": true,
+            "visible_in_analytics": false
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 7,
+        "fields": {
+            "name": "whois",
+            "description": "WHOIS information from the https://www.whois.com website",
+            "enabled": true,
+            "visible_in_analytics": false
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 1,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_SERVER",
+            "value": "ldap.domain.com",
+            "description": "Address of your LDAP server (e.g. \"ldap.domain.com\")"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 2,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_PORT",
+            "value": "636",
+            "description": "LDAP port number"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 3,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_SSL",
+            "value": "True",
+            "description": "Should the LDAP connection be forced via SSL? Possible values: \"True\" or \"False\""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 4,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_USER",
+            "value": "user@gad.domain.com",
+            "description": "Username used to query your LDAP."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 5,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_PWD",
+            "value": "****************",
+            "description": "Password associated to the user mentionned in LDAP_USER."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 6,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_SEARCH_BASE",
+            "value": "DC=gad,DC=domain,DC=com",
+            "description": "The search base DN. This specifies the base of the subtree in which the search is to be constrained. It is denoted as the distinguished name of the search base directory object. Example: CN=Users,DC=domain,DC=com."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 7,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_USER_NAME",
+            "value": "displayName",
+            "description": "Corresponding value of your Active Directory attribute for the User Name."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 8,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_JOB_TITLE",
+            "value": "title",
+            "description": "Corresponding value of your Active Directory attribute for the Job Title."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 9,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_BUSINESS_UNIT",
+            "value": "division",
+            "description": "Corresponding value of your Active Directory attribute for the Business Unit."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 10,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_OFFICE",
+            "value": "physicalDeliveryOfficeName",
+            "description": "Corresponding value of your Active Directory attribute for the Office."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 11,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_COUNTRY",
+            "value": "co",
+            "description": "Corresponding value of your Active Directory attribute for the Country."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 35,
+        "fields": {
+            "connector": 1,
+            "key": "S1_URL",
+            "value": "https://tenant.sentinelone.net",
+            "description": "S1_URL is the SentinelOne URL for your tenant and is used for any API call to SentinelOne."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 37,
+        "fields": {
+            "connector": 1,
+            "key": "S1_TOKEN",
+            "value": "*******************************************************",
+            "description": "S1_TOKEN is the token associated to your API."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 38,
+        "fields": {
+            "connector": 1,
+            "key": "XDR_URL",
+            "value": "https://xdr.eu1.sentinelone.net",
+            "description": "URL address to use to point to SentinelOne frontend from the timeline view. For the legacy UI, you can use \"https://xdr.eu1.sentinelone.net\". For the new UI, use the same URL as for the \"S1_URL\" parameter."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 39,
+        "fields": {
+            "connector": 1,
+            "key": "XDR_PARAMS",
+            "value": "view=edr",
+            "description": "Parameters associated to the URL address used to point to SentinelOne frontend from the timeline view. For the legacy UI, you can use \"view=edr\" parameters. For the new UI, use \"_categoryId=eventSearch\"."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 40,
+        "fields": {
+            "connector": 1,
+            "key": "S1_THREATS_URL",
+            "value": "https://se-prod.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS",
+            "description": "URL address used to point to the threats page in SentinelOne. Notice that S1_THREATS_URL is dnyamically rendered by the Django view using format to evaluate the correct hostname. This is why the {} string appears in the URL. For legacy UI, use the following URL:  'https://tenant.sentinelone.net/incidents/threats?filter={\"computerName__contains\":\"{}\",\"timeTitle\":\"Last%203%20Months\"}'. For the new UI, use 'https://tenant.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS'"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 41,
+        "fields": {
+            "connector": 1,
+            "key": "SYNC_STAR_RULES",
+            "value": "False",
+            "description": "If set to True, DeepHunter will automatically synchronize your threat hunting analytics (create, modify or delete) with corresponding STAR rules in SentinelOne. Possible values: True|False"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 42,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_PREFIX",
+            "value": "TH_",
+            "description": "STAR rules created from DeepHunter to SentinelOne can have a prefix in their name (e.g. \"TH_\") for an easier identification. Beware if you change this value while some STAR rules have already been synchronized, as you will need to manually change the name of existing rules in S1 to match the new prefix."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 43,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_SEVERITY",
+            "value": "High",
+            "description": "The rule severity in your environment. Possible values: Low|Medium|High|Critical"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 44,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_STATUS",
+            "value": "Active",
+            "description": "Defines the rule is Enabled (Activated and sends alerts if triggered) or Disabled. Possible values: Active|Draft"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 45,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_EXPIRATION",
+            "value": "",
+            "description": "If the rule is Temporary, enter the expiration delay (in days) for the rule. If set, it will automatically consider expirationMode is \"Temporary\". Empty string to ignore"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 46,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_COOLOFFPERIOD",
+            "value": "",
+            "description": "Receive only one alert and suppress additional alerts when a rule is triggered multiple times during the cool-off period. Mitigation actions set in the rule will not be applied to suppressed alerts. Leave empty to ignore."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 47,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_TREATASTHREAT",
+            "value": "",
+            "description": "Defines the Treat as a threat auto response. Possible values: Undefined(or empty)|Suspicious|Malicious"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 48,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_NETWORKQUARANTINE",
+            "value": "false",
+            "description": "Set to True to automatically quarantine the alerted endpoints. Possible values: true|false"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 58,
+        "fields": {
+            "connector": 3,
+            "key": "API_KEY",
+            "value": "abcdefghijklmnopqrstuvwxyz1234567890",
+            "description": "VirusTotal API key"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 59,
+        "fields": {
+            "connector": 4,
+            "key": "API_KEY",
+            "value": "abcdefghijklmnopqrstuvwxyz1234567890",
+            "description": "MalwareBazaar API key"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 64,
+        "fields": {
+            "connector": 5,
+            "key": "TENANT_ID",
+            "value": "1234567-89ab-cdef-0123-456789abcdef",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 65,
+        "fields": {
+            "connector": 5,
+            "key": "CLIENT_ID",
+            "value": "1234567-89ab-cdef-0123-456789abcdef",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 66,
+        "fields": {
+            "connector": 5,
+            "key": "CLIENT_SECRET",
+            "value": "*********************",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 67,
+        "fields": {
+            "connector": 5,
+            "key": "WORKSPACE_ID",
+            "value": "1234567-89ab-cdef-0123-456789abcdef",
+            "description": "Log Analytics Workspace ID"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 68,
+        "fields": {
+            "connector": 5,
+            "key": "SYNC_RULES",
+            "value": "False",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 69,
+        "fields": {
+            "connector": 5,
+            "key": "SUBSCRIPTION_ID",
+            "value": "1234567-89ab-cdef-0123-456789abcdef",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 70,
+        "fields": {
+            "connector": 5,
+            "key": "RESOURCE_GROUP",
+            "value": "MyResourceGroup",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 71,
+        "fields": {
+            "connector": 5,
+            "key": "WORKSPACE_NAME",
+            "value": "MyWorkspaceName",
+            "description": ""
+        }
+    }
+]
