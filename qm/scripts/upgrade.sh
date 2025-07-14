@@ -266,8 +266,6 @@ do
 done
 # Restore settings
 cp $TEMP_FOLDER/deephunter/deephunter/settings.py $APP_PATH/deephunter/
-# Restore token renewal date
-cp $TEMP_FOLDER/deephunter/static/tokendate.txt $APP_PATH/static/
 echo -e "[\033[32mdone\033[0m]"
 
 # DB Migrations
@@ -309,8 +307,6 @@ touch $APP_PATH/campaigns.log
 chmod 666 $APP_PATH/campaigns.log
 touch $APP_PATH/static/mitre.json
 chmod 666 $APP_PATH/static/mitre.json
-touch $APP_PATH/static/tokendate.txt
-chmod 666 $APP_PATH/static/tokendate.txt
 chmod 664 $APP_PATH/static/VERSION
 chmod 664 $APP_PATH/static/commit_id.txt
 chown -R $USER $VENV_PATH
