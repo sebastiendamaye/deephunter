@@ -14,7 +14,64 @@ Plugins' settings should be stored in the database (Connector and ConnectorConf 
 Python file
 ===========
 
-The python file should be stored in the `plugins` folder. It should contain at least mandatory methods. You can also add additional methods to enhance the functionality of your plugin.
+The python file should be stored in the `plugins` folder and have the same name (extension excluded) as the plugin name in the database (Connector table). It should contain all mandatory methods.
+
+Methods are listed below (M/O = Mandatory / Optional).
+
+.. list-table::
+   :widths: 250 300 20 500 500
+   :header-rows: 1
+
+   * - Method
+     - Description
+     - M/O
+     - inputs
+     - outputs
+   * - ``init_globals``
+     - Define global variables and initialize them. This method should be called in the beginning of all other methods.
+     - M
+     - 
+     - 
+   * - ``query``
+     - API calls to the remote data lake to query logs. Used by the "campaign" daily cron, and the "regenerate stats" script
+     - M
+     - * ``analytic``: Analytic object corresponding to the threat hunting analytic
+       * ``from_date``: Optional start date for the query. Date received in isoformat.
+       * ``to_date``: Optional end date for the query. Date received in isoformat.
+     - The result of the query (array with 4 fields: endpoint.name, NULL, number of hits, NULL), or empty array if the query failed.
+   * - ``need_to_sync_rule``
+     - Check if the rule needs to be synced with Microsoft Sentinel. This is determined by the SYNC_RULES setting.
+     - M
+     - 
+     - boolean (defined in a global variable, recommended to get the value from a setting in the database)
+   * - ``create_rule``
+     - Create a rule in the remote data lake. This method is called when the user enables the ``create_flag`` on a threat hunting analytic.
+     - O
+     - ``analytic``: Analytic object corresponding to the analytic.
+     - JSON object containing the response from the remote data lake.
+   * - ``update_rule``
+     - Update a rule in the remote data lake. This method is called when the user updates a threat hunting analytic with ``create_flag`` set.
+     - O
+     - ``analytic``: Analytic object corresponding to the analytic.
+     - JSON object containing the response from the remote data lake.
+   * - ``delete_rule``
+     - Deletes a rule in the remote data lake. 
+     - O
+     - ``analytic``: Analytic object corresponding to the analytic.
+     - 
+   * - ``get_threats``
+     - Get threats from your EDR for a specific hostname and a date.
+     - O
+     - * ``hostname``: Hostname of the machine to retrieve threats for.
+       * ``created_at``: Date in ISO format to filter threats created after this date.
+     - List of threats (array) or ``None`` if not found.
+   * - ``get_redirect_analytic_link``
+     - Get the redirect link to run the analytic in the remote data lake.
+     - M
+     - * ``analytic``: Analytic object containing the query string and columns.
+       * ``date``: Date to filter the analytic by, in ISO format (range will be date-date+1day).
+       * ``endpoint_name``: Name of the endpoint to filter the analytic by.
+     - String containing the redirect link for the analytic.
 
 Template
 ********

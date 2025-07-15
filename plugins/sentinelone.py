@@ -330,11 +330,10 @@ def get_applications(agent_id):
 
 def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
     """
-    Get the redirect link to run the analytic in SentinelOne.
-    
-    :param endpoint_name: Name of the endpoint to filter the analytic by.
+    Get the redirect link to run the analytic in SentinelOne.    
     :param analytic: Analytic object containing the query string and columns.
     :param date: Date to filter the analytic by, in ISO format (range will be date-date+1day).
+    :param endpoint_name: Name of the endpoint to filter the analytic by.
     :return: String containing the redirect link for the analytic.
     """
     init_globals()

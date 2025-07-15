@@ -174,6 +174,7 @@ Crontab (standard user)
 You can use the crontab in ``install/scripts/crontab``.
 
 .. code-block:: sh
+	
 	# m h  dom mon dow   command
 	1  0 * * *      /data/deephunter/qm/scripts/run_campaign.sh
 	0  2 * * *      /data/deephunter/qm/scripts/optimize_db.sh
