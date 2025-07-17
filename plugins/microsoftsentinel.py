@@ -63,6 +63,17 @@ def query(analytic, from_date=None, to_date=None, debug=None):
     """
     
     init_globals()
+
+    # Authentication
+    try:
+        client = authenticate()
+    except:
+        if debug or DEBUG:
+            print(f"[ ERROR ] Analytic {analytic.name} failed. Failed to connect to MS Sentinel. Check report for more info.")        
+        manage_analytic_error(analytic, f"Failed to connect to MS Sentinel while executing the analytic {analytic.name}.")
+        return []
+
+
     if from_date and to_date:
         start_date = datetime.fromisoformat(from_date)
         start_date_utc = start_date.replace(tzinfo=timezone.utc)
@@ -73,16 +84,6 @@ def query(analytic, from_date=None, to_date=None, debug=None):
         # Default to the last 24 hours if no dates are provided
         timespan = timedelta(hours=24)
 
-    try:
-        client = authenticate()
-        # KQL query
-    except:
-        if debug or DEBUG:
-            print(f"[ ERROR ] Analytic {analytic.name} failed. Failed to connect to MS Sentinel. Check report for more info.")
-        
-        manage_analytic_error(analytic, f"Failed to connect to MS Sentinel while executing the analytic {analytic.name}.")
-
-        return None
 
     q = f'{analytic.query} | summarize count() by Computer'
     if debug or DEBUG:
@@ -95,23 +96,24 @@ def query(analytic, from_date=None, to_date=None, debug=None):
             query=q,
             timespan=timespan
         )
-
-        # Handle response
-        if response.status == LogsQueryStatus.SUCCESS:
-            res = []
-            for table in response.tables:
-                for row in table.rows:
-                    res.append([row[0], '', row[1], ''])
-            return res
-        else:
-            if DEBUG:
-                logger.error(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
-            manage_analytic_error(analytic, response.error)
-            return []
-    except:
-        logger.error(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
+    except Exception as e:
         if debug or DEBUG:
             print(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
+        logger.error(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info. Error: {e}")
+        manage_analytic_error(analytic, e.message)
+        return []
+
+    # Handle response
+    if response.status == LogsQueryStatus.SUCCESS:
+        res = []
+        for table in response.tables:
+            for row in table.rows:
+                res.append([row[0], '', row[1], ''])
+        return res
+    else:
+        if DEBUG:
+            logger.error(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
+        manage_analytic_error(analytic, response.error)
         return []
 
 def need_to_sync_rule():
