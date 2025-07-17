@@ -11,8 +11,8 @@
 <table class="mitre">
 	<tr>
 		<th>Admin/Stats/Run</th>
+		<th>Connector</th>
 		<th>Analytic</th>
-		<th>Query</th>
 		<th>Maxhosts Count</th>
 		<th>Run daily</th>
 		<th>Category</th>
@@ -25,8 +25,8 @@
 			[<a target="_blank" href="/{{ analytic.id }}/trend/">stats</a>]
 			[<a target="_blank" href="/events/{{ analytic.id }}/">run query</a>]
 		</td>
-		<td>{{ analytic.name }}</td>
-		<td><pre>{{ analytic.query }}</pre></td>
+		<td>{{ analytic.connector.name }}</td>
+		<td title="DESCRIPTION:&#013;===========&#013;{{ analytic.description }}&#013;&#013;QUERY:&#013;===========&#013;{{analytic.query}}">{{ analytic.name }}</td>
 		<td class="acenter">{{ analytic.maxhosts_count }}</td>
 		<td class="acenter">
 			{% if analytic.run_daily %}

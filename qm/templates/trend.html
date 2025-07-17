@@ -8,7 +8,7 @@
 </head>
 <body>
 
-<h1>Data for {{ analytic }}</h1>
+<h1>Data for {{ analytic.name }} ({{ analytic.connector.name }})</h1>
 <div class="charts_left">
 	<div id="chartContainer_runtime"></div>
 	<div id="chartContainer_count"></div>
@@ -41,6 +41,9 @@
 	<div class="paragraph">
 		<b>Description:</b><br />
 		<p>{{ analytic.description|apply_markup:"markdown" }}</p>
+	</div>
+	<div class="paragraph">
+		<b>Connector: </b>{{ analytic.connector.name }}
 	</div>
 	<div class="paragraph">
 		<b>Query:</b><br />

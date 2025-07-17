@@ -14,6 +14,7 @@
 		<th>Runtime</th>
 		<th>Trend</th>
 		<th>Admin/Stats</th>
+		<th>Connector</th>
 		<th>Analytic</th>
 	</tr>
 {% for analytic in analytics %}
@@ -24,6 +25,7 @@
 			[<a target="_blank" href="/admin/qm/analytic/{{ analytic.id }}/change/">admin</a>]
 			[<a target="_blank" href="/{{ analytic.id }}/trend/">stats</a>]
 		</td>
+		<td>{{ analytic.connector }}</td>
 		<td>{{ analytic.name }}</td>
 	</tr>	
 {% endfor %}

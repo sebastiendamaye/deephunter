@@ -9,6 +9,7 @@
 <p>This report shows Threat Hunting Analytics with few distinct endpoints in the entire database. It may be a useful indicator to identify suspicious behaviors.</p>
 <table class="mitre">
 	<tr>
+		<th>Connector</th>
 		<th>Analytic</th>
 		<th>Confidence</th>
 		<th>Relevance</th>
@@ -18,6 +19,7 @@
 	</tr>
 	{% for analytic in analytics %}
 	<tr>
+		<td class="acenter">{{ analytic.connector }}</td>
 		<td title="DESCRIPTION:&#013;===========&#013;{{ analytic.description }}&#013;&#013;QUERY:&#013;===========&#013;{{analytic.query}}">{{ analytic.name }}</td>
         <td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
         <td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>

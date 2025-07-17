@@ -31,8 +31,8 @@ class AnalyticHistoryAdmin(SimpleHistoryAdmin):
         return super().save_model(request, obj, form, change)
 
 class SnapshotAdmin(admin.ModelAdmin):
-    list_display = ('get_campaign', 'analytic', 'date', 'runtime', 'hits_count', 'hits_endpoints','zscore_count', 'zscore_endpoints', 'anomaly_alert_count', 'anomaly_alert_endpoints',)
-    list_filter = ['campaign__name', 'analytic', 'date', 'anomaly_alert_count', 'anomaly_alert_endpoints']
+    list_display = ('get_campaign', 'analytic__name', 'analytic__connector__name', 'date', 'runtime', 'hits_count', 'hits_endpoints','zscore_count', 'zscore_endpoints', 'anomaly_alert_count', 'anomaly_alert_endpoints',)
+    list_filter = ['campaign__name', 'analytic__connector__name', 'analytic__name', 'date', 'anomaly_alert_count', 'anomaly_alert_endpoints']
     
     @admin.display(description='campaign')
     def get_campaign(self, obj):
@@ -67,14 +67,18 @@ class ThreatActorAdmin(admin.ModelAdmin):
     search_fields = ['name', 'aka_name']
 
 class EndpointAdmin(admin.ModelAdmin):
-    list_display = ('hostname', 'site', 'get_analytic_name', 'get_confidence', 'get_relevance', 'get_date', 'storylineid')
-    list_filter = ['snapshot__date', 'site', 'snapshot__analytic__confidence', 'snapshot__analytic__relevance', 'snapshot__analytic__name']
+    list_display = ('hostname', 'site', 'get_analytic_name', 'get_connector_name', 'get_confidence', 'get_relevance', 'get_date', 'storylineid')
+    list_filter = ['snapshot__date', 'site', 'snapshot__analytic__connector__name', 'snapshot__analytic__confidence', 'snapshot__analytic__relevance', 'snapshot__analytic__name']
     search_fields = ['hostname', 'snapshot__analytic__name', 'storylineid']
 
     @admin.display(description='analytic')
     def get_analytic_name(self, obj):
         return obj.snapshot.analytic.name
-    
+
+    @admin.display(description='connector')
+    def get_connector_name(self, obj):
+        return obj.snapshot.analytic.connector.name
+
     @admin.display(description='confidence')
     def get_confidence(self, obj):
         return obj.snapshot.analytic.confidence

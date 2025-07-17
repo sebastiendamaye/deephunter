@@ -355,12 +355,12 @@ def timeline(request):
         endpoints = Endpoint.objects.filter(hostname=hostname).order_by('snapshot__date')
         for e in endpoints:
             # search if group already exists
-            g = next((group for group in groups if group['content'] == e.snapshot.analytic.name), None)
+            g = next((group for group in groups if group['content'] == f'{e.snapshot.analytic.name} ({e.snapshot.analytic.connector.name})'), None)
             # if group does not exist yet, create it
             if g:
                 g = g['id']
             else:
-                groups.append({'id':gid, 'analyticid':e.snapshot.analytic.id, 'content':e.snapshot.analytic.name})
+                groups.append({'id':gid, 'analyticid':e.snapshot.analytic.id, 'content':f'{e.snapshot.analytic.name} ({e.snapshot.analytic.connector.name})'})
                 g = gid
                 gid += 1
                 
@@ -428,7 +428,7 @@ def timeline(request):
                 
                     # Populate applications (group ID = 998 for easy identification in template)
                     gid = 998
-                    groups.append({'id':gid, 'content':'Apps install (S1)'})
+                    groups.append({'id':gid, 'content':'Apps install (sentinelone)'})
                     
                     createdat = (datetime.today()-timedelta(days=DB_DATA_RETENTION))
                     apps = all_connectors.get('sentinelone').get_applications(agent_id)

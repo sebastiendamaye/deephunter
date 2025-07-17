@@ -7,126 +7,108 @@
 {% endblock %}
 
 {% block body %}
-<h1>Stats campaigns last {{ db_retention }} days</h1>
+<!--h1>Stats campaigns last {{ db_retention }} days</h1-->
 
 <div id="chartContainer_count_analytics" class="chartcontainer"></div>
 <div id="chartContainer_duration" class="chartcontainer"></div>
 <div id="chartContainer_count_endpoints" class="chartcontainer"></div>
 
+
 <script nonce="fgd56sh1bc">
 window.onload = function () {
 
-var options_count_analytics = {
-	animationEnabled: false,
-	axisX:{
-		valueFormatString: "DD MMM"
-	},
-	toolTip:{
-		shared:true
-	},  
-	legend:{
-		cursor:"pointer",
-		verticalAlign: "bottom",
-		horizontalAlign: "left",
-		dockInsidePlotArea: true,
-		itemclick: toogleDataSeries
-	},
-	data: [
-	{
-		type: "line",
-		showInLegend: true,
-		name: "#analytics",
-		markerType: "square",
-		xValueFormatString: "DD MMM, YYYY",
-		color: "#2596be",
-		yValueFormatString: "#,##0",
-		dataPoints: [
-			{% for s in stats %}
-				{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.count_analytics }} },
+	var options_count_analytics = {
+		animationEnabled: false,
+		axisX:{
+			valueFormatString: "DD MMM"
+		},
+		toolTip:{
+			shared:true
+		},
+		title:{
+			text: "Count of threat hunting analytics",
+			fontFamily: "arial"
+		},
+		data: [
+			{% for connector, data in connector_stats.items %}
+				{
+					type: "stackedColumn",
+					showInLegend: true,
+					name: "{{ connector }}",
+					dataPoints: [
+						{% for i in data %}
+							{{ connector_stats.connector }}
+							{ y: {{ i.count }}, x: new Date("{{ i.date|date:"Y-m-d" }}") }{% if not forloop.last %},{% endif %}
+						{% endfor %}
+					]
+				}{% if not forloop.last %},{% endif %}
 			{% endfor %}
 		]
-	}
-	]
-};
+	};
 
-var options_duration = {
-	animationEnabled: false,
-	axisX:{
-		valueFormatString: "DD MMM"
-	},
-	toolTip:{
-		shared:true
-	},  
-	legend:{
-		cursor:"pointer",
-		verticalAlign: "bottom",
-		horizontalAlign: "left",
-		dockInsidePlotArea: true,
-		itemclick: toogleDataSeries
-	},
-	data: [
-	{
-		type: "line",
-		showInLegend: true,
-		name: "duration",
-		markerType: "square",
-		xValueFormatString: "DD MMM, YYYY",
-		color: "#2596be",
-		yValueFormatString: "#,##0",
-		dataPoints: [
-			{% for s in stats %}
-				{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.duration }} },
-			{% endfor %}
+	var options_duration = {
+		animationEnabled: false,
+		axisX:{
+			valueFormatString: "DD MMM"
+		},
+		toolTip:{
+			shared:true
+		},
+		title:{
+			text: "Run time duration (in minutes) of campaigns",
+			fontFamily: "arial"
+		},
+		data: [
+		{
+			type: "column",
+			showInLegend: true,
+			name: "duration (minutes)",
+			markerType: "square",
+			xValueFormatString: "DD MMM, YYYY",
+			color: "#2596be",
+			yValueFormatString: "#,##0",
+			dataPoints: [
+				{% for s in stats %}
+					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.duration }} },
+				{% endfor %}
+			]
+		}
 		]
-	}
-	]
-};
+	};
 
-var options_count_endpoints = {
-	animationEnabled: false,
-	axisX:{
-		valueFormatString: "DD MMM"
-	},
-	toolTip:{
-		shared:true
-	},  
-	legend:{
-		cursor:"pointer",
-		verticalAlign: "bottom",
-		horizontalAlign: "left",
-		dockInsidePlotArea: true,
-		itemclick: toogleDataSeries
-	},
-	data: [
-	{
-		type: "line",
-		showInLegend: true,
-		name: "#endpoints",
-		markerType: "square",
-		xValueFormatString: "DD MMM, YYYY",
-		color: "#2596be",
-		yValueFormatString: "#,##0",
-		dataPoints: [
-			{% for s in stats %}
-				{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.count_endpoints }} },
-			{% endfor %}
+	var options_count_endpoints = {
+		animationEnabled: false,
+		axisX:{
+			valueFormatString: "DD MMM"
+		},
+		toolTip:{
+			shared:true
+		},
+		title:{
+			text: "Number of endpoints per day",
+			fontFamily: "arial"
+		},
+		data: [
+		{
+			type: "column",
+			showInLegend: true,
+			name: "#endpoints",
+			markerType: "square",
+			xValueFormatString: "DD MMM, YYYY",
+			color: "#2596be",
+			yValueFormatString: "#,##0",
+			dataPoints: [
+				{% for s in stats %}
+					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.count_endpoints_total }} },
+				{% endfor %}
+			]
+		}
 		]
-	}
-	]
-};
+	};
 
-$("#chartContainer_count_analytics").CanvasJSChart(options_count_analytics);
-$("#chartContainer_duration").CanvasJSChart(options_duration);
-$("#chartContainer_count_endpoints").CanvasJSChart(options_count_endpoints);
-
-function toogleDataSeries(e){
-	if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
-		e.dataSeries.visible = false;
-	} else{
-		e.dataSeries.visible = true;
-	}
-	e.chart.render();
-}
+	$("#chartContainer_count_analytics").CanvasJSChart(options_count_analytics);
+	$("#chartContainer_duration").CanvasJSChart(options_duration);
+	$("#chartContainer_count_endpoints").CanvasJSChart(options_count_endpoints);
 
 }
 </script>

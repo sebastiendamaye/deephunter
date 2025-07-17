@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.db.models import Q, Sum, Count
 from urllib.parse import quote
 from datetime import datetime, timedelta, date
-from qm.models import Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus
+from qm.models import Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus, Connector
 
 # Dynamically import all connectors
 import importlib
@@ -33,6 +33,13 @@ def campaigns_stats(request):
     stats = []
     seconds_in_day = 24 * 60 * 60
     
+    connectors = Connector.objects.filter(visible_in_analytics=True)
+    
+    # initialize connector stats with empty lists
+    connector_stats = {}
+    for connector in connectors:
+        connector_stats[connector.name] = []
+
     for i in reversed(range(DB_DATA_RETENTION)):
         d=datetime.combine(datetime.today(), datetime.min.time()) - timedelta(days=i)
         
@@ -45,25 +52,35 @@ def campaigns_stats(request):
             difference = campaign.date_end - campaign.date_start
             dur = divmod(difference.days * seconds_in_day + difference.seconds, 60)
             duration = round(dur[0]+dur[1]*5/3/100, 1)
+            count_endpoints_total = Endpoint.objects.filter(snapshot__campaign=campaign).count()
             
-            count_endpoints = Endpoint.objects.filter(snapshot__campaign=campaign).count()
-            
+            # Recursily count endpoints per connector
+            for connector in connectors:
+                connector_stats[connector.name].append({
+                    'date': d,
+                    'count': Snapshot.objects.filter(
+                        campaign=campaign,
+                        analytic__connector=connector
+                        ).count()
+                    })
+
             stats.append({
                 'date':d,
                 'count_analytics':campaign.nb_queries,
                 'duration':duration,
-                'count_endpoints':count_endpoints
+                'count_endpoints_total':count_endpoints_total,
                 })
         except:
             stats.append({
                 'date':d,
                 'count_analytics':0,
                 'duration':0,
-                'count_endpoints':0
+                'count_endpoints_total':0
                 })
     
     context = {
         'stats': stats,
+        'connector_stats': connector_stats,
         'db_retention': DB_DATA_RETENTION
         }
     
@@ -204,6 +221,7 @@ def endpoints(request):
             qdata.append({
                 "analyticid":analytic.snapshot.analytic.id,
                 "name":analytic.snapshot.analytic.name,
+                "connector":analytic.snapshot.analytic.connector.name,
                 "confidence":analytic.snapshot.analytic.confidence,
                 "relevance":analytic.snapshot.analytic.relevance,
                 "xdrlink":xdrlink
@@ -250,6 +268,7 @@ def analytics_perfs(request):
         analytics.append({
                 'id': snapshot.analytic.id,
                 'name': snapshot.analytic.name,
+                'connector': snapshot.analytic.connector.name,
                 'runtime': snapshot.runtime,
                 'sparkline': [analytic_snapshot.runtime for analytic_snapshot in analytic_snapshots]
             })
@@ -285,7 +304,7 @@ def query_error(request):
 def rare_occurrences(request):
     analytics = (
         Endpoint.objects
-        .values('snapshot__analytic__id', 'snapshot__analytic__name', 'snapshot__analytic__confidence', 'snapshot__analytic__relevance', 'snapshot__analytic__description', 'snapshot__analytic__query')
+        .values('snapshot__analytic__id', 'snapshot__analytic__name', 'snapshot__analytic__connector__name', 'snapshot__analytic__confidence', 'snapshot__analytic__relevance', 'snapshot__analytic__description', 'snapshot__analytic__query')
         .annotate(distinct_hostnames=Count('hostname', distinct=True))
         .filter(distinct_hostnames__lt=RARE_OCCURRENCES_THRESHOLD)
         .order_by('distinct_hostnames')
@@ -299,6 +318,7 @@ def rare_occurrences(request):
         data.append({
             'id': analytic['snapshot__analytic__id'],
             'name': analytic['snapshot__analytic__name'],
+            'connector': analytic['snapshot__analytic__connector__name'],
             'confidence': analytic['snapshot__analytic__confidence'],
             'relevance': analytic['snapshot__analytic__relevance'],
             'description': analytic['snapshot__analytic__description'],
