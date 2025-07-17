@@ -139,6 +139,12 @@
     margin: 0 0 0 30px;
 }
 
+@media (forced-colors: active) {
+  #changelist-filter {
+      border: 1px solid;
+  }
+}
+
 #changelist-filter h2 {
     font-size: 0.875rem;
     text-transform: uppercase;
@@ -215,9 +221,9 @@
     color: var(--link-hover-color);
 }
 
-#changelist-filter #changelist-filter-clear a {
+#changelist-filter #changelist-filter-extra-actions {
     font-size: 0.8125rem;
-    padding-bottom: 10px;
+    margin-bottom: 10px;
     border-bottom: 1px solid var(--hairline-color);
 }
 
@@ -263,6 +269,15 @@
 
 #changelist tbody tr:has(.action-select:checked) {
     background-color: var(--selected-row);
+}
+
+@media (forced-colors: active) {
+    #changelist tbody tr.selected {
+        background-color: SelectedItem;
+    }
+    #changelist tbody tr:has(.action-select:checked) {
+        background-color: SelectedItem;
+    }
 }
 
 #changelist .actions {
