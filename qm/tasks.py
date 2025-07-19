@@ -3,7 +3,8 @@ from datetime import datetime, timedelta
 import numpy as np
 from scipy import stats
 from math import isnan
-from qm.models import Analytic, Snapshot, Campaign, Endpoint, CeleryStatus
+from qm.models import Analytic, Snapshot, Campaign, Endpoint, TasksStatus
+from qm.utils import run_campaign, get_campaign_date
 import logging
 import requests
 from celery import shared_task
@@ -49,8 +50,8 @@ def regenerate_stats(analytic_id):
         )
     campaign.save()
 
-    # Get task in CeleryStatus object
-    celery_status = get_object_or_404(CeleryStatus, analytic=analytic)
+    # Get task in TasksStatus object
+    celery_status = get_object_or_404(TasksStatus, taskname=analytic.name)
 
     # Delete all snapshots for this analytic
     # (related Endpoint object will automatically cascade delete)
@@ -173,3 +174,9 @@ def regenerate_stats(analytic_id):
 
     # Delete Celery task in DB
     celery_status.delete()
+
+
+@shared_task()
+def regenerate_campaign(campaigndate):
+    # We assume that the task is managed by Celery because it is called from the tasks.py file
+    run_campaign(campaigndate=campaigndate, celery=True)

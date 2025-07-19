@@ -216,14 +216,14 @@ class Endpoint(models.Model):
     def __str__(self):
         return '{} - {} - {}'.format(self.snapshot.date, self.hostname, self.snapshot.analytic.name)
 
-class CeleryStatus(models.Model):
-    analytic = models.ForeignKey(Analytic, on_delete=models.CASCADE)
+class TasksStatus(models.Model):
+    taskname = models.CharField(max_length=200, unique=True)
     date = models.DateTimeField(auto_now_add=True)
-    progress = models.FloatField()
-    taskid = models.CharField(max_length=36)
+    progress = models.FloatField(default=0)
+    taskid = models.CharField(max_length=36, blank=True)
 
     def __str__(self):
-        return self.analytic.name
+        return self.taskname
     
     class Meta:
-        verbose_name_plural = "celery status"
+        verbose_name_plural = "Tasks status"

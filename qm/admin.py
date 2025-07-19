@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName, ThreatActor, Analytic, Snapshot, Campaign, Endpoint, Tag, CeleryStatus, Category
+from .models import Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName, ThreatActor, Analytic, Snapshot, Campaign, Endpoint, Tag, TasksStatus, Category
 from connectors.models import Connector
 from django.contrib.admin.models import LogEntry
 from simple_history.admin import SimpleHistoryAdmin
@@ -95,8 +95,8 @@ class LogEntryAdmin(admin.ModelAdmin):
     list_display = ('user', 'content_type', 'object_repr', 'action_flag', 'change_message')
     list_filter = ['user', 'content_type', 'action_flag']
 
-class CeleryStatusAdmin(admin.ModelAdmin):
-    list_display = ('analytic', 'date', 'progress')
+class TasksStatusAdmin(admin.ModelAdmin):
+    list_display = ('taskname', 'taskid', 'date', 'progress')
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'short_name', 'description')
@@ -114,5 +114,5 @@ admin.site.register(Analytic, AnalyticHistoryAdmin)
 admin.site.register(Snapshot, SnapshotAdmin)
 admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Endpoint, EndpointAdmin)
-admin.site.register(CeleryStatus, CeleryStatusAdmin)
+admin.site.register(TasksStatus, TasksStatusAdmin)
 admin.site.register(Category, CategoryAdmin)

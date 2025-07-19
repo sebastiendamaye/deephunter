@@ -2,12 +2,10 @@ from django.conf import settings
 import json
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required, permission_required
-from django.http import HttpResponse, HttpResponseRedirect, FileResponse, JsonResponse
 from django.utils import timezone
 from django.db.models import Q, Sum, Count
-from urllib.parse import quote
-from datetime import datetime, timedelta, date
-from qm.models import Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus, Connector
+from datetime import datetime, timedelta
+from qm.models import Analytic, Snapshot, Campaign, MitreTactic, MitreTechnique, Endpoint, Connector
 
 # Dynamically import all connectors
 import importlib
@@ -41,14 +39,11 @@ def campaigns_stats(request):
         connector_stats[connector.name] = []
 
     for i in reversed(range(DB_DATA_RETENTION)):
-        d=datetime.combine(datetime.today(), datetime.min.time()) - timedelta(days=i)
+        #d=datetime.combine(datetime.today(), datetime.min.time()) - timedelta(days=i)
+        d=datetime.today() - timedelta(days=i)
         
         try:
-            campaign = Campaign.objects.get(
-                name__startswith="daily_cron_",
-                date_start__gt=d,
-                date_start__lt=d + timedelta(days=1)
-                )        
+            campaign = get_object_or_404(Campaign, name=f"daily_cron_{d.strftime('%Y-%m-%d')}")
             difference = campaign.date_end - campaign.date_start
             dur = divmod(difference.days * seconds_in_day + difference.seconds, 60)
             duration = round(dur[0]+dur[1]*5/3/100, 1)

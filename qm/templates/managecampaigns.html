@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/list_analytics.css" />
+    <script src="/static/js/htmx.min.js"></script>
+{% endblock %}
+
+{% block body %}
+    <h1>Manage campaigns</h1>
+    <div class="warning">
+        <ul>
+            <li><b>Warning</b>: regenerating a campaign will destroy existing data for the selected campaign.</li>
+            <li><b>Info</b>: the regenerated campaign will run threat analytics with the "run_daily" flag set as of today. You may see differences in the results compared to the previous campaign, as the "run_daily" flag may have been updated for some analytics, and newer analytics may have been created since.</li>
+        </ul>
+    </div>
+
+    {% if campaigns %}
+        <table class="mitre">
+            <thead>
+                <tr>
+                    <th>Actions</th>
+                    <th>Campaign</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th># queries</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for campaign in campaigns %}
+                    <tr>
+                        <td><div hx-get="/regencampaignstatus/{{ campaign.name }}/" hx-trigger="every 2s"></div></td>
+                        <td>{{ campaign.name }}</td>
+                        <td>{{ campaign.date_start }}</td>
+                        <td>{{ campaign.date_end }}</td>
+                        <td>{{ campaign.nb_queries }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No campaigns found.</p>
+    {% endif %}
+
+{% endblock %}

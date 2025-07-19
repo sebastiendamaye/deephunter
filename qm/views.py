@@ -10,12 +10,14 @@ from datetime import datetime, timedelta, timezone
 import logging
 import numpy as np
 from scipy import stats
-from .models import Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, CeleryStatus, Category
+from math import isnan
+from .models import Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category
 from connectors.models import Connector
-from .tasks import regenerate_stats
+from .tasks import regenerate_stats, regenerate_campaign
 import ipaddress
 from connectors.utils import is_connector_enabled, get_connector_conf
 from celery import current_app
+from qm.utils import get_campaign_date
 
 # Dynamically import all connectors
 import importlib
@@ -34,6 +36,9 @@ UPDATE_ON = settings.UPDATE_ON
 DB_DATA_RETENTION = settings.DB_DATA_RETENTION
 GITHUB_LATEST_RELEASE_URL = settings.GITHUB_LATEST_RELEASE_URL
 GITHUB_COMMIT_URL = settings.GITHUB_COMMIT_URL
+CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
+ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
+DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -261,7 +266,7 @@ def index(request):
 def trend(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     # show graph for last 90 days only
-    snapshots = Snapshot.objects.filter(analytic=analytic, date__gt=datetime.today()-timedelta(days=90))
+    snapshots = Snapshot.objects.filter(analytic=analytic, date__gt=datetime.today()-timedelta(days=90)).order_by('date')
     
     stats_vals = []
     date = [snapshot.date for snapshot in snapshots]
@@ -313,7 +318,7 @@ def analyticdetail(request, analytic_id):
 
     # get celery status for the selected analytic
     try:
-        celery_status = get_object_or_404(CeleryStatus, analytic=analytic)
+        celery_status = get_object_or_404(TasksStatus, taskname=analytic.name)
         progress = round(celery_status.progress)
     except:
         progress = 999
@@ -505,22 +510,19 @@ def storyline(request, storylineids, eventdate):
 @permission_required("qm.delete_campaign")
 def regen(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
-    
-    # Create task in CeleryStatus object
-    celery_status = CeleryStatus(
-        analytic=analytic,
-        progress=0
-        )
-    celery_status.save()    
-    
+        
     # start the celery task (defined in qm/tasks.py)
     taskid = regenerate_stats.delay(analytic_id)
 
-    # Update CeleryStatus with the task ID
-    celery_status.taskid = taskid
+    # Create task in TasksStatus object
+    celery_status = TasksStatus(
+        taskname=analytic.name,
+        taskid = taskid
+    )
     celery_status.save()
 
-    return HttpResponse('Celery Task ID: {}'.format(taskid))
+    #return HttpResponse('Celery Task ID: {}'.format(taskid))
+    return HttpResponse('Task running...')
 
 @login_required
 @permission_required("qm.delete_campaign")
@@ -529,9 +531,9 @@ def cancelregen(request, taskid):
         # without signal='SIGKILL', the task is not cancelled immediately
         current_app.control.revoke(taskid, terminate=True, signal='SIGKILL')
         # delete task in DB
-        celery_status = get_object_or_404(CeleryStatus, taskid=taskid)
+        celery_status = get_object_or_404(TasksStatus, taskid=taskid)
         celery_status.delete()
-        return HttpResponse('Celery Task terminated')
+        return HttpResponse('Task terminated')
     except Exception as e:
         logging.error(f"Revoke failed: {e}")
         return HttpResponse('Error terminating Celery Task: {}'.format(e))
@@ -541,8 +543,10 @@ def cancelregen(request, taskid):
 def progress(request, analytic_id):
     try:
         analytic = get_object_or_404(Analytic, pk=analytic_id)
-        celery_status = get_object_or_404(CeleryStatus, analytic=analytic)
-        return HttpResponse('<span><b>Task progress:</b> {}% | <a href="/cancelregen/{}/" target="_blank">CANCEL</a></span>'.format(round(celery_status.progress), celery_status.taskid))
+        celery_status = get_object_or_404(TasksStatus, taskname=analytic.name)
+        button = f'<span><b>Task progress:</b> {round(celery_status.progress)}%'
+        button += f' | <a href="/cancelregen/{celery_status.taskid}/" target="_blank">CANCEL</a></span>'
+        return HttpResponse(button)
     except:
         return HttpResponse('<a href="/{}/regen/" target="_blank" class="buttonred">Regenerate stats</a>'.format(analytic_id))
 
@@ -643,3 +647,44 @@ def about(request):
 def notifications(request):
     context = {}
     return render(request, 'notifications.html', context)
+
+
+@login_required
+def managecampaigns(request):
+    campaigns = Campaign.objects.filter(name__startswith='daily_cron_').order_by('-name')
+    context = {'campaigns': campaigns}
+    return render(request, 'managecampaigns.html', context)
+
+@login_required
+@permission_required("qm.delete_campaign")
+def regencampaign(request, campaign_name):
+    campaign = get_object_or_404(Campaign, name=campaign_name)
+    campaign_name = campaign.name
+    campaign_date = get_campaign_date(campaign)
+    # Delete campaign and all related snapshots/endpoints
+    campaign.delete()
+    
+    # start the celery task (defined in qm/tasks.py)
+    taskid = regenerate_campaign.delay(campaigndate=campaign_date)
+
+    # Create task in TasksStatus object
+    celery_status = TasksStatus(
+        taskname=campaign_name,
+        taskid=taskid
+    )
+    celery_status.save()
+
+    return HttpResponse('running...')
+
+@login_required
+def regencampaignstatus(request, campaign_name):
+    try:
+        celery_status = get_object_or_404(TasksStatus, taskname=campaign_name)
+        button = f'<span><b>Task progress:</b> {round(celery_status.progress)}%'
+        # cancel task is only possible if task started from celery (not if campaign is running from cron)
+        if celery_status.taskid:
+            button += f' | <button hx-get="/cancelregen/{celery_status.taskid}/" class="buttonred">CANCEL</button>'
+        button += '</span>'
+        return HttpResponse(button)
+    except:
+        return HttpResponse(f'<button hx-get="/regencampaign/{campaign_name}/" class="buttonred">Regenerate</button>')

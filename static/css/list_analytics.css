@@ -301,3 +301,15 @@ div.warningquery {
   padding: 3px;
   text-align: center;
 }
+
+div.warning {
+	width: 50%;
+	border-radius: 5px;
+	background: orange;
+	padding-top: 3px;
+	padding-right: 5px;
+	padding-left: 1px;
+	padding-bottom: 0px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}

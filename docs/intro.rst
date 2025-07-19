@@ -64,7 +64,13 @@ Campaigns
 *********
 The purpose of DeepHunter is to automate the execution of threat hunting analytics (the ones with the ``run_daily`` flag set) each day. This is done through campaigns.
 
-A Campaign is a cron job running every day at the same time. It executes the analytics, and collects statistics (number of matching events, number of endpoints, etc.) for each analytic every day for the last 24 hours, creating a baseline (trend analysis) for each analytic. A z-score based model is then applied on these statistics to identify potential statistical anomalies.
+A Campaign is a cron job running every day at the same time. It executes the analytics, and collects statistics (number of matching events, number of endpoints, etc.) for each analytic every day for the last day (24 hours time range), creating a baseline (trend analysis) for each analytic. A z-score based model is then applied on these statistics to identify potential statistical anomalies.
+
+Whenever the cron job is scheduled during the day, it will query the data from the previous day.
+
+.. image:: img/campaign_cron.png
+  :width: 1200
+  :alt: Sync rule logic
 
 Statistics regeneration
 ***********************
