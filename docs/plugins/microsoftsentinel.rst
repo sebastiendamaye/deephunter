@@ -5,10 +5,17 @@ Description
 ***********
 Microsoft Sentinel is a scalable, cloud-native security information and event management (SIEM) that delivers an intelligent and comprehensive solution for SIEM and security orchestration, automation, and response (SOAR). Microsoft Sentinel provides cyberthreat detection, investigation, response, and proactive hunting, with a bird's-eye view across your enterprise.
 
+This connector allows querying Microsoft Sentinel logs using KQL (Kusto Query Language).
+
+Queries have to return a "Computer" column, corresponding to either a native "Computer" field, or a transformation. If a transformation is required, it has to be part of the "query" field (not in the "columns" field).
+
+- You can define "Computer" by copying the value from another field: ``| project Computer = DstDvcHostname``
+- You can also truncate the computer name to remove the domain: ``| project Computer = tostring(split(Computer, ".")[0])``
+
 Limitations
 ***********
 
-The current implementation of the Microsoft Sentinel plugin does not support synchronizing rules. ``SYNC_RULES`` has to be set to `False`.
+The current implementation of the Microsoft Sentinel plugin does not support synchronizing rules. ``SYNC_RULES`` has to be set to ``False``.
 
 Settings
 ********

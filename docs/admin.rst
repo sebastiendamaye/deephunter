@@ -46,10 +46,10 @@ Points to the Django backend (admin pages).
 
 Create/modify threat hunting analytics
 **************************************
-To create a new threat hunting analytic, go to the Django backend (``/admin`` URL) and click on the ``+ Add`` link on the right side of the ``Queries`` table.
+To create a new threat hunting analytic, go to the Django backend (``/admin`` URL) and click on the ``+ Add`` link on the right side of the ``Analytics`` table.
 
-.. image:: img/admin_create_query_button.png
-  :width: 1000
+.. image:: img/admin_create_analytic_button.png
+  :width: 800
   :alt: img
 
 Fields should be quite explicit, and it shouldn't be too complicated for you to create new threat hunting analytics. There are some points you should consider though:

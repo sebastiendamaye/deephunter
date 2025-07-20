@@ -85,4 +85,4 @@ The list of all possible filters, broken down into sections. Expand a section an
 
 Create/Modify/Clone analytics
 *****************************
-Refer to `this page <admin.html#create-modify-threat-hunting-analytics>`_.
+Refer to `this page <../admin.html#create-modify-threat-hunting-analytics>`_.
