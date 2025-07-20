@@ -58,10 +58,10 @@ Architecture
   :alt: DeepHunter architecture diagram
 
 Campaigns and Statistics
-########################
+************************
 
 Campaigns
-*********
+=========
 The purpose of DeepHunter is to automate the execution of threat hunting analytics (the ones with the ``run_daily`` flag set) each day. This is done through campaigns.
 
 A Campaign is a cron job running every day at the same time. It executes the analytics, and collects statistics (number of matching events, number of endpoints, etc.) for each analytic every day for the last day (24 hours time range), creating a baseline (trend analysis) for each analytic. A z-score based model is then applied on these statistics to identify potential statistical anomalies.
@@ -73,7 +73,7 @@ Whenever the cron job is scheduled during the day, it will query the data from t
   :alt: Sync rule logic
 
 Statistics regeneration
-***********************
+=======================
 It may happen that you modify a threat hunting query for various reasons (e.g., add a filter to exclude some results). When you do so, statistics for the updated query will change. If you want to apply the same logic to all past statistics, as if the query would have always been as you just changed it, you can regenerate the statistics for this threat hunting query. It will work on the background and show the percentage of completion as shown below.
 
 .. image:: img/analytics_regen_stats.png
@@ -81,7 +81,7 @@ It may happen that you modify a threat hunting query for various reasons (e.g., 
   :alt: DeepHunter architecture diagram
 
 Thresholds, error detection and automation
-******************************************
+==========================================
 
 In order to prevent the database from being overwhelmed with useless information, several thresholds and automatic actions are available in the `settings <settings.html>`_:
 
@@ -94,7 +94,7 @@ In order to prevent the database from being overwhelmed with useless information
 	The actions described above won't be applied to Threat Hunting analytics that have the flag ``run_daily_lock`` set. This is a way to protect some analytics from being automatically removed from the campaigns, or have the statistics deleted.
 
 Static vs Dynamic analytics
-***************************
+===========================
 
 By default, threat hunting analytics you will create in DeepHunter will be static. They will match a hunting query that is stored in the database, and that will be executed daily by the campaigns cron job.
 
@@ -103,10 +103,10 @@ However, it may happen that a hunting query needs to be dynamically generated. D
 Dynamic queries should have the ``Dyn. query`` flag enabled (which is just an indication, there is no control associated to this flag), to indicate that they should not be manually edited in DeepHunter. Modifications should be done through their corresponding scripts directly.
 
 DeepHunter Modules and Tools
-############################
+****************************
 
 Modules
-*******
+=======
 DeepHunter comes with several modules that are particularly useful for threat hunters and incident responders:
 
 - the `timeline view <modules/timeline.html>`_ shows the distribution of matching analytics accross campaigns for a particular host. For each match, a box will be shown for the given date, and double clicking on it will replay the query directly in the appropriate data lake, for the selected date. If you have enabled the sentinelone plugin, campaigns will also gather the storylineID information (a special information collected by SentinelOne), which is used to highlight analytics with the same storylineID in the timeline.
@@ -114,7 +114,7 @@ DeepHunter comes with several modules that are particularly useful for threat hu
 - the `netview (network view) <modules/netview.html>`_ module shows the list of network outbound connections for a particular host or storylineID. For each IP address, the popularity (number of endpoints in your environment where this destination is contacted) is shown, and for public IPs, a whois information is available, as well as the VirusTotal IP reputation.
 
 Tools
-*****
+=====
 Besides the modules, there are also some tools, and it's easy to `develop your own <tools_develop_your_own.html>`_:
 
 - `VirusTotal Hash Checker <tools_vt_hash_checker.html>`_: takes a list of file hashes and compares each against the VirusTotal database.
@@ -122,7 +122,7 @@ Besides the modules, there are also some tools, and it's easy to `develop your o
 - `Whois <tools_whois.html>`_: Whois module developed in Python.
 
 Rules synchronization
-#####################
+*********************
 
 DeepHunter can synchronize its threat hunting analytics with a remote data lake, such as SentinelOne (i.e. STAR rules) or Microsoft Sentinel. This is done per connector, with the ``need_to_sync()`` method.
 
