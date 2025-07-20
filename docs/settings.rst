@@ -235,6 +235,7 @@ ANALYTICS_PER_PAGE
 - **Example**:
 
 .. code-block:: python
+	
 	ANALYTICS_PER_PAGE = 50
 
 
