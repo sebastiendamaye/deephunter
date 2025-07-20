@@ -8,3 +8,4 @@ Modules
    trend
    timeline
    netview
+   manage_campaigns
