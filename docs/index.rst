@@ -17,7 +17,7 @@ Contents
    authentication
    scripts
    settings
-   usage/index
+   modules/index
    reports/index
    tools/index
    plugins/index

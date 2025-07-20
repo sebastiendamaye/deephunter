@@ -1,5 +1,5 @@
-Usage: Trend
-############
+Trend
+#####
 
 Trend Analysis
 **************

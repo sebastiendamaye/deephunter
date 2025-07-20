@@ -16,8 +16,8 @@ The column "matching analytics" shows the number of analytics matching the endpo
 Actions (links)
 ***************
 - **Expand/collapse**: click on each row to expand or collapse the details.
-- **Send to timeline**: Send the endpoint to the `timeline <usage_timeline.html>`_ module.
-- **Send to Netview**: Send the endpoint to the `netview <usage_netview.html>`_ module.
+- **Send to timeline**: Send the endpoint to the `timeline <modules/timeline.html>`_ module.
+- **Send to Netview**: Send the endpoint to the `netview <modules/netview.html>`_ module.
 - **events**: Send the PowerQuery associated to the select threat hunting analytic to SentinelOne.
-- **trend**: Show the `trend <usage_trend.html>`_ graph for the selected threat hunting analytic.
+- **trend**: Show the `trend <modules/trend.html>`_ graph for the selected threat hunting analytic.
 - **admin**: Open the selected threat hunting analytic in the admin backend for modification.

@@ -5,12 +5,12 @@ What is DeepHunter?
 *******************
 DeepHunter is a Threat Hunting platform that features:
 
-- `Repository <usage_analytics.html>`_ for your threat hunting analytics shown in a sortable table.
-- `Search and filters <usage_analytics.html#id4>`_ (description, threat hunting notes, tags, query, OS coverage, vulnerabilities, threat actors, threat names, MITRE coverage, etc.) to find particular threat hunting analytics or group them into hunting packages.
+- `Repository <modules/analytics.html>`_ for your threat hunting analytics shown in a sortable table.
+- `Search and filters <modules/analytics.html#id4>`_ (description, threat hunting notes, tags, query, OS coverage, vulnerabilities, threat actors, threat names, MITRE coverage, etc.) to find particular threat hunting analytics or group them into hunting packages.
 - `Automated execution <intro.html#campaigns>`_ of threat hunting queries in daily campaigns and collection of daily statistics (number of matching events, number of matching endpoints, etc).
-- `Trend analysis <usage_trend.html>`_ with automatic detection of statistical anomalies.
-- `Timeline view <usage_timeline.html>`_ of the distribution of threat hunting analytics for a given endpoint.
-- `Network view <usage_netview.html>`_ module to analyze network activities from a host, with highlights on the destination popularity (based on your environment) and VirusTotal reputation.
+- `Trend analysis <modules/trend.html>`_ with automatic detection of statistical anomalies.
+- `Timeline view <modules/timeline.html>`_ of the distribution of threat hunting analytics for a given endpoint.
+- `Network view <modules/netview.html>`_ module to analyze network activities from a host, with highlights on the destination popularity (based on your environment) and VirusTotal reputation.
 - Reports (`Campaigns performance report <reports_stats.html>`_, `Top endpoints identified in the last campaign <reports_endpoints.html>`_, `MITRE coverage <reports_mitre_coverage.html>`_, `List of analytics with missing MITRE coverage <reports_missing_mitre.html>`_)
 - Tools (`LOL Driver Hash Checker <tools_lol_drivers_hash_checker.html>`_, `VirusTotal Hash Checker <tools_vt_hash_checker.html>`_, `Whois <tools_whois.html>`_).
 
@@ -109,9 +109,9 @@ Modules
 *******
 DeepHunter comes with several modules that are particularly useful for threat hunters and incident responders:
 
-- the `timeline view <usage_timeline.html>`_ shows the distribution of matching analytics accross campaigns for a particular host. For each match, a box will be shown for the given date, and double clicking on it will replay the query directly in the appropriate data lake, for the selected date. If you have enabled the sentinelone plugin, campaigns will also gather the storylineID information (a special information collected by SentinelOne), which is used to highlight analytics with the same storylineID in the timeline.
-- the `trend analysis <usage_trend.html>`_ module is composed of graphs showing the distribution of the number of hits, and number of endpoints over time. This shows how frequent a threat hunting analytic triggers. A mathematical model is applied to the series to highlight potential statistical anomalies.
-- the `netview (network view) <usage_netview.html>`_ module shows the list of network outbound connections for a particular host or storylineID. For each IP address, the popularity (number of endpoints in your environment where this destination is contacted) is shown, and for public IPs, a whois information is available, as well as the VirusTotal IP reputation.
+- the `timeline view <modules/timeline.html>`_ shows the distribution of matching analytics accross campaigns for a particular host. For each match, a box will be shown for the given date, and double clicking on it will replay the query directly in the appropriate data lake, for the selected date. If you have enabled the sentinelone plugin, campaigns will also gather the storylineID information (a special information collected by SentinelOne), which is used to highlight analytics with the same storylineID in the timeline.
+- the `trend analysis <modules/trend.html>`_ module is composed of graphs showing the distribution of the number of hits, and number of endpoints over time. This shows how frequent a threat hunting analytic triggers. A mathematical model is applied to the series to highlight potential statistical anomalies.
+- the `netview (network view) <modules/netview.html>`_ module shows the list of network outbound connections for a particular host or storylineID. For each IP address, the popularity (number of endpoints in your environment where this destination is contacted) is shown, and for public IPs, a whois information is available, as well as the VirusTotal IP reputation.
 
 Tools
 *****

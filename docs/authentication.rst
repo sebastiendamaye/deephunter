@@ -9,6 +9,12 @@ DeepHunter currently supports 3 authentication modes:
 - **PingID**: this authentication relies on `PingIdentity Single Sign-On <https://www.pingidentity.com/en/platform/capabilities/single-sign-on.html>`_.
 - **Entra ID**: this authentication relies on `Microsoft Entra ID <https://learn.microsoft.com/en-us/entra/fundamentals/whatis>`_.
 
+The login screen will look as follows if you haven't set ``LOGIN_FORM`` to ``False`` in the settings. Else, only the ``Login with SSO`` link will appear.
+
+.. image:: img/login.png
+  :width: 300
+  :alt: DeepHunter login form
+
 Local authentication
 ********************
 This is the native Django authentication. Start by creating a super user

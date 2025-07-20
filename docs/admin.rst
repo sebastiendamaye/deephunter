@@ -6,7 +6,7 @@ The database model
 
 * **Administration**
 
-  * **Log entries**: actions logs (native to Django, and different from the history tracking accessible from the `analytic details header information <usage_analytics.html#id1>`_).
+  * **Log entries**: actions logs (native to Django, and different from the history tracking accessible from the `analytic details header information <modules/analytics.html#id1>`_).
 
 * **Authentication and Authorization**
 
@@ -16,7 +16,7 @@ The database model
 * **Qm**
 
   * **Analytics**: List of threat hunting analytics.
-  * **Campaigns**: List of `campaigns <intro.html#campaigns>`_ (daily jobs) and `stats regeneration jobs <usage_analytics.html#actions-buttons>`_.
+  * **Campaigns**: List of `campaigns <intro.html#campaigns>`_ (daily jobs) and `stats regeneration jobs <modules/analytics.html#actions-buttons>`_.
   * **Categories**: Used to assign threat hunting analytics to categories (e.g. detect, triage, threat hunting).
   * **Celery status**: 	Table used to monitor background celery jobs (when a user regenerates statistics).
   * **Countries**: List of countries, associated to threat actors.
