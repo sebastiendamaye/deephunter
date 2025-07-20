@@ -227,6 +227,17 @@ DISABLE_RUN_DAILY_ON_ERROR
 
 	DISABLE_RUN_DAILY_ON_ERROR = True
 
+ANALYTICS_PER_PAGE
+******************
+
+- **Type**: integer
+- **Description**: Number of analytics displayed per page in the list view. This is used to paginate the list of analytics.
+- **Example**:
+
+.. code-block:: python
+	ANALYTICS_PER_PAGE = 50
+
+
 PROXY
 *****
 - **Type**: dictionary

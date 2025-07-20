@@ -313,3 +313,36 @@ div.warning {
 	margin-top: 10px;
 	margin-bottom: 10px;
 }
+
+div.pagination {
+	width: 100%;
+	padding: 10px;
+	display: flex;
+	justify-content: center;
+}
+
+/*
+span.step-links {
+	padding: 5px;
+}
+*/
+
+span.pagelink {
+	margin-right: 5px;
+}
+span.pagelink a {
+	text-decoration: none;
+}
+
+span.previous  {
+	margin-right: 50px;
+}
+span.previous a {
+	text-decoration: none;
+}
+span.next  {
+	margin-left: 30px;
+}
+span.next a {
+	text-decoration: none;
+}

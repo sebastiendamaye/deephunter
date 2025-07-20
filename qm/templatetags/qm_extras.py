@@ -183,3 +183,8 @@ def isselectedoption(opt, v):
         return 'selected'
     else:
         return ''
+
+
+@register.filter
+def to_range(value):
+    return range(1,value+1)

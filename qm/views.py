@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models import Q, Sum
+from django.core.paginator import Paginator
 from datetime import datetime, timedelta, timezone
 import logging
 import numpy as np
@@ -18,6 +19,7 @@ import ipaddress
 from connectors.utils import is_connector_enabled, get_connector_conf
 from celery import current_app
 from qm.utils import get_campaign_date
+from urllib.parse import urlencode
 
 # Dynamically import all connectors
 import importlib
@@ -39,6 +41,7 @@ GITHUB_COMMIT_URL = settings.GITHUB_COMMIT_URL
 CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
 ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
 DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
+ANALYTICS_PER_PAGE = settings.ANALYTICS_PER_PAGE
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -51,104 +54,104 @@ def index(request):
     posted_search = ''
     posted_filters = {}
     
-    if request.POST:
+    if request.GET:
         
-        if 'search' in request.POST:
+        if 'search' in request.GET:
             analytics = analytics.filter(
-                Q(name__icontains=request.POST['search'])
-                | Q(description__icontains=request.POST['search'])
-                | Q(notes__icontains=request.POST['search'])
+                Q(name__icontains=request.GET['search'])
+                | Q(description__icontains=request.GET['search'])
+                | Q(notes__icontains=request.GET['search'])
             )
-            posted_search = request.POST['search']
+            posted_search = request.GET['search']
             
-        if 'connectors' in request.POST:
-            analytics = analytics.filter(connector__pk__in=request.POST.getlist('connectors'))
-            posted_filters['connectors'] = request.POST.getlist('connectors')
+        if 'connectors' in request.GET:
+            analytics = analytics.filter(connector__pk__in=request.GET.getlist('connectors'))
+            posted_filters['connectors'] = request.GET.getlist('connectors')
 
-        if 'categories' in request.POST:
-            analytics = analytics.filter(category__pk__in=request.POST.getlist('categories'))
-            posted_filters['categories'] = request.POST.getlist('categories')
+        if 'categories' in request.GET:
+            analytics = analytics.filter(category__pk__in=request.GET.getlist('categories'))
+            posted_filters['categories'] = request.GET.getlist('categories')
 
-        if 'target_os' in request.POST:
-            analytics = analytics.filter(target_os__pk__in=request.POST.getlist('target_os'))
-            posted_filters['target_os'] = request.POST.getlist('target_os')
+        if 'target_os' in request.GET:
+            analytics = analytics.filter(target_os__pk__in=request.GET.getlist('target_os'))
+            posted_filters['target_os'] = request.GET.getlist('target_os')
         
-        if 'vulnerabilities' in request.POST:
-            analytics = analytics.filter(vulnerabilities__pk__in=request.POST.getlist('vulnerabilities'))
-            posted_filters['vulnerabilities'] = request.POST.getlist('vulnerabilities')
+        if 'vulnerabilities' in request.GET:
+            analytics = analytics.filter(vulnerabilities__pk__in=request.GET.getlist('vulnerabilities'))
+            posted_filters['vulnerabilities'] = request.GET.getlist('vulnerabilities')
         
-        if 'tags' in request.POST:
-            analytics = analytics.filter(tags__pk__in=request.POST.getlist('tags'))
-            posted_filters['tags'] = request.POST.getlist('tags')
+        if 'tags' in request.GET:
+            analytics = analytics.filter(tags__pk__in=request.GET.getlist('tags'))
+            posted_filters['tags'] = request.GET.getlist('tags')
         
-        if 'actors' in request.POST:
-            analytics = analytics.filter(actors__pk__in=request.POST.getlist('actors'))
-            posted_filters['actors'] = request.POST.getlist('actors')
+        if 'actors' in request.GET:
+            analytics = analytics.filter(actors__pk__in=request.GET.getlist('actors'))
+            posted_filters['actors'] = request.GET.getlist('actors')
         
-        if 'source_countries' in request.POST:
+        if 'source_countries' in request.GET:
             # List of all APT associated to the selected source countries
             apt = []
-            for countryid in request.POST.getlist('source_countries'):
+            for countryid in request.GET.getlist('source_countries'):
                 country = get_object_or_404(Country, pk=countryid)
                 for i in ThreatActor.objects.filter(source_country=country):
                     apt.append(i.id)
             analytics = analytics.filter(actors__pk__in=apt)
-            posted_filters['source_countries'] = request.POST.getlist('source_countries')
+            posted_filters['source_countries'] = request.GET.getlist('source_countries')
         
-        if 'threats' in request.POST:
-            analytics = analytics.filter(threats__pk__in=request.POST.getlist('threats'))
-            posted_filters['threats'] = request.POST.getlist('threats')
+        if 'threats' in request.GET:
+            analytics = analytics.filter(threats__pk__in=request.GET.getlist('threats'))
+            posted_filters['threats'] = request.GET.getlist('threats')
         
-        if 'mitre_techniques' in request.POST:
-            analytics = analytics.filter(mitre_techniques__pk__in=request.POST.getlist('mitre_techniques'))
-            posted_filters['mitre_techniques'] = request.POST.getlist('mitre_techniques')
+        if 'mitre_techniques' in request.GET:
+            analytics = analytics.filter(mitre_techniques__pk__in=request.GET.getlist('mitre_techniques'))
+            posted_filters['mitre_techniques'] = request.GET.getlist('mitre_techniques')
         
-        if 'mitre_tactics' in request.POST:
-            analytics = analytics.filter(mitre_techniques__mitre_tactic__pk__in=request.POST.getlist('mitre_tactics'))
-            posted_filters['mitre_tactics'] = request.POST.getlist('mitre_tactics')
+        if 'mitre_tactics' in request.GET:
+            analytics = analytics.filter(mitre_techniques__mitre_tactic__pk__in=request.GET.getlist('mitre_tactics'))
+            posted_filters['mitre_tactics'] = request.GET.getlist('mitre_tactics')
         
-        if 'confidence' in request.POST:
-            analytics = analytics.filter(confidence__in=request.POST.getlist('confidence'))
-            posted_filters['confidence'] = request.POST.getlist('confidence')
+        if 'confidence' in request.GET:
+            analytics = analytics.filter(confidence__in=request.GET.getlist('confidence'))
+            posted_filters['confidence'] = request.GET.getlist('confidence')
         
-        if 'relevance' in request.POST:
-            analytics = analytics.filter(relevance__in=request.POST.getlist('relevance'))
-            posted_filters['relevance'] = request.POST.getlist('relevance')
+        if 'relevance' in request.GET:
+            analytics = analytics.filter(relevance__in=request.GET.getlist('relevance'))
+            posted_filters['relevance'] = request.GET.getlist('relevance')
 
-        if 'status' in request.POST:
-            analytics = analytics.filter(pub_status__in=request.POST.getlist('status'))
-            posted_filters['status'] = request.POST.getlist('status')
+        if 'status' in request.GET:
+            analytics = analytics.filter(pub_status__in=request.GET.getlist('status'))
+            posted_filters['status'] = request.GET.getlist('status')
             
-        if 'run_daily' in request.POST:
-            if request.POST['run_daily'] == '1':
+        if 'run_daily' in request.GET:
+            if request.GET['run_daily'] == '1':
                 analytics = analytics.filter(run_daily=True)
                 posted_filters['run_daily'] = 1
             else:
                 analytics = analytics.filter(run_daily=False)
                 posted_filters['run_daily'] = 0
             
-        if 'create_rule' in request.POST:
-            if request.POST['create_rule'] == '1':
+        if 'create_rule' in request.GET:
+            if request.GET['create_rule'] == '1':
                 analytics = analytics.filter(create_rule=True)
                 posted_filters['create_rule'] = 1
             else:
                 analytics = analytics.filter(create_rule=False)
                 posted_filters['create_rule'] = 0
 
-        if 'dynamic_query' in request.POST:
-            if request.POST['dynamic_query'] == '1':
+        if 'dynamic_query' in request.GET:
+            if request.GET['dynamic_query'] == '1':
                 analytics = analytics.filter(dynamic_query=True)
                 posted_filters['dynamic_query'] = 1
             else:
                 analytics = analytics.filter(dynamic_query=False)
                 posted_filters['dynamic_query'] = 0
 
-        if 'hits' in request.POST:
+        if 'hits' in request.GET:
             # Get yesterday's date
             yesterday = datetime.now() - timedelta(days=1)
             yesterday_date = yesterday.date()  # Get the date part
 
-            if request.POST['hits'] == '1':
+            if request.GET['hits'] == '1':
                 # Filter queries where related Snapshot has hits_count > 0 and date is yesterday
                 analytics = analytics.filter(
                     snapshot__hits_count__gt=0,
@@ -163,25 +166,25 @@ def index(request):
                 ).distinct()
                 posted_filters['hits'] = 0
 
-        if 'maxhosts' in request.POST:
-            if request.POST['maxhosts'] == '1':
+        if 'maxhosts' in request.GET:
+            if request.GET['maxhosts'] == '1':
                 analytics = analytics.filter(maxhosts_count__gt=0)
                 posted_filters['maxhosts'] = 1
             else:
                 analytics = analytics.filter(maxhosts_count=0)
                 posted_filters['maxhosts'] = 0
 
-        if 'queryerror' in request.POST:
-            if request.POST['queryerror'] == '1':
+        if 'queryerror' in request.GET:
+            if request.GET['queryerror'] == '1':
                 analytics = analytics.filter(query_error=True)
                 posted_filters['queryerror'] = 1
             else:
                 analytics = analytics.filter(query_error=False)
                 posted_filters['queryerror'] = 0
 
-        if 'created_by' in request.POST:
-            analytics = analytics.filter(created_by__pk__in=request.POST.getlist('created_by'))
-            posted_filters['created_by'] = request.POST.getlist('created_by')
+        if 'created_by' in request.GET:
+            analytics = analytics.filter(created_by__pk__in=request.GET.getlist('created_by'))
+            posted_filters['created_by'] = request.GET.getlist('created_by')
 
     for analytic in analytics:
         snapshot = Snapshot.objects.filter(analytic=analytic, date=datetime.today()-timedelta(days=1)).order_by('date')
@@ -242,8 +245,21 @@ def index(request):
     except:
         update_available = False
 
+    # Paginate the analytics list
+    analytics_count = analytics.count()
+    paginator = Paginator(analytics, ANALYTICS_PER_PAGE)
+    page_number = int(request.GET.get('page', 1))
+    page_obj = paginator.get_page(page_number)
+    # Save filters to query string for pagination
+    querydict = request.GET.copy()
+    if 'page' in querydict:
+        del querydict['page']
+    query_string = querydict.urlencode()
+
     context = {
-        'analytics': analytics,
+        'analytics': page_obj,
+        'query_string': query_string,
+        'analytics_count': analytics_count,
         'connectors': Connector.objects.filter(visible_in_analytics=True),
         'target_os': TargetOs.objects.all(),
         'vulnerabilities': Vulnerability.objects.all(),

@@ -85,6 +85,9 @@ ON_MAXHOSTS_REACHED = {
 # Automatically remove analytic from future campaigns if it failed
 DISABLE_RUN_DAILY_ON_ERROR = True
 
+# Analytics per page in the list view
+ANALYTICS_PER_PAGE = 50
+
 # Proxy settings
 PROXY = {
     'http': 'http://proxy:port',
