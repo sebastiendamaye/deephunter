@@ -257,15 +257,6 @@ div.progress {
 	float:right;
 }
 
-div.tokenexpiresoon {
-	background: #ffdf52;
-	text-align: center;
-}
-div.tokenexpired {
-	background: #f05316;
-	color: #fff;
-	text-align: center;
-}
 div.errormsg {
 	font-weight: bold;
 	color:#ff0000;

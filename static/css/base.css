@@ -195,3 +195,12 @@ td.vtcenter, th.vtcenter {
 div.margin10 {
 	margin-left:10px;
 }
+div.tokenexpiresoon {
+	background: #ffdf52;
+	text-align: center;
+}
+div.tokenexpired {
+	background: #f05316;
+	color: #fff;
+	text-align: center;
+}

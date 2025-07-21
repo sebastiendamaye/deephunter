@@ -17,15 +17,6 @@
 {% endblock %}
 
 {% block body %}
-{% if tokenexpires <= 0 %}
-<div class="tokenexpired">Your S1 token has expired. DeepHunter won't work as expected.</div>
-{% elif tokenexpires <= 5 %}
-<div class="tokenexpiresoon">Your S1 token expires in {{ tokenexpires }} day{% if tokenexpires > 1 %}s{% endif %}.</div>
-{% endif %}
-
-{% if update_available %}
-<div class="tokenexpiresoon">An update is available. Use the upgrade script to do the update.</div>
-{% endif %}
 <div class="float-container">
 
 <div class="float-child menu">

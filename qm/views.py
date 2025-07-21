@@ -202,49 +202,6 @@ def index(request):
         snapshots = Snapshot.objects.filter(analytic=analytic, date__gt=datetime.today()-timedelta(days=20))
         analytic.sparkline = [snapshot.hits_endpoints for snapshot in snapshots]
         
-    # Check if token is about to expire
-    tokenexpires = 999
-    if is_connector_enabled('sentinelone'):
-        expires_on = all_connectors.get('sentinelone').get_token_expiration_date()
-        if expires_on:
-            dt = datetime.strptime(expires_on, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
-            now = datetime.now(timezone.utc)
-            delta = dt - now
-            tokenexpires = delta.days + 1    
-
-    # Check if new version available
-    try:
-        update_available = False
-        
-        # remote version
-        # update on new release only
-        if UPDATE_ON == 'release':
-            r = requests.get(
-                GITHUB_LATEST_RELEASE_URL,
-                proxies=PROXY
-                )
-            remote_ver = r.json()['name']
-            # local version
-            with open(f'{STATIC_PATH}/VERSION', 'r') as f:
-                local_ver = f.readline().strip()
-        else:
-            # update on every new commit
-            r = requests.get(
-                GITHUB_COMMIT_URL,
-                proxies=PROXY
-                )
-            remote_ver = r.text.strip()
-            # local version
-            with open(f'{STATIC_PATH}/commit_id.txt', 'r') as f:
-                local_ver = f.readline().strip()
-            
-        # compare
-        if local_ver != remote_ver:
-            update_available = True
-            
-    except:
-        update_available = False
-
     # Paginate the analytics list
     analytics_count = analytics.count()
     paginator = Paginator(analytics, ANALYTICS_PER_PAGE)
@@ -273,8 +230,6 @@ def index(request):
         'created_by': User.objects.filter(id__in=Analytic.objects.exclude(created_by__isnull=True).values('created_by').distinct()),
         'posted_search': posted_search,
         'posted_filters': posted_filters,
-        'tokenexpires': tokenexpires,
-        'update_available': update_available
     }
     return render(request, 'list_analytics.html', context)
     

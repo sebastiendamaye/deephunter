@@ -1,10 +1,12 @@
 from django.conf import settings
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from qm.models import Campaign, Analytic, Snapshot, Endpoint, TasksStatus
 from django.shortcuts import get_object_or_404
 import numpy as np
 from scipy import stats
 from math import isnan
+import requests
+from connectors.utils import is_connector_enabled
 
 # Dynamically import all connectors
 import importlib
@@ -26,6 +28,57 @@ CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
 ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
 DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
 
+
+def is_update_available():
+    """
+    Check if a new version of the application is available.
+    The check is done by comparing the local version with the remote version, either based on commits or releases.
+    Returns bool: True if an update is available, False otherwise.
+    """
+    try:
+        
+        # update on new release only
+        if UPDATE_ON == 'release':
+            r = requests.get(
+                GITHUB_LATEST_RELEASE_URL,
+                proxies=PROXY
+                )
+            remote_ver = r.json()['name']
+            # local version
+            with open(f'{STATIC_PATH}/VERSION', 'r') as f:
+                local_ver = f.readline().strip()
+        else:
+            # update on every new commit
+            r = requests.get(
+                GITHUB_COMMIT_URL,
+                proxies=PROXY
+                )
+            remote_ver = r.text.strip()
+            # local version
+            with open(f'{STATIC_PATH}/commit_id.txt', 'r') as f:
+                local_ver = f.readline().strip()
+            
+        # compare
+        if local_ver != remote_ver:
+            return True
+        else:
+            return False
+            
+    except:
+        return False
+
+def token_expiration_check():
+    # Check if token is about to expire
+    tokenexpires = 999
+    if is_connector_enabled('sentinelone'):
+        expires_on = all_connectors.get('sentinelone').get_token_expiration_date()
+        if expires_on:
+            dt = datetime.strptime(expires_on, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
+            now = datetime.now(timezone.utc)
+            delta = dt - now
+            tokenexpires = delta.days + 1    
+    
+    return tokenexpires
 
 def get_campaign_date(campaign):
     """

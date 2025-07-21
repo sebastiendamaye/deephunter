@@ -1,7 +1,10 @@
 from django.db.models.signals import pre_save, post_save, post_delete
+from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 from django.conf import settings
+from django.contrib.auth.models import User
 from .models import Analytic
+from qm.utils import token_expiration_check, is_update_available
 
 # Dynamically import all connectors
 import importlib
@@ -12,8 +15,13 @@ for loader, module_name, is_pkg in pkgutil.iter_modules(plugins.__path__):
     module = importlib.import_module(f"plugins.{module_name}")
     all_connectors[module_name] = module
 
-
 PROXY = settings.PROXY
+
+# This function is called after a user logs in
+@receiver(user_logged_in)
+def user_logged_in_receiver(sender, request, user, **kwargs):
+    request.session['update_available'] = is_update_available()
+    request.session['tokenexpires'] = token_expiration_check()
 
 # This handler is triggered before an "Analytic" object is saved (pre_save when created or updated)
 @receiver(pre_save, sender=Analytic)
