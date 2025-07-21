@@ -84,7 +84,7 @@
 
 {% if request.session.tokenexpires <= 0 %}
 	<div class="tokenexpired">Your S1 token has expired. DeepHunter won't work as expected.</div>
-{% elif request.session.tokenexpires <= 5 %}
+{% elif request.session.tokenexpires <= 7 %}
 	<div class="tokenexpiresoon">Your S1 token expires in {{ request.session.tokenexpires }} day{% if request.session.tokenexpires > 1 %}s{% endif %}.</div>
 {% endif %}
 
