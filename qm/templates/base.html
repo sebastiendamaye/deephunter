@@ -20,7 +20,13 @@
 						<ul>
 							<li><a class="deephunter" href="#">DeepHunter<span class="blinking-cursor">_</span></a></li>
 
-							<li><a class="{{ request.path|isactiveurl:"/" }}" href="/">Analytics</a></li>
+							<li><a href="#">Analytics</a>
+							<ul>
+								<li><a class="{{ request.path|isactiveurl:"/" }}" href="/">List analytics</a></li>
+								<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin/qm/analytic/add/">Create analytic</a></li>
+							</ul>        
+							</li>
+
 							<li><a class="{{ request.path|isactiveurl:"/timeline" }}" href="/timeline">Timeline</a></li>
 							<li><a class="{{ request.path|isactiveurl:"/netview" }}" href="/netview">Netview</a></li>
 
@@ -56,6 +62,7 @@
 									<li><a class="{{ request.path|isactiveurl:"/debug" }}" href="/debug">Debug</a></li>
 									<li><a class="{{ request.path|isactiveurl:"/connectors/connectorconf/" }}" href="/connectors/connectorconf">Connectors</a></li>
 									<li><a class="{{ request.path|isactiveurl:"/qm/managecampaigns" }}" href="/qm/managecampaigns">Manage campaigns</a></li>
+									<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin/qm/tasksstatus/">Running tasks</a></li>
 								{% endif %}
 							</ul> 
 							</li>
