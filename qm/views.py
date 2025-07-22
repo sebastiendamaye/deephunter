@@ -234,7 +234,7 @@ def index(request):
     return render(request, 'list_analytics.html', context)
     
 @login_required
-def trend(request, analytic_id):
+def trend(request, analytic_id, tab=0):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     # show graph for last 90 days only
     snapshots = Snapshot.objects.filter(analytic=analytic, date__gt=datetime.today()-timedelta(days=90)).order_by('date')
@@ -268,6 +268,7 @@ def trend(request, analytic_id):
         'stats': stats_vals,
         'distinct_endpoints': endpoints.count(),
         'endpoints': endpoints,
+        'tab': tab,
         }
     return render(request, 'trend.html', context)
 
@@ -492,8 +493,7 @@ def regen(request, analytic_id):
     )
     celery_status.save()
 
-    #return HttpResponse('Celery Task ID: {}'.format(taskid))
-    return HttpResponse('Task running...')
+    return HttpResponse('running...')
 
 @login_required
 @permission_required("qm.delete_campaign")
@@ -504,7 +504,7 @@ def cancelregen(request, taskid):
         # delete task in DB
         celery_status = get_object_or_404(TasksStatus, taskid=taskid)
         celery_status.delete()
-        return HttpResponse('Task terminated')
+        return HttpResponse('stopping...')
     except Exception as e:
         logging.error(f"Revoke failed: {e}")
         return HttpResponse('Error terminating Celery Task: {}'.format(e))
@@ -516,17 +516,17 @@ def progress(request, analytic_id):
         analytic = get_object_or_404(Analytic, pk=analytic_id)
         celery_status = get_object_or_404(TasksStatus, taskname=analytic.name)
         button = f'<span><b>Task progress:</b> {round(celery_status.progress)}%'
-        button += f' | <a href="/cancelregen/{celery_status.taskid}/" target="_blank">CANCEL</a></span>'
+        button += f' | <button hx-get="/cancelregen/{celery_status.taskid}/" class="buttonred">CANCEL</button></span>'
         return HttpResponse(button)
     except:
-        return HttpResponse('<a href="/{}/regen/" target="_blank" class="buttonred">Regenerate stats</a>'.format(analytic_id))
+        return HttpResponse('<button hx-get="/{}/regen/" class="buttonred">Regenerate stats</button>'.format(analytic_id))
 
 @login_required
 @permission_required("qm.delete_campaign")
 def deletestats(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     Snapshot.objects.filter(analytic=analytic).delete()
-    return HttpResponseRedirect('/')
+    return HttpResponse('Stats deleted')
 
 @login_required
 def netview(request):
@@ -659,3 +659,9 @@ def regencampaignstatus(request, campaign_name):
         return HttpResponse(button)
     except:
         return HttpResponse(f'<button hx-get="/regencampaign/{campaign_name}/" class="buttonred">Regenerate</button>')
+
+@login_required
+def analytic_review(request, analytic_id):
+    context = {'analytic_id': analytic_id}
+    return render(request, 'analytic_review.html', context)
+    

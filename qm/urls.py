@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('<int:analytic_id>/trend/', views.trend, name='trend'),
+    path('<int:analytic_id>/trend/<int:tab>/', views.trend, name='trend'),
     path('events/<int:analytic_id>/<str:eventdate>/<str:endpointname>/', views.events, name='events'),
     path('events/<int:analytic_id>/<str:eventdate>/', views.events, name='events'),
     path('events/<int:analytic_id>/', views.events, name='events'),
@@ -21,4 +22,5 @@ urlpatterns = [
     path('managecampaigns', views.managecampaigns, name='managecampaigns'),
     path('regencampaign/<str:campaign_name>/', views.regencampaign, name='regencampaign'),
     path('regencampaignstatus/<str:campaign_name>/', views.regencampaignstatus, name='regencampaignstatus'),
+    path('review/<int:analytic_id>/', views.analytic_review, name='analytic_review'),
 ]

@@ -2,58 +2,78 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<link rel="stylesheet" href="/static/css/trend.css" />
-<script src="/static/jquery/jquery.min.js"></script>
-<script src="/static/canvasjs/jquery.canvasjs.min.js"></script>
+	<link rel="stylesheet" href="/static/css/trend.css" />
+	<script src="/static/jquery/jquery.min.js"></script>
+	<script src="/static/canvasjs/jquery.canvasjs.min.js"></script>
+	<script src="/static/js/htmx.min.js"></script>
 </head>
 <body>
 
-<h1>Data for {{ analytic.name }} ({{ analytic.connector.name }})</h1>
-<div class="charts_left">
-	<div id="chartContainer_runtime"></div>
-	<div id="chartContainer_count"></div>
-	<div id="chartContainer_endpoints"></div>
+{% if tab == 0 %}<h1>Data for {{ analytic.name }} ({{ analytic.connector.name }})</h1>{% endif %}
+
+<div class="container_trend">
+
+	<div class="charts_left">
+		<div class="chartContainer{% if tab == 1 %}_small{% endif %}" id="chartContainer_runtime_{{ analytic.id }}"></div>
+		<div class="chartContainer{% if tab == 1 %}_small{% endif %}" id="chartContainer_count_{{ analytic.id }}"></div>
+		<div class="chartContainer{% if tab == 1 %}_small{% endif %}" id="chartContainer_endpoints_{{ analytic.id }}"></div>
+	</div>
+
+	<div class="charts_right{% if tab == 1 %}_tab{% endif %}">
+		<div class="paragraph">
+			{% if tab == 0 %}
+				[<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank">edit in admin</a>]
+				[<a href="/admin/qm/endpoint/?snapshot__analytic__name={{ analytic.name }}" target="_blank">see endpoints</a>]
+			{% endif %}
+			{% if perms.qm.delete_campaign %}
+				<div class="progress"><a hx-get="/{{ analytic.id }}/progress/" hx-trigger="every 3s"></a></div>&nbsp;
+				<div class="progress"><button hx-get="/{{ analytic.id }}/deletestats/" class="buttonred">Delete stats</button></div>
+			{% endif %}
+
+		</div>
+		<div class="paragraph"><b>#hits z-score threshold:</b> {{ analytic.anomaly_threshold_count }}</div>
+		<div><b>#endpoints z-score threshold:</b> {{ analytic.anomaly_threshold_endpoints }}</div>
+		<div class="paragraph"><b>Distinct endpoints: </b>{{ distinct_endpoints }}
+			<br /><b>Top 10 endpoints</b>:
+			{% if endpoints %}
+				<ul>
+					{% for endpoint in endpoints|slice:":10" %}
+						<li><a href="/timeline?hostname={{ endpoint.hostname }}" target="_blank">{{ endpoint.hostname }}</a></li>
+					{% endfor %}
+					{% if distinct_endpoints > 10 %}<li>...</li>{% endif %}
+				</ul>
+			{% endif %}
+		</div>
+		{% if tab == 0 %}
+			<div class="paragraph">
+				<b>Description:</b><br />
+				<p>{{ analytic.description|apply_markup:"markdown" }}</p>
+			</div>
+			<div class="paragraph">
+				<b>Connector: </b>{{ analytic.connector.name }}
+			</div>
+			<div class="paragraph">
+				<b>Query:</b><br />
+				<pre>{{ analytic.query }}</pre>
+			</div>
+		{% endif %}
+	</div>
+
 </div>
 
-<div class="charts_right">
-	<div class="paragraph">
-		[<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank">edit in admin</a>]
-		[<a href="/admin/qm/endpoint/?snapshot__analytic__name={{ analytic.name }}" target="_blank">see endpoints</a>]
-		{% if perms.qm.delete_campaign %}
-			<div id="progress_{{ analytic.id }}" class="progress">...</div>&nbsp;
-			<div class="progress"><a href="/{{ analytic.id }}/deletestats/" target="_blank" class="buttonred">Delete stats</a></div>
-		{% endif %}
+{% if perms.qm.delete_campaign %}
+<script type="text/javascript" nonce="jg6kl5z3v2">
+$(document).ready(function() {
 
-	</div>
-	<div class="paragraph"><b>#hits z-score threshold:</b> {{ analytic.anomaly_threshold_count }}</div>
-	<div><b>#endpoints z-score threshold:</b> {{ analytic.anomaly_threshold_endpoints }}</div>
-	<div class="paragraph"><b>Distinct endpoints: </b>{{ distinct_endpoints }}
-		<br /><b>Top 10 endpoints</b>:
-		{% if endpoints %}
-			<ul>
-				{% for endpoint in endpoints|slice:":10" %}
-					<li><a href="/timeline?hostname={{ endpoint.hostname }}" target="_blank">{{ endpoint.hostname }}</a></li>
-				{% endfor %}
-				{% if distinct_endpoints > 10 %}<li>...</li>{% endif %}
-			</ul>
-		{% endif %}
-	</div>
-	<div class="paragraph">
-		<b>Description:</b><br />
-		<p>{{ analytic.description|apply_markup:"markdown" }}</p>
-	</div>
-	<div class="paragraph">
-		<b>Connector: </b>{{ analytic.connector.name }}
-	</div>
-	<div class="paragraph">
-		<b>Query:</b><br />
-		<pre>{{ analytic.query }}</pre>
-	</div>
-</div>
-<!--div class="clear"></div-->
+	/*
+	setInterval(function() {
+		$("#progress_{{ analytic.id }}").load('/{{ analytic.id }}/progress/')
+	}, 2000);
+	*/
 
-<script nonce="jvfd35kaz9">
-window.onload = function () {
+
+
+
 
 	var options_runtime = {
 		animationEnabled: false,
@@ -67,8 +87,7 @@ window.onload = function () {
 			cursor:"pointer",
 			verticalAlign: "bottom",
 			horizontalAlign: "left",
-			dockInsidePlotArea: true,
-			itemclick: toogleDataSeries
+			dockInsidePlotArea: true
 		},
 		data: [
 		{
@@ -112,8 +131,7 @@ window.onload = function () {
 			cursor:"pointer",
 			verticalAlign: "bottom",
 			horizontalAlign: "left",
-			dockInsidePlotArea: true,
-			itemclick: toogleDataSeries
+			dockInsidePlotArea: true
 		},
 		data: [
 		{
@@ -126,7 +144,7 @@ window.onload = function () {
 			yValueFormatString: "#,##0",
 			dataPoints: [
 				{% for s in stats %}
-					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_count }} },
+					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_count }}, click: function(e) { open('/events/{{ analytic.id }}/{{ s.date|date:"Y-m-d" }}/', '_blank'); } },
 				{% endfor %}
 			]
 		}
@@ -157,8 +175,7 @@ window.onload = function () {
 			cursor:"pointer",
 			verticalAlign: "bottom",
 			horizontalAlign: "left",
-			dockInsidePlotArea: true,
-			itemclick: toogleDataSeries
+			dockInsidePlotArea: true
 		},
 		data: [
 		{
@@ -178,28 +195,13 @@ window.onload = function () {
 	};
 
 
-	$("#chartContainer_runtime").CanvasJSChart(options_runtime);
-	$("#chartContainer_count").CanvasJSChart(options_count);
-	$("#chartContainer_endpoints").CanvasJSChart(options_endpoints);
+	$("#chartContainer_runtime_{{ analytic.id }}").CanvasJSChart(options_runtime);
+	$("#chartContainer_count_{{ analytic.id }}").CanvasJSChart(options_count);
+	$("#chartContainer_endpoints_{{ analytic.id }}").CanvasJSChart(options_endpoints);
 
-	function toogleDataSeries(e){
-		if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
-			e.dataSeries.visible = false;
-		} else{
-			e.dataSeries.visible = true;
-		}
-		e.chart.render();
-	}
-}
 
-</script>
 
-{% if perms.qm.delete_campaign %}
-<script type="text/javascript" nonce="jg6kl5z3v2">
-$(document).ready(function() {
-	setInterval(function() {
-		$("#progress_{{ analytic.id }}").load('/{{ analytic.id }}/progress/')
-	}, 2000);
+
 });
 </script>
 {% endif %}

@@ -1,7 +1,7 @@
 $("#myTable").tablesorter()
  .bind("sortEnd",function(e, t) {
-			$("#myTable .row-summary").each(function() {
-			var $rowSummary = $(this)
+	$("#myTable .row-summary").each(function() {
+		var $rowSummary = $(this)
 		var rowIdentifer = $rowSummary.data('row-number')
 		var $rowExpander = $("#myTable .row-expanded[data-row-number='" + rowIdentifer + "']")
 		$rowSummary.after($rowExpander)
@@ -9,15 +9,15 @@ $("#myTable").tablesorter()
 });
 
 $(".toggle-row").click(function() {
- // add in accordion - first close anything
-//$("#myTable .row-summary .active").removeClass("active").closest("tr").next("tr").collapse("hide")
+	// add in accordion - first close anything
+	//$("#myTable .row-summary .active").removeClass("active").closest("tr").next("tr").collapse("hide")
 
-// make this one visible
-$(this).toggleClass("active");
-$(this).closest("tr").next("tr").collapse("toggle")
+	// make this one visible
+	$(this).toggleClass("active");
+	$(this).closest("tr").next("tr").collapse("toggle")
 
-//.toggle();
-})
+	//.toggle();
+});
 
 $('.btn').click(function(){
 	$("#d_"+this.id.split('_')[1]).load("/"+this.id.split('_')[1]+"/detail/");

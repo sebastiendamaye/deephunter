@@ -337,3 +337,11 @@ span.next  {
 span.next a {
 	text-decoration: none;
 }
+
+analytic_comment {
+	width: 600px;
+}
+
+table a {
+	text-decoration: none;
+}

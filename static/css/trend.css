@@ -1,41 +1,26 @@
-table, th, td {
-	border: solid 1px #ccc;
-	border-collapse: collapse;
-}
-td {
-	text-align:right;
-}
-td.red {
-	background:#f28563;
-	color:#fff;
-}
-.w25 {
-	float:left;
-	width:25%;
-}
-.m10 {
-	margin:10px;
-}
-.highlight_yellow {
-	background:#fffbb5;
+.container_trend {
+  display: flex;
+  width: 100%;
 }
 
 .charts_left {
-	float:left;
-	width:60%;
+  flex: 1; /* Takes up remaining space */
 }
+
 .charts_right {
-	float:right;
-	width:40%;
+  width: 700px; /* Fixed width */
 }
-.clear {
-	clear: both;
+.charts_right_tab {
+  width: 300px; /* Fixed width */
 }
-#chartContainer_runtime, #chartContainer_count, #chartContainer_endpoints {
+
+
+
+.chartContainer {
 	height: 270px;
 }
-#chartContainer_c1, #chartContainer_c2, #chartContainer_c3 {
-	height: 270px;
+.chartContainer_small {
+	height: 150px;
 }
 
 div.progress {

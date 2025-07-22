@@ -1,13 +1,24 @@
 {% load qm_extras %}
 {% load markup_tags %}
+<html>
+	<head>
+		<link rel="stylesheet" href="/static/jquery-ui/jquery-ui.min.css" />
+		<script src="/static/jquery-ui/jquery-ui.min.js"></script>
+		<script src="/static/js/htmx.min.js"></script>
+	</head>
+	<body>
+
+<div id="tabs_{{ analytic.id }}">
+	<ul>
+		<li><a href="#details_{{ analytic.id }}"><span>Details</span></a></li>
+		<li><a href="#trend_{{ analytic.id }}" hx-get="{{ analytic.id }}/trend/1/" hx-target="#trend_{{ analytic.id }}"><span>Trend</span></a></li>
+		<!--li><a href="#review_{{ analytic.id }}" hx-get="/review/{{ analytic.id }}/" hx-target="#review_{{ analytic.id }}"><span>Review</span></a></li-->
+	</ul>
+	<div id="details_{{ analytic.id }}">
+
 <div class="m10">
 	<a href="/events/{{ analytic.id }}/" target="_blank" class="button">Run query</a>
-	<a href="{{ analytic.id }}/trend/" target="_blank" class="button">See trend</a>
 	<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank" class="button">Edit in admin</a></li>
-	{% if perms.qm.delete_campaign %}
-		<div id="progress_{{ analytic.id }}" class="progress">...</div>&nbsp;
-		<div class="progress"><a href="{{ analytic.id }}/deletestats/" target="_blank" class="buttonred">Delete stats</a></div>
-	{% endif %}
 </div>
 
 {% if endpoints %}
@@ -103,12 +114,20 @@
 <h1>REFERENCES</h1>
 {% if analytic.references %}<ul>{% for link in analytic.references|links %}<li><a href="{{ link }}" target="_blank">{{ link }}</a></li>{% endfor %}</ul>{% endif %}
 
-{% if perms.qm.delete_campaign %}
+	</div>
+	<div id="trend_{{ analytic.id }}">
+	</div>
+	<div id="review_{{ analytic.id }}">
+	</div>
+
+</div>
+
+
 <script type="text/javascript" nonce="jg6kl5z3v2">
 $(document).ready(function() {
-	setInterval(function() {
-		$("#progress_{{ analytic.id }}").load('{{ analytic.id }}/progress/')
-	}, 2000);
+	$( "#tabs_{{ analytic.id }}" ).tabs();
 });
 </script>
-{% endif %}
+
+	</body>
+</html>
