@@ -2,12 +2,13 @@
 <!doctype html>
 <html>
 <head>
-<meta charset="utf-8">
-<link rel="stylesheet" href="/static/fontawesome/all.min.css" />
-<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-<link rel="stylesheet" href="/static/css/base.css">
-{% block style %}{% endblock %}
-{{ redirect_to_login_immediately }}
+	<meta charset="utf-8">
+	<meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
+	<link rel="stylesheet" href="/static/fontawesome/all.min.css" />
+	<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/static/css/base.css">
+	{% block style %}{% endblock %}
+	{{ redirect_to_login_immediately }}
 </head>
 <body>
 
