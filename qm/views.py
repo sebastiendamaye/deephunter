@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def index(request):
-    analytics = Analytic.objects.all()
+    analytics = Analytic.objects.all().order_by('id')
     
     posted_search = ''
     posted_filters = {}
