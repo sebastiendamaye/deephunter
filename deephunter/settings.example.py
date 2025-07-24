@@ -92,6 +92,9 @@ ANALYTICS_PER_PAGE = 50
 DAYS_BEFORE_REVIEW = 30  # Number of days before an analytic is considered for review
 DISABLE_ANALYTIC_ON_REVIEW = False  # Disable analytics with status 'REVIEW'
 
+# Automatically regenerate stats when analytic query field is changed
+AUTO_STATS_REGENERATION = True
+
 # Proxy settings
 PROXY = {
     'http': 'http://proxy:port',
