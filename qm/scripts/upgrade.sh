@@ -318,6 +318,7 @@ echo -n -e "[\033[90mINFO\033[0m] RESTARTING SERVICES ..........................
 sudo systemctl start apache2
 sudo systemctl restart redis-server
 sudo systemctl restart celery
+sudo systemctl restart cron
 echo -e "[\033[32mdone\033[0m]"
 
 # cleaning /tmp
