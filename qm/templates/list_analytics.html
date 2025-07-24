@@ -92,9 +92,9 @@
 					<button class="button_filter" id="button_checkrelevance_{{ v }}">RELEVANCE:{{ v|confidencelabel }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
-			{% if posted_filters.status %}
-				{% for v in posted_filters.status %}
-					<button class="button_filter" id="button_checkstatus_{{ v }}">STATUS:{{ v|statuslabel }}&nbsp;&nbsp;<b>x</b></button>
+			{% if posted_filters.statuses %}
+				{% for v in posted_filters.statuses %}
+					<button class="button_filter" id="button_checkstatus_{{ v }}">STATUS:{{ v }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
 			{% if posted_filters.run_daily == 0 or posted_filters.run_daily == 1 %}
@@ -307,20 +307,18 @@
 			</div>
 		</td></tr>
 
+
 		<tr><td><div class="filter">Status</div></td></tr>
 		<tr><td>
+			{% for status in statuses %}
 			<div class="form-check">
-				<input class="form-check-input" type="checkbox" id="checkstatusDRAFT" name="status" value="DRAFT"
-					{% if 'DRAFT' in posted_filters.status %} checked{% endif %}>
-				<label class="form-check-label" for="checkstatusDRAFT">Draft</label>
+				<input class="form-check-input" type="checkbox" id="checkstatus{{ status.name }}" name="statuses" value="{{ status.name }}"
+					{% if status.name in posted_filters.statuses %} checked{% endif %}>
+				<label class="form-check-label" for="checkstatus{{ status.name }}" title="{{ status.description }}"">{{ status.name }}</label>
 			</div>
-			<div class="form-check">
-				<input class="form-check-input" type="checkbox" id="checkstatusDIST" name="status" value="DIST"
-					{% if 'DIST' in posted_filters.status %} checked{% endif %}>
-				<label class="form-check-label" for="checkstatusDIST">Dist</label>
-			</div>
+			{% endfor %}
 		</td></tr>
-		
+
 		<tr><td><div class="filter">Flags</div></td></tr>
 		<tr><td>
 			<h5>Run daily</h5>
@@ -427,7 +425,7 @@
       <th width="50px" data-sort="false"></th>
         <th>Name</th>
 		<th>Connector</th>
-		<th>Pub status</th>
+		<th>Status</th>
 		<th>Cat.</th>
 		<th>Confidence</th>
 		<th>Relevance</th>
@@ -446,8 +444,8 @@
         <td><button id="b_{{ analytic.id }}" class="btn btn-default toggle-row"><i class="fa fa-chevron-right"></i></button></td>
         <td>{{ analytic.name }}</td>
 		<td>{{ analytic.connector.name }}</td>
-        <td>{{ analytic.pub_status }}</td>
-        <td>{{ analytic.category.short_name }}</td>
+        <td class="acenter"><div class="{{ analytic.status|lower }}">{{ analytic.status }}</div></td>
+        <td class="acenter">{{ analytic.category.short_name }}</td>
         <td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
         <td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>
 		<td class="acenter">{% if analytic.run_daily %}{% if analytic.run_daily_lock %}<img src="/static/images/lock.png" width="20" />{% else %}<img src="/static/admin/img/icon-yes.svg" />{% endif %}{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>

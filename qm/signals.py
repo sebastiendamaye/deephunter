@@ -3,6 +3,7 @@ from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.models import User
+from datetime import datetime, timedelta
 from .models import Analytic
 from qm.utils import token_expiration_check, is_update_available
 
@@ -16,6 +17,7 @@ for loader, module_name, is_pkg in pkgutil.iter_modules(plugins.__path__):
     all_connectors[module_name] = module
 
 PROXY = settings.PROXY
+DAYS_BEFORE_REVIEW = settings.DAYS_BEFORE_REVIEW
 
 # This function is called after a user logs in
 @receiver(user_logged_in)
@@ -64,6 +66,18 @@ def pre_save_handler(sender, instance, **kwargs):
             # if the create_rule flag is set, we need to create the remote rule associated with the analytic
             if instance.create_rule:
                 all_connectors.get(instance.connector.name).create_rule(instance)
+
+    # Workflow. Set the next review date if the analytic is published
+    if instance.status == 'PUB':
+        if not instance.run_daily_lock:
+            instance.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
+        else:
+            instance.next_review_date = None
+
+    # When analytics are archived, automatically remove the run_daily flag
+    if instance.status == 'ARCH' or instance.status == 'PENDING':
+        instance.run_daily = False
+
 
 # This handler is triggered after an "Analytic" object is deleted
 @receiver(post_delete, sender=Analytic)

@@ -238,6 +238,28 @@ ANALYTICS_PER_PAGE
 	
 	ANALYTICS_PER_PAGE = 50
 
+DAYS_BEFORE_REVIEW
+******************
+
+- **Type**: integer
+- **Description**: Number of days before an analytic is considered for review.
+- **Example**:
+
+.. code-block:: python
+
+	DAYS_BEFORE_REVIEW = 30
+
+DISABLE_ANALYTIC_ON_REVIEW
+**************************
+
+- **Type**: boolean
+- **Possible values**: ``True`` or ``False``
+- **Description**: If set to ``True``, automatically disable analytics with status 'REVIEW'
+- **Example**:
+
+.. code-block:: python
+	
+	DISABLE_ANALYTIC_ON_REVIEW = False
 
 PROXY
 *****

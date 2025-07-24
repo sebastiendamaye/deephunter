@@ -88,6 +88,10 @@ DISABLE_RUN_DAILY_ON_ERROR = True
 # Analytics per page in the list view
 ANALYTICS_PER_PAGE = 50
 
+# Workflow settings
+DAYS_BEFORE_REVIEW = 30  # Number of days before an analytic is considered for review
+DISABLE_ANALYTIC_ON_REVIEW = False  # Disable analytics with status 'REVIEW'
+
 # Proxy settings
 PROXY = {
     'http': 'http://proxy:port',

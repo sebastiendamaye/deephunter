@@ -107,7 +107,10 @@ class Category(models.Model):
 class Analytic(models.Model):
     STATUS_CHOICES = [
         ('DRAFT', 'Draft'),
-        ('DIST', 'Production'),
+        ('PUB', 'Published'),
+        ('REVIEW', 'To be reviewed'),
+        ('ARCH', 'Archived'),
+        ('PENDING', 'Pending Update'),
     ]
     CONFIDENCE_CHOICES = [
         (1, 'Low'),
@@ -127,7 +130,7 @@ class Analytic(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     pub_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
-    pub_status = models.CharField(max_length=5, choices=STATUS_CHOICES, default='DRAFT')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='DRAFT')
     confidence = models.IntegerField(choices=CONFIDENCE_CHOICES, default=1)
     relevance = models.IntegerField(choices=RELEVANCE_CHOICES, default=1)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
@@ -156,6 +159,7 @@ class Analytic(models.Model):
     maxhosts_count = models.IntegerField(default=0, help_text="Counts how many times max hosts threshold is reached")
     query_error = models.BooleanField(default=False, editable=False)
     query_error_message = models.TextField(blank=True, editable=False)
+    next_review_date = models.DateField(blank=True, null=True, editable=False)
     history = HistoricalRecords()
     
     def __str__(self):
@@ -227,3 +231,24 @@ class TasksStatus(models.Model):
     
     class Meta:
         verbose_name_plural = "Tasks status"
+
+class Review(models.Model):
+    DECISION_CHOICES = [
+        ('PENDING', 'Needs to be updated'),
+        ('KEEP', 'Keep it running'),
+        ('LOCK', 'Keep and lock'),
+        ('ARCH', 'Archive'),
+        ('DEL', 'Delete'),
+    ]
+
+    analytic = models.ForeignKey(Analytic, on_delete=models.CASCADE)
+    reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    date = models.DateTimeField(auto_now_add=True)
+    decision = models.CharField(max_length=10, choices=DECISION_CHOICES)
+    comments = models.TextField(blank=True)
+
+    def __str__(self):
+        return '{} - {}'.format(self.analytic.name, self.date)
+
+    class Meta:
+        ordering = ['-date', 'analytic__name']

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName, ThreatActor, Analytic, Snapshot, Campaign, Endpoint, Tag, TasksStatus, Category
+from .models import Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName, ThreatActor, Analytic, Snapshot, Campaign, Endpoint, Tag, TasksStatus, Category, Review
 from connectors.models import Connector
 from django.contrib.admin.models import LogEntry
 from simple_history.admin import SimpleHistoryAdmin
@@ -10,8 +10,8 @@ admin.site.site_header = 'DeepHunter_'
 admin.site.index_title = 'DeepHunter_'
 
 class AnalyticHistoryAdmin(SimpleHistoryAdmin):
-    list_display = ('name', 'update_date', 'created_by', 'pub_status', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'maxhosts_count', 'connector', 'query')
-    list_filter = ['pub_status', 'created_by', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'maxhosts_count', 'dynamic_query', 'query_error', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name', 'target_os', 'tags__name', 'connector']
+    list_display = ('name', 'update_date', 'created_by', 'status', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'maxhosts_count', 'connector', 'query')
+    list_filter = ['status', 'created_by', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'maxhosts_count', 'dynamic_query', 'query_error', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name', 'target_os', 'tags__name', 'connector']
     search_fields = ['name', 'description', 'notes', 'emulation_validation']
     filter_horizontal = ('mitre_techniques', 'threats', 'actors', 'target_os', 'vulnerabilities', 'tags')
     history_list_display = ['query', 'columns']
@@ -111,6 +111,7 @@ admin.site.register(MitreTechnique, MitreTechniqueAdmin)
 admin.site.register(ThreatName, ThreatNameAdmin)
 admin.site.register(ThreatActor, ThreatActorAdmin)
 admin.site.register(Analytic, AnalyticHistoryAdmin)
+admin.site.register(Review)
 admin.site.register(Snapshot, SnapshotAdmin)
 admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Endpoint, EndpointAdmin)

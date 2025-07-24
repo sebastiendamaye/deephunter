@@ -12,7 +12,7 @@ import logging
 import numpy as np
 from scipy import stats
 from math import isnan
-from .models import Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category
+from .models import Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category, Review
 from connectors.models import Connector
 from .tasks import regenerate_stats, regenerate_campaign
 import ipaddress
@@ -20,6 +20,7 @@ from connectors.utils import is_connector_enabled, get_connector_conf
 from celery import current_app
 from qm.utils import get_campaign_date
 from urllib.parse import urlencode
+from .forms import ReviewForm
 
 # Dynamically import all connectors
 import importlib
@@ -42,6 +43,7 @@ CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
 ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
 DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
 ANALYTICS_PER_PAGE = settings.ANALYTICS_PER_PAGE
+DAYS_BEFORE_REVIEW = settings.DAYS_BEFORE_REVIEW
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -118,10 +120,10 @@ def index(request):
             analytics = analytics.filter(relevance__in=request.GET.getlist('relevance'))
             posted_filters['relevance'] = request.GET.getlist('relevance')
 
-        if 'status' in request.GET:
-            analytics = analytics.filter(pub_status__in=request.GET.getlist('status'))
-            posted_filters['status'] = request.GET.getlist('status')
-            
+        if 'statuses' in request.GET:
+            analytics = analytics.filter(status__in=request.GET.getlist('statuses'))
+            posted_filters['statuses'] = request.GET.getlist('statuses')
+
         if 'run_daily' in request.GET:
             if request.GET['run_daily'] == '1':
                 analytics = analytics.filter(run_daily=True)
@@ -186,6 +188,9 @@ def index(request):
             analytics = analytics.filter(created_by__pk__in=request.GET.getlist('created_by'))
             posted_filters['created_by'] = request.GET.getlist('created_by')
 
+    # Exclude analytics that are archived
+    analytics = analytics.exclude(status='ARCH')
+
     for analytic in analytics:
         snapshot = Snapshot.objects.filter(analytic=analytic, date=datetime.today()-timedelta(days=1)).order_by('date')
         if len(snapshot) > 0:
@@ -227,6 +232,7 @@ def index(request):
         'mitre_tactics': MitreTactic.objects.all(),
         'mitre_techniques': MitreTechnique.objects.all(),
         'categories': Category.objects.all(),
+        'statuses': [{'name': name, 'description': description} for name,description in Analytic.STATUS_CHOICES if name != 'ARCH'],
         'created_by': User.objects.filter(id__in=Analytic.objects.exclude(created_by__isnull=True).values('created_by').distinct()),
         'posted_search': posted_search,
         'posted_filters': posted_filters,
@@ -662,6 +668,59 @@ def regencampaignstatus(request, campaign_name):
 
 @login_required
 def analytic_review(request, analytic_id):
-    context = {'analytic_id': analytic_id}
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+
+    if request.method == "POST":
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            # commit set to False to simulate save and check errors
+            review = form.save(commit=False)
+            review.analytic = analytic
+            review.reviewer = request.user
+            review.save()
+
+            msg = ''
+            if form.cleaned_data['decision'] == 'PENDING':
+                analytic.status = 'PENDING'
+                # run_daily flag will be set to False automatically (signals)
+                analytic.next_review_date = None
+                analytic.save()
+                msg = " and analytic status updated to 'Pending Update'"
+            elif form.cleaned_data['decision'] == 'KEEP':
+                analytic.status = 'PUB'
+                # next_review_date will be set automatically (signals)
+                analytic.save()
+                msg = " and analytic status updated to 'Published'"
+            elif form.cleaned_data['decision'] == 'LOCK':
+                analytic.status = 'PUB'
+                analytic.run_daily_lock = True
+                analytic.next_review_date = None
+                analytic.save()
+                msg = " and analytic status updated to 'Published' and locked"
+            elif form.cleaned_data['decision'] == 'ARCH':
+                analytic.status = 'ARCH'
+                analytic.next_review_date = None
+                # run_daily flag will be set to False automatically (signals)
+                msg = " and analytic archived"
+                analytic.save()
+            elif form.cleaned_data['decision'] == 'DEL':
+                msg = " and analytic deleted"
+                analytic.delete()
+
+            return HttpResponse(f'Review saved{ msg }')
+        else:
+            return HttpResponse(
+                'Review failed: {}'.format(''.join([v[0] for k, v in form.errors.items()]))
+                )
+            
+    else:
+        form = ReviewForm()
+    
+    context = {
+        'analytic': analytic,
+        'days_before_review': DAYS_BEFORE_REVIEW,
+        'form': form,
+        'reviews': Review.objects.filter(analytic=analytic).order_by('-date'),
+        }
     return render(request, 'analytic_review.html', context)
     

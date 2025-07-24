@@ -116,7 +116,8 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
         )
     campaign.save()
     
-    analytics = Analytic.objects.filter(run_daily=True)
+    # List of analytics with the run_daily flag but not archived
+    analytics = Analytic.objects.filter(run_daily=True).exclude(status='ARCH')
 
     # Filter analytic with the "run_daily" flag set
     for progress, analytic in enumerate(analytics, start=1):

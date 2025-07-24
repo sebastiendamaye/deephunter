@@ -132,3 +132,20 @@ Modifications on analytics (creation, modification, deletion) are monitored via 
 .. image:: img/sync_rule_logic.jpg
   :width: 800
   :alt: Sync rule logic
+
+Analytic Workflow
+*****************
+
+Because threat hunting analytics may become obsolete with time, or need to be updated, DeepHunter has a workflow to manage the lifecycle of threat hunting analytics. The workflow is as follows:
+
+.. image:: img/analytics_workflow.png
+  :width: 800
+  :alt: Analytics workflow
+
+The "run_campaigns.sh" cron job will automatically update the status of threat hunting analytics that need to be reviewed, based on their last review date.
+
+You can access the list of analytics to review from the menu (``Reports > Analytics to review``). Expand the details and click the "Review" tab.
+
+.. image:: img/review_tab.png
+  :width: 400
+  :alt: Review tab

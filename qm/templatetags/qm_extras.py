@@ -2,7 +2,7 @@ from django import template
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import stringfilter
 from django.contrib.auth.models import User
-from qm.models import Country, TargetOs, ThreatActor, ThreatName, Vulnerability, MitreTactic, MitreTechnique, Tag, Category
+from qm.models import Country, TargetOs, ThreatActor, ThreatName, Vulnerability, MitreTactic, MitreTechnique, Tag, Category, Review
 from connectors.models import Connector
 from django.conf import settings
 
@@ -188,3 +188,9 @@ def isselectedoption(opt, v):
 @register.filter
 def to_range(value):
     return range(1,value+1)
+
+@register.filter
+def get_review_label(decision):
+    for k,v in Review.DECISION_CHOICES:
+        if k==decision:
+            return v
