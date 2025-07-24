@@ -80,6 +80,8 @@ It may happen that you modify a threat hunting query for various reasons (e.g., 
   :width: 1500
   :alt: DeepHunter architecture diagram
 
+Statistics can be automatically regenerated for new analytics, or when the query field of existing analytics is modified. This is controlled by the ``AUTO_STATS_REGENERATION`` setting.
+
 Thresholds, error detection and automation
 ==========================================
 

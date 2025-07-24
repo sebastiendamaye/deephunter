@@ -261,6 +261,18 @@ DISABLE_ANALYTIC_ON_REVIEW
 	
 	DISABLE_ANALYTIC_ON_REVIEW = False
 
+AUTO_STATS_REGENERATION
+***********************
+
+- **Type**: boolean
+- **Possible values**: ``True`` or ``False``
+- **Description**: If set to ``True``, automatically regenerate stats when analytic query field is changed, or for new analytics
+- **Example**:
+
+.. code-block:: python
+
+	AUTO_STATS_REGENERATION = True
+
 PROXY
 *****
 - **Type**: dictionary
