@@ -1,0 +1,39 @@
+{% load qm_extras %}
+<div id="analyticsByStatus_chartContainer" class="chartContainer"></div>
+<script>
+    $(document).ready(function() {
+
+        var chart = new CanvasJS.Chart("analyticsByStatus_chartContainer", {
+            backgroundColor: "#f9f9f9",
+            title:{
+                text: "Analytics by status",
+                fontSize: 12,
+                fontColor: "#858383",
+                fontWeight: "normal",
+                fontFamily: "Arial",
+                horizontalAlign: "center"
+            },
+            data: [{
+                type: "doughnut",
+                startAngle: 60,
+                explodeOnClick: false,
+                legendMarkerType: "square",
+                showInLegend: true,
+                legendText: "{name}: {y}",
+                toolTipContent: "<b>{name}:</b> {y} (#percent%)",
+                dataPoints: [
+                    {% for status in status_breakdown %}
+                        { y: {{ status.count }}, name: "{{ status.status }}", color: "{{ status.status|statuscolor }}", click: function(e) { window.location='/qm/listanalytics/?statuses={{ status.status }}'; } },
+                    {% endfor %}
+                ]
+            }],
+            legend: {
+                horizontalAlign: 'right',
+                verticalAlign: 'center',
+            }
+        });
+        
+        chart.render();
+
+    });
+</script>

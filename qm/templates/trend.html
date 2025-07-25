@@ -65,16 +65,6 @@
 <script type="text/javascript" nonce="jg6kl5z3v2">
 $(document).ready(function() {
 
-	/*
-	setInterval(function() {
-		$("#progress_{{ analytic.id }}").load('/{{ analytic.id }}/progress/')
-	}, 2000);
-	*/
-
-
-
-
-
 	var options_runtime = {
 		animationEnabled: false,
 		axisX:{
@@ -194,13 +184,9 @@ $(document).ready(function() {
 		}]
 	};
 
-
 	$("#chartContainer_runtime_{{ analytic.id }}").CanvasJSChart(options_runtime);
 	$("#chartContainer_count_{{ analytic.id }}").CanvasJSChart(options_count);
 	$("#chartContainer_endpoints_{{ analytic.id }}").CanvasJSChart(options_endpoints);
-
-
-
 
 });
 </script>

@@ -2,7 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.dashboards, name='dashboards'),
+    path('listanalytics/', views.list_analytics, name='list_analytics'),
     path('<int:analytic_id>/trend/', views.trend, name='trend'),
     path('<int:analytic_id>/trend/<int:tab>/', views.trend, name='trend'),
     path('events/<int:analytic_id>/<str:eventdate>/<str:endpointname>/', views.events, name='events'),
@@ -23,4 +24,11 @@ urlpatterns = [
     path('regencampaign/<str:campaign_name>/', views.regencampaign, name='regencampaign'),
     path('regencampaignstatus/<str:campaign_name>/', views.regencampaignstatus, name='regencampaignstatus'),
     path('review/<int:analytic_id>/', views.analytic_review, name='analytic_review'),
+
+    path('db_totalnumberanalytics/', views.db_totalnumberanalytics, name='db_totalnumberanalytics'),
+    path('db_analyticsrunintodaycampaign/', views.db_analyticsrunintodaycampaign, name='db_analyticsrunintodaycampaign'),
+    path('db_analyticsmatchingintodaycampaign/', views.db_analyticsmatchingintodaycampaign, name='db_analyticsmatchingintodaycampaign'),
+    path('db_analyticstoreview/', views.db_analyticstoreview, name='db_analyticstoreview'),
+    path('db_analyticsbystatus/', views.db_analyticsbystatus, name='db_analyticsbystatus'),
+    path('db_analyticsbyconnector/', views.db_analyticsbyconnector, name='db_analyticsbyconnector'),
 ]

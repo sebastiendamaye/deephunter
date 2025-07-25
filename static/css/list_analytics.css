@@ -368,28 +368,30 @@ table.review td {
 /* Div styles for analytic status */
 
 div.draft {
-	background: orange;
+	background: #A9C9FF;
 	padding: 1px;
 	border-radius: 5px;
 }
 div.pub {
-	background: greenyellow;
+	background: #28A745;
 	padding: 1px;
+	color: #fff;
 	border-radius: 5px;
 }
 div.review {
-	background: yellow;
+	background: #FFC107;
 	padding: 1px;
 	border-radius: 5px;
 }
 div.pending {
-	background: #e65a5a;
+	background: #FF6F00;
 	padding: 1px;
 	border-radius: 5px;
 	color: #fff;
 }
 div.arch {
-	background: #d9edf7;
+	background: #6C757D;
 	padding: 1px;
+	color: #fff;
 	border-radius: 5px;
 }

@@ -21,9 +21,11 @@
 						<ul>
 							<li><a class="deephunter" href="#">DeepHunter<span class="blinking-cursor">_</span></a></li>
 
+							<li><a class="{{ request.path|isactiveurl:"/" }}" href="/">Dashboards</a></li>
+
 							<li><a href="#">Analytics</a>
 							<ul>
-								<li><a class="{{ request.path|isactiveurl:"/" }}" href="/">List analytics</a></li>
+								<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/" }}" href="/qm/listanalytics/">List analytics</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin/qm/analytic/add/">Create analytic</a></li>
 							</ul>        
 							</li>

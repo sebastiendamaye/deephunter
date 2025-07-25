@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta, timezone
 import logging
@@ -50,7 +50,13 @@ logger = logging.getLogger(__name__)
 
 
 @login_required
-def index(request):
+def dashboards(request):
+    context = {}
+    return render(request, 'dashboards.html', context)
+
+@login_required
+def list_analytics(request):
+
     analytics = Analytic.objects.all().order_by('id')
     
     posted_search = ''
@@ -724,3 +730,56 @@ def analytic_review(request, analytic_id):
         }
     return render(request, 'analytic_review.html', context)
     
+@login_required
+def db_totalnumberanalytics(request):
+    analytics = Analytic.objects.exclude(status='ARCH')    
+    
+    code = f"""<h3>Total number of analytics</h3>
+        <p class="num"><a href="/qm/listanalytics/">{analytics.count()}</a></p>
+        """
+    return HttpResponse(code)
+
+@login_required
+def db_analyticsrunintodaycampaign(request):
+    campaign = get_object_or_404(Campaign, name='daily_cron_{}'.format(datetime.today().strftime('%Y-%m-%d')))
+    
+    code = f"""<h3>Analytics run in today's campaign</h3>
+        <p class="num"><a href="/qm/listanalytics/?run_daily=1">{campaign.nb_queries}</p>
+        """
+    return HttpResponse(code)
+
+@login_required
+def db_analyticsmatchingintodaycampaign(request):
+    yesterday = datetime.now() - timedelta(days=1)
+    yesterday_date = yesterday.date()  # Get the date part
+
+    analytics = Analytic.objects.filter(
+        snapshot__hits_count__gt=0,
+        snapshot__date=yesterday_date
+    ).distinct()
+    
+    code = f"""<h3>Analytics triggered during today's campaign</h3>
+        <p class="num"><a href="/qm/listanalytics/?hits=1">{analytics.count()}</p>
+        """
+    return HttpResponse(code)
+
+@login_required
+def db_analyticstoreview(request):
+    analytics = Analytic.objects.filter(status='REVIEW').exclude(status='ARCH')
+    
+    code = f"""<h3>Analytics to review</h3>
+        <p class="num"><a href="/qm/listanalytics/?statuses=REVIEW">{analytics.count()}</p>
+        """
+    return HttpResponse(code)
+
+@login_required
+def db_analyticsbystatus(request):
+    status_breakdown = Analytic.objects.values('status').annotate(count=Count('id'))
+    context = { 'status_breakdown': status_breakdown, }
+    return render(request, 'db_analyticsbystatus.html', context)        
+
+@login_required
+def db_analyticsbyconnector(request):
+    connector_breakdown = Analytic.objects.values('connector__id', 'connector__name').annotate(count=Count('id'))
+    context = { 'connector_breakdown': connector_breakdown, }
+    return render(request, 'db_analyticsbyconnector.html', context)        

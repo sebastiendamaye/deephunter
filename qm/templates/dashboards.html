@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/dashboards.css" />
+    <script src="/static/jquery/jquery.min.js"></script>
+    <script src="/static/canvasjs/jquery.canvasjs.min.js"></script>
+    <script src="/static/js/htmx.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="container_widgets">
+
+    <div class="widget_number" hx-get="/qm/db_totalnumberanalytics/" hx-trigger="load">
+        <img alt="Result loading..." src="/static/images/bars.svg"/>
+    </div>
+
+    <div class="widget_number" hx-get="/qm/db_analyticsrunintodaycampaign/" hx-trigger="load">
+        <img alt="Result loading..." src="/static/images/bars.svg"/>
+    </div>
+
+    <div class="widget_number" hx-get="/qm/db_analyticsmatchingintodaycampaign/" hx-trigger="load">
+        <img alt="Result loading..." src="/static/images/bars.svg"/>
+    </div>
+
+    <div class="widget_number" hx-get="/qm/db_analyticstoreview/" hx-trigger="load">
+        <img alt="Result loading..." src="/static/images/bars.svg"/>
+    </div>
+
+</div>
+
+<div class="container_widgets">
+
+    <div class="widget_chart" hx-get="/qm/db_analyticsbystatus/" hx-trigger="load">
+        <img alt="Result loading..." width="100" src="/static/images/bars.svg"/>
+    </div>
+
+    <div class="widget_chart" hx-get="/qm/db_analyticsbyconnector/" hx-trigger="load">
+        <img alt="Result loading..." width="100" src="/static/images/bars.svg"/>
+    </div>
+
+</div>
+{% endblock %}

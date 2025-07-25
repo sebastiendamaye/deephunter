@@ -1,0 +1,38 @@
+<div id="analyticsByConnector_chartContainer" class="chartContainer"></div>
+<script>
+    $(document).ready(function() {
+
+        var chart = new CanvasJS.Chart("analyticsByConnector_chartContainer", {
+            backgroundColor: "#f9f9f9",
+            title:{
+                text: "Analytics by connector",
+                fontSize: 12,
+                fontColor: "#858383",
+                fontWeight: "normal",
+                fontFamily: "Arial",
+                horizontalAlign: "center"
+            },
+            data: [{
+                type: "doughnut",
+                startAngle: 60,
+                explodeOnClick: false,
+                legendMarkerType: "square",
+                showInLegend: true,
+                legendText: "{name}: {y}",
+                toolTipContent: "<b>{name}:</b> {y} (#percent%)",
+                dataPoints: [
+                    {% for connector in connector_breakdown %}
+                        { y: {{ connector.count }}, name: "{{ connector.connector__name }}", click: function(e) { window.location='/qm/listanalytics/?connectors={{ connector.connector__id }}'; } },
+                    {% endfor %}
+                ]
+            }],
+            legend: {
+                horizontalAlign: 'right',
+                verticalAlign: 'center',
+            }
+        });
+        
+        chart.render();
+
+    });
+</script>

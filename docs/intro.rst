@@ -14,6 +14,9 @@ DeepHunter is a Threat Hunting platform that features:
 - Reports (`Campaigns performance report <reports_stats.html>`_, `Top endpoints identified in the last campaign <reports_endpoints.html>`_, `MITRE coverage <reports_mitre_coverage.html>`_, `List of analytics with missing MITRE coverage <reports_missing_mitre.html>`_)
 - Tools (`LOL Driver Hash Checker <tools_lol_drivers_hash_checker.html>`_, `VirusTotal Hash Checker <tools_vt_hash_checker.html>`_, `Whois <tools_whois.html>`_).
 
+.. image:: img/dashboards.png
+  :width: 600
+  :alt: Dashboards
 .. image:: img/deephunter_analytics.png
   :width: 600
   :alt: DeepHunter Analytics
@@ -111,6 +114,7 @@ Modules
 =======
 DeepHunter comes with several modules that are particularly useful for threat hunters and incident responders:
 
+- the welcome screen shows a `dashboard <modules/dashboards.html>` with several widgets.
 - the `timeline view <modules/timeline.html>`_ shows the distribution of matching analytics accross campaigns for a particular host. For each match, a box will be shown for the given date, and double clicking on it will replay the query directly in the appropriate data lake, for the selected date. If you have enabled the sentinelone plugin, campaigns will also gather the storylineID information (a special information collected by SentinelOne), which is used to highlight analytics with the same storylineID in the timeline.
 - the `trend analysis <modules/trend.html>`_ module is composed of graphs showing the distribution of the number of hits, and number of endpoints over time. This shows how frequent a threat hunting analytic triggers. A mathematical model is applied to the series to highlight potential statistical anomalies.
 - the `netview (network view) <modules/netview.html>`_ module shows the list of network outbound connections for a particular host or storylineID. For each IP address, the popularity (number of endpoints in your environment where this destination is contacted) is shown, and for public IPs, a whois information is available, as well as the VirusTotal IP reputation.

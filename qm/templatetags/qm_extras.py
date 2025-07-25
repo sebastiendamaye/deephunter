@@ -194,3 +194,19 @@ def get_review_label(decision):
     for k,v in Review.DECISION_CHOICES:
         if k==decision:
             return v
+
+@register.filter
+def statuscolor(status):
+    color= ''
+    if status == 'DRAFT':
+        color = '#A9C9FF'
+    elif status == 'PUB':
+        color = '#28A745'
+    elif status == 'REVIEW':
+        color = '#FFC107'
+    elif status == 'PENDING':
+        color = '#FF6F00'
+    elif status == 'ARCH':
+        color = '#6C757D'
+
+    return color

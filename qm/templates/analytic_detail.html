@@ -11,8 +11,8 @@
 <div id="tabs_{{ analytic.id }}">
 	<ul>
 		<li><a href="#details_{{ analytic.id }}"><span>Details</span></a></li>
-		<li><a href="#trend_{{ analytic.id }}" hx-get="{{ analytic.id }}/trend/1/" hx-target="#trend_{{ analytic.id }}"><span>Trend</span></a></li>
-		<li><a href="#review_{{ analytic.id }}" hx-get="/review/{{ analytic.id }}/" hx-target="#review_{{ analytic.id }}"><span>Review</span></a></li>
+		<li><a href="#trend_{{ analytic.id }}" hx-get="/qm/{{ analytic.id }}/trend/1/" hx-target="#trend_{{ analytic.id }}"><span>Trend</span></a></li>
+		<li><a href="#review_{{ analytic.id }}" hx-get="/qm/review/{{ analytic.id }}/" hx-target="#review_{{ analytic.id }}"><span>Review</span></a></li>
 	</ul>
 	<div id="details_{{ analytic.id }}">
 
