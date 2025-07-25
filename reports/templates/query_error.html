@@ -13,6 +13,7 @@
 		<th>Admin/Stats/Run</th>
 		<th>Connector</th>
 		<th>Analytic</th>
+		<th>Status</th>
 		<th>Maxhosts Count</th>
 		<th>Run daily</th>
 		<th>Category</th>
@@ -26,6 +27,7 @@
 			[<a target="_blank" href="/events/{{ analytic.id }}/">run query</a>]
 		</td>
 		<td>{{ analytic.connector.name }}</td>
+		<td><div class="{{ analytic.status|lower }}">{{ analytic.status }}</div></td>
 		<td title="DESCRIPTION:&#013;===========&#013;{{ analytic.description }}&#013;&#013;QUERY:&#013;===========&#013;{{analytic.query}}">{{ analytic.name }}</td>
 		<td class="acenter">{{ analytic.maxhosts_count }}</td>
 		<td class="acenter">

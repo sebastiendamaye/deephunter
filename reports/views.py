@@ -217,6 +217,7 @@ def endpoints(request):
                 "analyticid":analytic.snapshot.analytic.id,
                 "name":analytic.snapshot.analytic.name,
                 "connector":analytic.snapshot.analytic.connector.name,
+                "status":analytic.snapshot.analytic.status,
                 "confidence":analytic.snapshot.analytic.confidence,
                 "relevance":analytic.snapshot.analytic.relevance,
                 "xdrlink":xdrlink
@@ -265,6 +266,7 @@ def analytics_perfs(request):
                 'name': snapshot.analytic.name,
                 'connector': snapshot.analytic.connector.name,
                 'runtime': snapshot.runtime,
+                'status': snapshot.analytic.status,
                 'sparkline': [analytic_snapshot.runtime for analytic_snapshot in analytic_snapshots]
             })
     
@@ -273,18 +275,6 @@ def analytics_perfs(request):
         }
     
     return render(request, 'perfs.html', context)
-
-@login_required
-def disabled_analytics(request):
-    analytics = Analytic.objects.filter(
-        run_daily = False,
-        maxhosts_count__gte = ON_MAXHOSTS_REACHED['THRESHOLD']
-    )
-    context = {
-        'analytics': analytics
-        }
-    
-    return render(request, 'disabled_analytics.html', context)
 
 @login_required
 def query_error(request):
@@ -299,7 +289,7 @@ def query_error(request):
 def rare_occurrences(request):
     analytics = (
         Endpoint.objects
-        .values('snapshot__analytic__id', 'snapshot__analytic__name', 'snapshot__analytic__connector__name', 'snapshot__analytic__confidence', 'snapshot__analytic__relevance', 'snapshot__analytic__description', 'snapshot__analytic__query')
+        .values('snapshot__analytic__id', 'snapshot__analytic__name', 'snapshot__analytic__connector__name', 'snapshot__analytic__status', 'snapshot__analytic__confidence', 'snapshot__analytic__relevance', 'snapshot__analytic__description', 'snapshot__analytic__query')
         .annotate(distinct_hostnames=Count('hostname', distinct=True))
         .filter(distinct_hostnames__lt=RARE_OCCURRENCES_THRESHOLD)
         .order_by('distinct_hostnames')
@@ -314,6 +304,7 @@ def rare_occurrences(request):
             'id': analytic['snapshot__analytic__id'],
             'name': analytic['snapshot__analytic__name'],
             'connector': analytic['snapshot__analytic__connector__name'],
+            'status': analytic['snapshot__analytic__status'],
             'confidence': analytic['snapshot__analytic__confidence'],
             'relevance': analytic['snapshot__analytic__relevance'],
             'description': analytic['snapshot__analytic__description'],

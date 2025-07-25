@@ -16,6 +16,7 @@
 		<th>Admin/Stats</th>
 		<th>Connector</th>
 		<th>Analytic</th>
+		<th>Status</th>
 	</tr>
 {% for analytic in analytics %}
 	<tr>
@@ -27,6 +28,7 @@
 		</td>
 		<td>{{ analytic.connector }}</td>
 		<td>{{ analytic.name }}</td>
+		<td><div class="{{ analytic.status|lower }}">{{ analytic.status }}</div></td>
 	</tr>	
 {% endfor %}
 </table>
