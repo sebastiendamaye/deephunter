@@ -1,12 +1,12 @@
 {% load qm_extras %}
-<div id="analyticsByStatus_chartContainer" class="chartContainer"></div>
+<div id="analyticsByUser_chartContainer" class="chartContainer"></div>
 <script nonce="klf4do97jh">
     $(document).ready(function() {
 
-        var chart = new CanvasJS.Chart("analyticsByStatus_chartContainer", {
+        var chart = new CanvasJS.Chart("analyticsByUser_chartContainer", {
             backgroundColor: "#f9f9f9",
             title:{
-                text: "Analytics by status",
+                text: "Analytics by user",
                 fontSize: 17,
                 fontColor: "#858383",
                 fontWeight: "normal",
@@ -23,8 +23,8 @@
                 /*legendFontSize: 14,*/
                 toolTipContent: "<b>{name}:</b> {y} (#percent%)",
                 dataPoints: [
-                    {% for status in status_breakdown %}
-                        { y: {{ status.count }}, name: "{{ status.status|statuslabel }}", color: "{{ status.status|statuscolor }}", click: function(e) { window.location='/qm/listanalytics/?statuses={{ status.status }}'; } },
+                    {% for analytic in analytics_breakdown %}
+                        { y: {{ analytic.count }}, name: "{{ analytic.created_by__username }}", click: function(e) { window.location='/qm/listanalytics/?created_by={{ analytic.created_by__id }}'; } },
                     {% endfor %}
                 ]
             }],

@@ -758,17 +758,26 @@ def db_analyticsmatchingintodaycampaign(request):
         snapshot__date=yesterday_date
     ).distinct()
     
-    code = f"""<h3>Analytics triggered during today's campaign</h3>
+    code = f"""<h3>Analytics triggered in last campaign</h3>
         <p class="num"><a href="/qm/listanalytics/?hits=1">{analytics.count()}</p>
         """
     return HttpResponse(code)
 
 @login_required
 def db_analyticstoreview(request):
-    analytics = Analytic.objects.filter(status='REVIEW').exclude(status='ARCH')
+    analytics = Analytic.objects.filter(status='REVIEW')
     
     code = f"""<h3>Analytics to review</h3>
         <p class="num"><a href="/qm/listanalytics/?statuses=REVIEW">{analytics.count()}</p>
+        """
+    return HttpResponse(code)
+
+@login_required
+def db_archivedanalytics(request):
+    analytics = Analytic.objects.filter(status='ARCH')
+    
+    code = f"""<h3>Archived analytics</h3>
+        <p class="num"><a href="/admin/qm/analytic/?status__exact=ARCH">{analytics.count()}</p>
         """
     return HttpResponse(code)
 
@@ -783,3 +792,9 @@ def db_analyticsbyconnector(request):
     connector_breakdown = Analytic.objects.values('connector__id', 'connector__name').annotate(count=Count('id'))
     context = { 'connector_breakdown': connector_breakdown, }
     return render(request, 'db_analyticsbyconnector.html', context)        
+
+@login_required
+def db_analyticsbyuser(request):
+    analytics_breakdown = Analytic.objects.values('created_by__id', 'created_by__username').annotate(count=Count('id'))
+    context = { 'analytics_breakdown': analytics_breakdown, }
+    return render(request, 'db_analyticsbyuser.html', context)        

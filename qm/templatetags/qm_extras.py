@@ -2,7 +2,7 @@ from django import template
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import stringfilter
 from django.contrib.auth.models import User
-from qm.models import Country, TargetOs, ThreatActor, ThreatName, Vulnerability, MitreTactic, MitreTechnique, Tag, Category, Review
+from qm.models import Country, TargetOs, ThreatActor, ThreatName, Vulnerability, MitreTactic, MitreTechnique, Tag, Category, Review, Analytic
 from connectors.models import Connector
 from django.conf import settings
 
@@ -210,3 +210,7 @@ def statuscolor(status):
         color = '#6C757D'
 
     return color
+
+@register.filter
+def statuslabel(status):
+    return dict(Analytic.STATUS_CHOICES).get(status, status)

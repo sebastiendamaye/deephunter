@@ -6,8 +6,8 @@
 div.widget_number {
     display: grid;
     place-items: center; /* Centers both horizontally and vertically */
-    width: 150px;
-    height: 150px;
+    width: 200px;
+    height: 200px;
     margin-top: 20px;
     margin-left: 20px;
     padding: 20px;
@@ -17,19 +17,19 @@ div.widget_number {
 }
 
 div.widget_number img {
-    width:100px;
+    width: 100px;
     height: auto; /* Maintains aspect ratio */
 }
 
 div.widget_number h3 {
-    font-size: 0.7em;
+    font-size: 1em; /*0.7em*/
     margin-bottom: 10px;
     text-align: center;
     color: #858383;
 }
 
 p.num {
-    font-size: 2em;
+    font-size: 2.5em;
     text-align: center;
     font-weight: bold;
 }
@@ -43,8 +43,8 @@ div.widget_chart {
     display: grid;
     place-items: center; /* Centers both horizontally and vertically */
 
-    width: 320px;
-    height: 200px;
+    width: 460px;
+    height: 300px;
 
     margin-top: 20px;
     margin-left: 20px;
@@ -55,7 +55,7 @@ div.widget_chart {
 }
 
 div.chartContainer {
-    width: 310px;
-    height: 190px;
+    width: 450px; /* div.widget_chart - 10 */
+    height: 290px; /* div.widget_chart - 10 */
     padding: 0px;
 }

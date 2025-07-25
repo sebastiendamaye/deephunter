@@ -26,6 +26,10 @@
         <img alt="Result loading..." src="/static/images/bars.svg"/>
     </div>
 
+    <div class="widget_number" hx-get="/qm/db_archivedanalytics/" hx-trigger="load">
+        <img alt="Result loading..." src="/static/images/bars.svg"/>
+    </div>
+
 </div>
 
 <div class="container_widgets">
@@ -35,6 +39,10 @@
     </div>
 
     <div class="widget_chart" hx-get="/qm/db_analyticsbyconnector/" hx-trigger="load">
+        <img alt="Result loading..." width="100" src="/static/images/bars.svg"/>
+    </div>
+
+    <div class="widget_chart" hx-get="/qm/db_analyticsbyuser/" hx-trigger="load">
         <img alt="Result loading..." width="100" src="/static/images/bars.svg"/>
     </div>
 
