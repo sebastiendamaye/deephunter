@@ -13,3 +13,4 @@ Reports
    query_error
    rare_occurrences
    zero_occurrence
+   archived_analytics

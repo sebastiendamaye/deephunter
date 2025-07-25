@@ -155,3 +155,5 @@ You can access the list of analytics to review from the menu (``Reports > Analyt
 .. image:: img/review_tab.png
   :width: 800
   :alt: Review tab
+
+To restore a previously archived analytic, refer to `archived analytics report <reports/archived_analytics.html>`_.
