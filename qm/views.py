@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
-from django.db.models import Q, Sum, Count
+from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta, timezone
 import logging
@@ -760,6 +760,25 @@ def db_analyticsmatchingintodaycampaign(request):
     
     code = f"""<h3>Analytics triggered in last campaign</h3>
         <p class="num"><a href="/qm/listanalytics/?hits=1">{analytics.count()}</p>
+        """
+    return HttpResponse(code)
+
+@login_required
+def db_highestweightedscoretoday(request):
+
+    campaign = get_object_or_404(Campaign, name='daily_cron_{}'.format(datetime.today().strftime('%Y-%m-%d')))
+
+    qs = Endpoint.objects.filter(
+        snapshot__campaign=campaign
+    ).values('hostname').annotate(
+        total_weighted_score=Sum(F('snapshot__analytic__weighted_relevance'))
+    ).order_by('-total_weighted_score')
+
+    # Get the highest score
+    highestweightedscore = qs.first()
+    
+    code = f"""<h3>Highest weighted score today</h3>
+        <p class="num"><a href="/qm/listanalytics/?statuses=REVIEW">{highestweightedscore['total_weighted_score']}</p>
         """
     return HttpResponse(code)
 
