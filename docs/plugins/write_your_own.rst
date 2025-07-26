@@ -72,6 +72,11 @@ Methods are listed below (M/O = Mandatory / Optional).
        * ``date``: Date to filter the analytic by, in ISO format (range will be date-date+1day).
        * ``endpoint_name``: Name of the endpoint to filter the analytic by.
      - String containing the redirect link for the analytic.
+   * - ``get_token_expiration``
+     - Get the expiration (in days) of the API token.
+     - O
+     - 
+     - Integer (number of days) or None (if failure).
 
 Template
 ********

@@ -94,10 +94,14 @@
 	<div class="tokenexpiresoon">An update is available. Use the upgrade script to do the update.</div>
 {% endif %}
 
-{% if request.session.tokenexpires <= 0 %}
-	<div class="tokenexpired">Your S1 token has expired. DeepHunter won't work as expected.</div>
-{% elif request.session.tokenexpires <= 7 %}
-	<div class="tokenexpiresoon">Your S1 token expires in {{ request.session.tokenexpires }} day{% if request.session.tokenexpires > 1 %}s{% endif %}.</div>
+{% if request.session.tokenexpires %}
+	{% for token_connector in request.session.tokenexpires %}
+		{% if token_connector.tokenexpiresin <= 0 %}
+			<div class="tokenexpired">The {{ token_connector.connector }} token has expired.</div>
+		{% elif token_connector.tokenexpiresin <= 7 %}
+			<div class="tokenexpiresoon">The {{ token_connector.connector }} token expires in {{ token_connector.tokenexpiresin }} day{% if token_connector.tokenexpiresin > 1 %}s{% endif %}.</div>
+		{% endif %}
+	{% endfor %}
 {% endif %}
 
 {% block body %}{% endblock %}

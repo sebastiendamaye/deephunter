@@ -7,7 +7,7 @@ from django.conf import settings
 import logging
 import requests
 from time import sleep
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, quote_plus
 from connectors.utils import manage_analytic_error
 
@@ -427,11 +427,12 @@ and dst.ip.address != '127.0.0.1'
         return None
 
 
-def get_token_expiration_date():
+def get_token_expiration():
     """
-    Get the expiration date of the SentinelOne API token.
-    :return: String containing the expiration date in ISO format or None if not found.
+    Get the expiration (in days) of the SentinelOne API token.
+    :return: integer (number of days)or None.
     """
+
     init_globals()
     r = requests.post(f'{S1_URL}/web/api/v2.1/users/api-token-details',
         headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
@@ -439,7 +440,10 @@ def get_token_expiration_date():
         proxies=PROXY)
     
     if r.status_code == 200 and 'data' in r.json():
-        return r.json()['data']['expiresAt']
+        expires_at = r.json()['data']['expiresAt']
+        dt = datetime.strptime(expires_at, '%Y-%m-%dT%H:%M:%SZ').replace(tzinfo=timezone.utc)
+        now = datetime.now(timezone.utc)
+        return (dt - now).days + 1
     else:
         if DEBUG:
             print(f"[ ERROR ] Failed to retrieve token expiration date: {r.text}")

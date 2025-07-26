@@ -5,7 +5,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from .models import Analytic, TasksStatus
-from qm.utils import token_expiration_check, is_update_available
+from qm.utils import is_update_available
+from connectors.utils import is_connector_enabled
 from qm.tasks import regenerate_stats
 import time
 
@@ -25,8 +26,20 @@ AUTO_STATS_REGENERATION = settings.AUTO_STATS_REGENERATION
 # This function is called after a user logs in
 @receiver(user_logged_in)
 def user_logged_in_receiver(sender, request, user, **kwargs):
+    # check if there is an update available and store it in the session
     request.session['update_available'] = is_update_available()
-    request.session['tokenexpires'] = token_expiration_check()
+
+    # checks the token expiration for all connectors and stores the results in the session
+    session_tokens = []
+    for connector in all_connectors.values():
+        # only make the check if plugin is enabled and method get_token_expiration() exists
+        connector_name = connector.__name__.split('.')[1]
+        if is_connector_enabled(connector_name) and hasattr(connector, 'get_token_expiration'):
+            expires_in = connector.get_token_expiration()
+            # check if function returns a number
+            if isinstance(expires_in, (int, float)):
+                session_tokens.append({'connector': connector_name, 'tokenexpiresin': expires_in})
+    request.session['tokenexpires'] = session_tokens
 
 # This function is already defined in the views, but expects the request param that is not available in the signal handler.
 # So we cloned this function here so that it can be called from the signal handler.
