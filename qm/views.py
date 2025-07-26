@@ -792,6 +792,18 @@ def db_analyticstoreview(request):
     return HttpResponse(code)
 
 @login_required
+def db_analyticswitherrors(request):
+    analytics = Analytic.objects.filter(query_error=True).exclude(
+        query_error_message__contains='"status":"FINISHED"').exclude(
+        query_error_message__contains="'status': 'FINISHED'"
+        ).exclude(status='ARCH')
+    
+    code = f"""<h3>Analytics with errors</h3>
+        <p class="num"><a href="/reports/query_error">{analytics.count()}</p>
+        """
+    return HttpResponse(code)
+
+@login_required
 def db_archivedanalytics(request):
     analytics = Analytic.objects.filter(status='ARCH')
     
