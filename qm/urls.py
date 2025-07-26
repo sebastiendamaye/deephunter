@@ -33,4 +33,5 @@ urlpatterns = [
     path('db_analyticsbystatus/', views.db_analyticsbystatus, name='db_analyticsbystatus'),
     path('db_analyticsbyconnector/', views.db_analyticsbyconnector, name='db_analyticsbyconnector'),
     path('db_analyticsbyuser/', views.db_analyticsbyuser, name='db_analyticsbyuser'),
+    path('db_runningtasks/', views.db_runningtasks, name='db_runningtasks'),
 ]

@@ -782,6 +782,15 @@ def db_archivedanalytics(request):
     return HttpResponse(code)
 
 @login_required
+def db_runningtasks(request):
+    tasks = TasksStatus.objects.all()
+    
+    code = f"""<h3>Running tasks</h3>
+        <p class="num"><a href="/admin/qm/tasksstatus/">{tasks.count()}</p>
+        """
+    return HttpResponse(code)
+
+@login_required
 def db_analyticsbystatus(request):
     status_breakdown = Analytic.objects.values('status').annotate(count=Count('id'))
     context = { 'status_breakdown': status_breakdown, }
