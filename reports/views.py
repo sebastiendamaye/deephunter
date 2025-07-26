@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils import timezone
 from django.db.models import Q, Sum, Count
+from django.core.paginator import Paginator
 from datetime import datetime, timedelta
 from qm.models import Analytic, Snapshot, Campaign, MitreTactic, MitreTechnique, Endpoint, Connector
 
@@ -25,6 +26,8 @@ DB_DATA_RETENTION = settings.DB_DATA_RETENTION
 ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
 # threshold for rare occurrences
 RARE_OCCURRENCES_THRESHOLD = settings.RARE_OCCURRENCES_THRESHOLD
+
+ANALYTICS_PER_PAGE = settings.ANALYTICS_PER_PAGE
 
 @login_required
 def campaigns_stats(request):
@@ -269,9 +272,13 @@ def analytics_perfs(request):
                 'status': snapshot.analytic.status,
                 'sparkline': [analytic_snapshot.runtime for analytic_snapshot in analytic_snapshots]
             })
-    
+
+    paginator = Paginator(analytics, ANALYTICS_PER_PAGE)
+    page_number = int(request.GET.get('page', 1))
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'analytics': analytics
+        'analytics': page_obj
         }
     
     return render(request, 'perfs.html', context)
@@ -279,8 +286,13 @@ def analytics_perfs(request):
 @login_required
 def query_error(request):
     analytics = Analytic.objects.filter(query_error = True)
+
+    paginator = Paginator(analytics, ANALYTICS_PER_PAGE)
+    page_number = int(request.GET.get('page', 1))
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'analytics': analytics
+        'analytics': page_obj
         }
     
     return render(request, 'query_error.html', context)
@@ -294,7 +306,7 @@ def rare_occurrences(request):
         .filter(distinct_hostnames__lt=RARE_OCCURRENCES_THRESHOLD)
         .order_by('distinct_hostnames')
         )
-    
+
     data = []
     for analytic in analytics:
         q = get_object_or_404(Analytic, pk=analytic['snapshot__analytic__id'])
@@ -313,8 +325,12 @@ def rare_occurrences(request):
             'endpoints': [endpoint['hostname'] for endpoint in endpoints]
             })        
 
+    paginator = Paginator(data, ANALYTICS_PER_PAGE)
+    page_number = int(request.GET.get('page', 1))
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'analytics': data
+        'analytics': page_obj
         }
     
     return render(request, 'rare_occurrences.html', context)
@@ -324,7 +340,14 @@ def rare_occurrences(request):
 def zero_occurrence(request):
     analytics_without_endpoints = Analytic.objects.filter(run_daily=True).annotate(
         endpoint_count=Count('snapshot__endpoint')).filter(endpoint_count=0)
+    total = analytics_without_endpoints.count()
+
+    paginator = Paginator(analytics_without_endpoints, ANALYTICS_PER_PAGE)
+    page_number = int(request.GET.get('page', 1))
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'analytics': analytics_without_endpoints
-        }
+        'analytics': page_obj,
+        'total': total
+    }
     return render(request, 'zero_occurrence.html', context)

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load qm_extras %}
 
 {% block style %}
 <link rel="stylesheet" href="/static/css/list_analytics.css" />
@@ -32,6 +33,34 @@
 	</tr>	
 {% endfor %}
 </table>
+
+<div class="pagination">
+	<span class="step-links">
+		<span class="previous">
+			{% if analytics.has_previous %}
+			<a href="?page={{ analytics.previous_page_number }}">Previous</a>
+			{% endif %}
+		</span>
+
+		<span class="current">
+			{% for i in analytics.paginator.num_pages|to_range %}
+				{% if i == analytics.number %}
+					<span class="pagelink">{{ i }}</span>
+				{% else %}
+					<span class="pagelink"><a href="?page={{ i }}">{{ i }}</a></span>
+				{% endif %}
+			{% endfor %}
+		</span>
+
+		<span class="next">
+			{% if analytics.has_next %}
+				<span class="next"><a href="?page={{ analytics.next_page_number }}">Next</a></span>
+			{% endif %}
+		</span>
+	</span>
+</div>
+
+
 <script type="text/javascript" nonce="hf7hgo1ilm">
 $(function() {
 	{% for analytic in analytics %}

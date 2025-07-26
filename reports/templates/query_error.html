@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load qm_extras %}
 
 {% block style %}
 <link rel="stylesheet" href="/static/css/list_analytics.css" />
@@ -27,8 +28,8 @@
 			[<a target="_blank" href="/events/{{ analytic.id }}/">run query</a>]
 		</td>
 		<td>{{ analytic.connector.name }}</td>
-		<td><div class="{{ analytic.status|lower }}">{{ analytic.status }}</div></td>
 		<td title="DESCRIPTION:&#013;===========&#013;{{ analytic.description }}&#013;&#013;QUERY:&#013;===========&#013;{{analytic.query}}">{{ analytic.name }}</td>
+		<td><div class="{{ analytic.status|lower }}">{{ analytic.status }}</div></td>
 		<td class="acenter">{{ analytic.maxhosts_count }}</td>
 		<td class="acenter">
 			{% if analytic.run_daily %}
@@ -46,4 +47,31 @@
 	</tr>	
 {% endfor %}
 </table>
+
+<div class="pagination">
+	<span class="step-links">
+		<span class="previous">
+			{% if analytics.has_previous %}
+			<a href="?page={{ analytics.previous_page_number }}">Previous</a>
+			{% endif %}
+		</span>
+
+		<span class="current">
+			{% for i in analytics.paginator.num_pages|to_range %}
+				{% if i == analytics.number %}
+					<span class="pagelink">{{ i }}</span>
+				{% else %}
+					<span class="pagelink"><a href="?page={{ i }}">{{ i }}</a></span>
+				{% endif %}
+			{% endfor %}
+		</span>
+
+		<span class="next">
+			{% if analytics.has_next %}
+				<span class="next"><a href="?page={{ analytics.next_page_number }}">Next</a></span>
+			{% endif %}
+		</span>
+	</span>
+</div>
+
 {% endblock %}
