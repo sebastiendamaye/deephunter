@@ -1,0 +1,21 @@
+{% load qm_extras %}
+<ul>
+	<table>
+		<tr>
+			<th>Name</th>
+			<th>Installed date</th>
+			<th>Size</th>
+			<th>Version</th>
+			<th>Publisher</th>
+		</tr>
+		{% for app in apps %}
+			<tr>
+				<td>{{ app.name }}</td>
+				<td class="acenter">{{ app.installedDate|truncatechars:11 }}</td>
+				<td class="aright">{{ app.size }}</td>
+				<td class="acenter">{{ app.version }}</td>
+				<td>{{ app.publisher }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+</ul>

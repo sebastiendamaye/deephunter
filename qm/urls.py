@@ -13,6 +13,12 @@ urlpatterns = [
     path('<int:analytic_id>/detail/', views.analyticdetail, name='analyticdetail'),
     path('debug', views.debug, name='debug'),
     path('timeline', views.timeline, name='timeline'),
+
+    path('tl_timeline/<str:hostname>/', views.tl_timeline, name='tl_timeline'),
+    path('tl_host/<str:hostname>/', views.tl_host, name='tl_host'),
+    path('tl_ad/<str:hostname>/', views.tl_ad, name='tl_ad'),
+    path('tl_apps/<str:hostname>/', views.tl_apps, name='tl_apps'),
+
     path('<int:analytic_id>/regen/', views.regen, name='regen'),
     path('cancelregen/<str:taskid>/', views.cancelregen, name='cancelregen'),
     path('<int:analytic_id>/progress/', views.progress, name='progress'),

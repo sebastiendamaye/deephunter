@@ -323,6 +323,20 @@ def debug(request):
 
 @login_required
 def timeline(request):
+
+    hostname = ''
+
+    if request.GET:
+        hostname = request.GET['hostname'].strip()
+    
+    context = {
+        'hostname': hostname,
+        }
+    return render(request, 'timeline.html', context)
+
+@login_required
+def tl_timeline(request, hostname):
+
     groups = []
     items = []
     items2 = []
@@ -330,149 +344,185 @@ def timeline(request):
     iid = 0 # item id
     storylineid_json = {}
 
-    hostname = ''
-    username = ''
-    machinedetails = ''
     apps = ''
+
+    endpoints = Endpoint.objects.filter(hostname=hostname).order_by('snapshot__date')
+    for e in endpoints:
+        # search if group already exists
+        g = next((group for group in groups if group['content'] == f'{e.snapshot.analytic.name} ({e.snapshot.analytic.connector.name})'), None)
+        # if group does not exist yet, create it
+        if g:
+            g = g['id']
+        else:
+            groups.append({'id':gid, 'analyticid':e.snapshot.analytic.id, 'content':f'{e.snapshot.analytic.name} ({e.snapshot.analytic.connector.name})'})
+            g = gid
+            gid += 1
+            
+        # populate items and refer to relevant group
+        items.append({
+            'id': iid,
+            'group': g,
+            'start': e.snapshot.date,
+            'end': e.snapshot.date+timedelta(days=1),
+            'description': 'Signature: {}'.format(e.snapshot.analytic.name),
+            'connector': 'Connector: {}'.format(e.snapshot.analytic.connector.name),
+            'storylineid': 'StorylineID: {}'.format(e.storylineid.replace('#', ', '))
+            })
+        storylineid_json[iid] = e.storylineid.split('#')
+        iid += 1
+    
+
+    # Populate threats (group ID = 999 for easy identification in template)
+    gid = 999
+    created_at = (datetime.today()-timedelta(days=DB_DATA_RETENTION)).isoformat()
+
+    # Recursively call the get_threats function in each connector to build a consolidated list of threats
+    for connector in all_connectors.values():
+    
+        if hasattr(connector, 'get_threats'):
+            # If the connector has a get_threats method, call it
+            #try:
+            threats = connector.get_threats(hostname, created_at)
+            if threats:
+                groups.append({'id':gid, 'content':f'Threats ({connector.__name__.split(".")[1]})'})
+                for threat in threats:
+                    detectedat = threat['threatInfo']['identifiedAt']
+                    items.append({
+                        'id': iid,
+                        'group': gid,
+                        'start': datetime.strptime(detectedat, '%Y-%m-%dT%H:%M:%S.%fZ'),
+                        'end': datetime.strptime(detectedat, '%Y-%m-%dT%H:%M:%S.%fZ')+timedelta(days=1),
+                        'description': '{} [{}] [{}]'.format(
+                            threat['threatInfo']['threatName'],
+                            threat['threatInfo']['analystVerdict'],
+                            threat['threatInfo']['confidenceLevel']
+                            ),
+                        'storylineid': 'StorylineID: {}'.format(threat['threatInfo']['storyline'])
+                        })
+                    storylineid_json[iid] = [threat['threatInfo']['storyline']]
+                    iid += 1
+            #except Exception as e:
+            #    print(f"Error getting threats for {hostname}")
+
+    ###
+    # The below content is only available if SentinelOne connector is enabled
+    ###
+    if is_connector_enabled('sentinelone'):
+
+        # Get machine details from SentinelOne            
+        machinedetails = all_connectors.get('sentinelone').get_machine_details(hostname)
+        if machinedetails:
+            agent_id = machinedetails['id']
+
+            if agent_id:
+            
+                # Populate applications (group ID = 998 for easy identification in template)
+                gid = 998
+                groups.append({'id':gid, 'content':'Apps install (sentinelone)'})
+                
+                createdat = (datetime.today()-timedelta(days=DB_DATA_RETENTION))
+                apps = all_connectors.get('sentinelone').get_applications(agent_id)
+                
+                for app in apps:
+                    if app['installedDate']:
+                        if datetime.strptime(app['installedDate'][:10], '%Y-%m-%d') >= createdat:
+                            items.append({
+                                'id': iid,
+                                'group': gid,
+                                'start':  datetime.strptime(app['installedDate'][:10], '%Y-%m-%d'),
+                                'end': datetime.strptime(app['installedDate'][:10], '%Y-%m-%d')+timedelta(days=1),
+                                'description': '{} ({})'.format(app['name'].strip(), app['publisher'].strip())
+                                })
+                            iid += 1
+                
+                
+
+    # Visualization #2 (graph)
+    items2 = Endpoint.objects.filter(hostname=hostname) \
+        .values('snapshot__date') \
+        .annotate(cumulative_score=Sum('snapshot__analytic__weighted_relevance')) \
+        .order_by('snapshot__date')
+
+
+    context = {
+        'S1_THREATS_URL': get_connector_conf('sentinelone', 'S1_THREATS_URL').format(hostname),
+        'hostname': hostname,
+        'apps': apps,
+        'groups': groups,
+        'items': items,
+        'items2': items2,
+        'mindate': datetime.today()-timedelta(days=DB_DATA_RETENTION+1),
+        'maxdate': datetime.today()+timedelta(days=1),
+        'storylineid_json': storylineid_json
+        }
+    return render(request, 'tl_timeline.html', context)
+
+
+@login_required
+def tl_host(request, hostname):
+
+    machinedetails = {}
     user_name = ''
     job_title = ''
     business_unit = ''
     location = ''
 
-    if request.GET:
-        hostname = request.GET['hostname'].strip()
-        endpoints = Endpoint.objects.filter(hostname=hostname).order_by('snapshot__date')
-        for e in endpoints:
-            # search if group already exists
-            g = next((group for group in groups if group['content'] == f'{e.snapshot.analytic.name} ({e.snapshot.analytic.connector.name})'), None)
-            # if group does not exist yet, create it
-            if g:
-                g = g['id']
-            else:
-                groups.append({'id':gid, 'analyticid':e.snapshot.analytic.id, 'content':f'{e.snapshot.analytic.name} ({e.snapshot.analytic.connector.name})'})
-                g = gid
-                gid += 1
-                
-            # populate items and refer to relevant group
-            items.append({
-                'id': iid,
-                'group': g,
-                'start': e.snapshot.date,
-                'end': e.snapshot.date+timedelta(days=1),
-                'description': 'Signature: {}'.format(e.snapshot.analytic.name),
-                'connector': 'Connector: {}'.format(e.snapshot.analytic.connector.name),
-                'storylineid': 'StorylineID: {}'.format(e.storylineid.replace('#', ', '))
-                })
-            storylineid_json[iid] = e.storylineid.split('#')
-            iid += 1
-        
+    if is_connector_enabled('sentinelone'):
 
-        # Populate threats (group ID = 999 for easy identification in template)
-        gid = 999
-        created_at = (datetime.today()-timedelta(days=DB_DATA_RETENTION)).isoformat()
+        # Get machine details from SentinelOne            
+        machinedetails = all_connectors.get('sentinelone').get_machine_details(hostname)
+        if machinedetails:
+            agent_id = machinedetails['id']
 
-        # Recursively call the get_threats function in each connector to build a consolidated list of threats
-        for connector in all_connectors.values():
-        
-            if hasattr(connector, 'get_threats'):
-                # If the connector has a get_threats method, call it
-                #try:
-                threats = connector.get_threats(hostname, created_at)
-                if threats:
-                    groups.append({'id':gid, 'content':f'Threats ({connector.__name__.split(".")[1]})'})
-                    for threat in threats:
-                        detectedat = threat['threatInfo']['identifiedAt']
-                        items.append({
-                            'id': iid,
-                            'group': gid,
-                            'start': datetime.strptime(detectedat, '%Y-%m-%dT%H:%M:%S.%fZ'),
-                            'end': datetime.strptime(detectedat, '%Y-%m-%dT%H:%M:%S.%fZ')+timedelta(days=1),
-                            'description': '{} [{}] [{}]'.format(
-                                threat['threatInfo']['threatName'],
-                                threat['threatInfo']['analystVerdict'],
-                                threat['threatInfo']['confidenceLevel']
-                                ),
-                            'storylineid': 'StorylineID: {}'.format(threat['threatInfo']['storyline'])
-                            })
-                        storylineid_json[iid] = [threat['threatInfo']['storyline']]
-                        iid += 1
-                """except Exception as e:
-                    print(f"Error getting threats for {hostname}")"""
-
-        ###
-        # The below content is only available if SentinelOne connector is enabled
-        ###
-        if is_connector_enabled('sentinelone'):
-
-            username = ''
-
-            # Get machine details from SentinelOne            
-            machinedetails = all_connectors.get('sentinelone').get_machine_details(hostname)
-            if machinedetails:
-                agent_id = machinedetails['id']
-
-                if agent_id:
-                    # Get username
-                    username = all_connectors.get('sentinelone').get_last_logged_in_user(agent_id)
-                
-                    # Populate applications (group ID = 998 for easy identification in template)
-                    gid = 998
-                    groups.append({'id':gid, 'content':'Apps install (sentinelone)'})
-                    
-                    createdat = (datetime.today()-timedelta(days=DB_DATA_RETENTION))
-                    apps = all_connectors.get('sentinelone').get_applications(agent_id)
-                    
-                    for app in apps:
-                        if app['installedDate']:
-                            if datetime.strptime(app['installedDate'][:10], '%Y-%m-%d') >= createdat:
-                                items.append({
-                                    'id': iid,
-                                    'group': gid,
-                                    'start':  datetime.strptime(app['installedDate'][:10], '%Y-%m-%d'),
-                                    'end': datetime.strptime(app['installedDate'][:10], '%Y-%m-%d')+timedelta(days=1),
-                                    'description': '{} ({})'.format(app['name'].strip(), app['publisher'].strip())
-                                    })
-                                iid += 1
-                    
-                    # Get user info from AD
-                    user_name = 'N/A'
-                    job_title = 'N/A'
-                    business_unit = 'N/A'
-                    location = 'N/A'
-
-                    entry = all_connectors.get('activedirectory').ldap_search(username)
-                    if entry:
-                        user_name = entry.displayName
-                        job_title = entry.title
-                        business_unit = entry.division
-                        location = "{}, {}".format(entry.physicalDeliveryOfficeName, entry.co)
-                    
-
-        # Visualization #2 (graph)
-        items2 = Endpoint.objects.filter(hostname=hostname) \
-            .values('snapshot__date') \
-            .annotate(cumulative_score=Sum('snapshot__analytic__weighted_relevance')) \
-            .order_by('snapshot__date')
-
+            if agent_id:
+                # Get username
+                username = all_connectors.get('sentinelone').get_last_logged_in_user(agent_id)
+                entry = all_connectors.get('activedirectory').ldap_search(username)
+                if entry:
+                    user_name = entry.displayName
+                    job_title = entry.title
+                    business_unit = entry.division
+                    location = "{}, {}".format(entry.physicalDeliveryOfficeName, entry.co)
     
     context = {
-        'S1_THREATS_URL': get_connector_conf('sentinelone', 'S1_THREATS_URL').format(hostname),
-        'hostname': hostname,
-        'username': username,
         'machinedetails': machinedetails,
-        'apps': apps,
-        'groups': groups,
-        'items': items,
-        'items2': items2,
-        'mindate': datetime.today()-timedelta(days=91),
-        'maxdate': datetime.today()+timedelta(days=1),
         'user_name': user_name,
         'job_title': job_title,
         'business_unit': business_unit,
         'location': location,
-        'storylineid_json': storylineid_json
         }
-    return render(request, 'timeline.html', context)
+    return render(request, 'tl_host.html', context)
+
+
+@login_required
+def tl_ad(request, hostname):
+
+    machinedetails = {}
+    if is_connector_enabled('sentinelone'):
+
+        # Get machine details from SentinelOne            
+        machinedetails = all_connectors.get('sentinelone').get_machine_details(hostname)
+    
+    context = {
+        'machinedetails': machinedetails,
+        }
+    return render(request, 'tl_ad.html', context)
+
+@login_required
+def tl_apps(request, hostname):
+
+    if is_connector_enabled('sentinelone'):
+        # Get machine details from SentinelOne            
+        machinedetails = all_connectors.get('sentinelone').get_machine_details(hostname)
+        if machinedetails:
+            agent_id = machinedetails['id']
+            if agent_id:            
+                apps = all_connectors.get('sentinelone').get_applications(agent_id)
+
+    context = {
+        'apps': apps,
+        }
+    return render(request, 'tl_apps.html', context)
 
 @login_required
 def events(request, analytic_id, eventdate=None, endpointname=None):

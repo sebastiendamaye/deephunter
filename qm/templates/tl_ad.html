@@ -1,0 +1,58 @@
+{% load qm_extras %}
+{% if machinedetails %}
+
+	<h3>computerDistinguishedName</h3>
+	{% with machinedetails.activeDirectory.computerDistinguishedName|classname as modelclass %}
+	{% if modelclass == "str" %}
+		<ul><li>{{ machinedetails.activeDirectory.computerDistinguishedName }}</li></ul>
+	{% elif modelclass == "list" %}
+		<ul>		
+			{% for detail in machinedetails.activeDirectory.computerDistinguishedName %}
+				<li>{{ detail }}</li>
+			{% endfor %}
+		</ul>
+	{% endif %}
+	{% endwith %}
+
+	<h3>computerMemberOf</h3>
+	{% with machinedetails.activeDirectory.computerMemberOf|classname as modelclass %}
+	{% if modelclass == "str" %}
+		<ul><li>{{ machinedetails.activeDirectory.computerMemberOf }}</li></ul>
+	{% elif modelclass == "list" %}
+		<ul>		
+			{% for detail in machinedetails.activeDirectory.computerMemberOf %}
+				<li>{{ detail }}</li>
+			{% endfor %}
+		</ul>
+	{% endif %}
+	{% endwith %}
+
+	<h3>lastUserDistinguishedName</h3>
+	{% with machinedetails.activeDirectory.lastUserDistinguishedName|classname as modelclass %}
+	{% if modelclass == "str" %}
+		<ul><li>{{ machinedetails.activeDirectory.lastUserDistinguishedName }}</li></ul>
+	{% elif modelclass == "list" %}
+		<ul>		
+			{% for detail in machinedetails.activeDirectory.lastUserDistinguishedName %}
+				<li>{{ detail }}</li>
+			{% endfor %}
+		</ul>
+	{% endif %}
+	{% endwith %}
+
+	<h3>lastUserMemberOf</h3>
+	{% with machinedetails.activeDirectory.lastUserMemberOf|classname as modelclass %}
+	{% if modelclass == "str" %}
+		<ul><li>{{ machinedetails.activeDirectory.lastUserMemberOf }}</li></ul>
+	{% elif modelclass == "list" %}
+		<ul>		
+			{% for detail in machinedetails.activeDirectory.lastUserMemberOf %}
+				<li>{{ detail }}</li>
+			{% endfor %}
+		</ul>
+	{% endif %}
+	{% endwith %}
+
+{% else %}
+	<p>No information available.</p>
+{% endif %}

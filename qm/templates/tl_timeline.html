@@ -1,0 +1,264 @@
+{% load qm_extras %}
+
+{% block style %}
+	<link rel="stylesheet" href="/static/css/stats.css" />
+	<link rel="stylesheet" href="/static/css/timeline.css" />
+	<link href="/static/vis-timeline/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="/static/jquery-ui/jquery-ui.min.css" />
+	<script src="/static/jquery/jquery.min.js"></script>
+	<script src="/static/jquery-ui/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/static/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js"></script>
+	<script src="/static/js/htmx.min.js"></script>
+{% endblock %}
+
+{% block body %}
+		<br />
+		<input type="checkbox" id="compactview">
+		<label for="compactview">Compact view</label>
+		<br />
+	<div>
+		<ul>
+			<li>Click on item to highlight related analytics (based on storyline ID)</li>
+			<li>Double click to open related events or threats (new window)</li>
+		</ul>
+	</div>
+
+	<div class="outer-top-row">
+		<div id="visualization2"></div>
+	</div>
+	<div class="outer-bottom-row">
+		<div id="visualization"></div>
+	</div>
+
+
+
+	<div id="contextMenu">
+		<a id="link_events" href="" target="_blank">Open events</a>
+		<a id="link_storylineid" href="" target="_blank">Open Storyline ID</a>
+		<a id="link_trend" href="" target="_blank">See trend</a>
+		<a id="link_admin" href="" target="_blank">Edit in admin</a>
+	</div>
+
+	<script type="text/javascript" nonce="jc3vgs67dm">
+
+	var mygroups = []
+	{% for group in groups %}
+		mygroups.push('{{ group.analyticid }}');
+	{% endfor %}
+
+	var groups = new vis.DataSet([
+		{% for group in groups %}
+			{id: {{ group.id }}, content: '{{ group.content }}'},
+		{% endfor %}
+	]);
+
+	// create a dataset with items
+	// note that months are zero-based in the JavaScript Date object, so month 3 is April
+	var items = new vis.DataSet([
+	{% for item in items %}
+		{
+			id: {{ item.id }},
+			group: {{ item.group }},
+			start: new Date({{ item.start|date:"Y" }},{{ item.start|date:"n-1" }},{{ item.start|date:"j" }}),
+			end: new Date({{ item.end|date:"Y" }},{{ item.end|date:"n-1" }},{{ item.end|date:"j" }}),
+			title: "DATE: {{ item.start|date:"Y-n-j" }}<br />{{ item.description }}<br />{{ item.connector }}<br />{{ item.storylineid }}"
+		},
+	{% endfor %}
+	]);
+
+	// create visualization
+	var container = document.getElementById('visualization');
+
+	var	dt_start = new Date({{ mindate|date:"Y" }},{{ mindate|date:"n-1" }},{{ mindate|date:"j" }});
+	dt_start.setDate(dt_start.getDate() - 1);
+	var	dt_end = new Date({{ maxdate|date:"Y" }},{{ maxdate|date:"n-1" }},{{ maxdate|date:"j" }});
+	dt_end.setDate(dt_end.getDate() + 1);
+
+	var options = {
+		// option groupOrder can be a property name or a sort function
+		// the sort function must compare two groups and return a value
+		//     > 0 when a > b
+		//     < 0 when a < b
+		//       0 when a == b
+		groupOrder: function (a, b) {
+			return a.value - b.value;
+		},
+		editable: false,
+		stack: true,
+		zoomable: false,
+		start: dt_start,
+		end: dt_end,
+		min: dt_start,
+		max: dt_end
+	};
+
+	var timeline = new vis.Timeline(container);
+	timeline.setOptions(options);
+	timeline.setGroups(groups);
+	timeline.setItems(items);
+
+
+	/* Vis 2 */
+	var items2 = new vis.DataSet([
+	{% for item2 in items2 %}
+		{
+			x: new Date({{ item2.snapshot__date|date:"Y" }},{{ item2.snapshot__date|date:"n-1" }},{{ item2.snapshot__date|date:"j" }}),
+			y: {{ item2.cumulative_score }},
+			label: "DATE: {{ item2.snapshot__date|date:"Y-n-j" }}<br />{{ item2.cumulative_score }}"
+		},
+	{% endfor %}
+	]);
+	var container2 = document.getElementById('visualization2');
+	var options2 = {
+		style:'bar',
+		barChart: {width:12, align:'right'},
+		dataAxis: {
+			left: {
+				title: {
+					text:'Weighted Score'
+				},
+				/*textOrientation:'horizontal' <-- it doesn't work*/
+			}
+		},
+		drawPoints: false,
+		height: '100%',
+		zoomable: false,
+		start: dt_start,
+		end: dt_end,
+		min: dt_start,
+		max: dt_end
+	};
+	var graph2d = new vis.Graph2d(container2, items2, options2);
+
+
+	function formatDate(date) {
+	const year = date.getFullYear();
+	const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
+	const day = date.getDate().toString().padStart(2, '0');
+
+	return `${year}-${month}-${day}`;
+	}
+
+
+	var storylineid = {{ storylineid_json|safe }}
+
+	// Double click to play query in new window
+	timeline.on('doubleClick', function (properties) {	
+		if (properties['group'] == '998') {
+			// Double click not available for apps group
+			return false;
+		} else if (properties['group'] == '999') {
+			// Threats details
+			window.open('{{ S1_THREATS_URL|safe }}', '_blank');
+		} else {
+
+			var nodeID = properties['item'];
+			$('#link_events').attr('href', '/events/'+mygroups[properties['group']]+'/'+formatDate(properties['time'])+'/{{hostname}}/');
+			
+			if (storylineid[nodeID] != '') {
+				$('#link_storylineid').attr('href', '/storyline/'+storylineid[nodeID]+'/'+formatDate(properties['time'])+'/');
+				$('#link_storylineid').removeClass('disabled');
+			} else {
+				$('#link_storylineid').attr('href', '#');
+				$('#link_storylineid').addClass('disabled');
+			}
+			
+			$('#link_admin').attr('href', '/admin/qm/analytic/'+mygroups[properties['group']]+'/change/');
+			$('#link_trend').attr('href', '/'+mygroups[properties['group']]+'/trend/');
+
+			var x = properties.pageX;
+			var y = properties.pageY;
+
+			// Position and show the custom context menu
+			$('#contextMenu').css({
+				top: y + 'px',
+				left: x + 'px'
+			}).show();
+
+		}
+	});
+
+	// Simple click to highlight items with same storylineID as the clicked item
+	timeline.on("click", function(properties) {
+		
+		// Hide the menu when clicking anywhere on the page
+		$('#contextMenu').hide();
+		
+		if (properties['group'] == '998') {
+			// Click not available for apps (because they don't have storylineID)
+			return false;
+		} else {
+			var nodeID = properties['item'];
+			if (nodeID) {
+			
+				// Clean all previously selected items
+				for (var i=0 ; i < Object.keys(storylineid).length ; i++) {
+					var node = items.get(Number(Object.keys(storylineid)[i]));
+					node.className = 'blue';
+					items.update(node);
+				}
+			
+				// Initially only the clicked ID added to the array (more itemID will be added later)
+				var id_to_highlight = [nodeID];
+
+				// Only highlight nodes if the clicked node has a Storyline ID (if empty, do nothing)
+				if (storylineid[nodeID] != '') {
+
+					// for each storylineID associated to the clicked node
+					for (var s=0 ; s < storylineid[nodeID].length ; s++) {
+						var current_storylineid_clicked_item = storylineid[nodeID][s];
+						
+						// Recursively list all itemID in the JSON object
+						for (var i=0 ; i < Object.keys(storylineid).length ; i++) {
+							var current_item_id = Number(Object.keys(storylineid)[i]);
+							
+							// for each storylineID of the current item
+							for (var x=0; x<storylineid[current_item_id].length; x++) {
+								var current_storylineid_current_item = storylineid[current_item_id][x]
+								if (current_storylineid_current_item == current_storylineid_clicked_item) {
+									// Only add to array if not already added
+									if (id_to_highlight.indexOf(current_item_id) === -1) {
+										id_to_highlight.push(current_item_id);
+									}
+								}
+							}
+						}
+					}
+								
+					// Highlight all relevant items in red
+					for (var i=0; i<id_to_highlight.length; i++) {
+						var clickedNode = items.get(id_to_highlight[i]);
+						clickedNode.className = 'red';
+						items.update(clickedNode);
+					}
+				}
+			}
+		}
+	});
+
+	var toggle = false;
+	$("#compactview").click(function() {
+			$("input[type=checkbox]").attr("checked",!toggle);
+			options['stack'] = toggle;
+			timeline.setOptions(options);
+			toggle = !toggle;
+	});
+
+	// Apply same size to the 2 visualizations so that graph aligns with timeline nodes
+	// Credits: https://stackoverflow.com/questions/33596816/how-to-draw-line-graph-on-timeline-using-visjs
+	var ylabel_width = $("#visualization .vis-labelset .vis-label").width() + "px";
+
+	var w1 = $("#visualization2 .vis-content .vis-data-axis").width();
+	var w2 = $("#visualization .vis-labelset .vis-label").width();
+
+	$("#visualization2")[0].childNodes[0].childNodes[2].style.display = 'none';
+
+	if (w2 > w1) {
+		$("#visualization2 .vis-content")[1].style.width = ylabel_width;
+	}
+	else {
+		$("#visualization .vis-labelset .vis-label").width(w1+"px");
+	}
+	</script>
+
+{% endblock %}
