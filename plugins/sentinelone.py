@@ -268,16 +268,16 @@ def delete_rule(analytic):
         proxies=PROXY
         )
 
-def get_threats(hostname, created_at):
+def get_threats(hostname, sincedate):
     """
     Get threats from SentinelOne for a specific hostname and created_at date.
     :param hostname: Hostname of the machine to retrieve threats for.
-    :param created_at: Date in ISO format to filter threats created after this date.
+    :param sincedate: Date in ISO format to filter threats created after this date.
     :return: List of threats (array) or None if not found.
     """
     init_globals()
     r = requests.get(
-        f'{S1_URL}/web/api/v2.1/threats?computerName__contains={hostname}&createdAt__gte={created_at}',
+        f'{S1_URL}/web/api/v2.1/threats?computerName__contains={hostname}&createdAt__gte={sincedate}',
         params = {"limit": 100},
         headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
         proxies=PROXY
@@ -449,3 +449,25 @@ def get_token_expiration():
             print(f"[ ERROR ] Failed to retrieve token expiration date: {r.text}")
         logger.error(f"Failed to retrieve token expiration date: {r.text}")
         return None
+
+
+def get_redirect_threats_link(endpoint, date):
+    """
+    Generate a link to the SentinelOne threats page for a specific endpoint and date.
+    :param endpoint: The endpoint name.
+    :param date: Threat detection date, in 'YYYY-MM-DD' format.
+    :return: A formatted URL string for the SentinelOne threats page.
+    """
+    init_globals()
+
+    # convert date to datetime object
+    start_date = datetime.combine(datetime.strptime(date, '%Y-%m-%d'), datetime.min.time())
+    end_date = start_date + timedelta(days=1)
+
+    # We add 000 because timerange is expected in epoch time milliseconds
+    timerange = "{}000-{}000".format(
+        int(start_date.timestamp()),
+        int(end_date.timestamp())
+        )
+ 
+    return S1_THREATS_URL.format(endpoint, timerange)

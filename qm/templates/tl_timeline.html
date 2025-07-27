@@ -132,24 +132,25 @@
 
 
 	function formatDate(date) {
-	const year = date.getFullYear();
-	const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
-	const day = date.getDate().toString().padStart(2, '0');
+		const year = date.getFullYear();
+		const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed
+		const day = date.getDate().toString().padStart(2, '0');
 
-	return `${year}-${month}-${day}`;
+		return `${year}-${month}-${day}`;
 	}
 
 
 	var storylineid = {{ storylineid_json|safe }}
+	var connectors = {{ connectors_json|safe }}
 
 	// Double click to play query in new window
 	timeline.on('doubleClick', function (properties) {	
-		if (properties['group'] == '998') {
+		if (properties['group'] == '500') {
 			// Double click not available for apps group
 			return false;
-		} else if (properties['group'] == '999') {
+		} else if (properties['group'] == '1000') {
 			// Threats details
-			window.open('{{ S1_THREATS_URL|safe }}', '_blank');
+			window.open('/threats/'+connectors[properties['item']]+'/{{ hostname }}/'+formatDate(properties['time'])+'/', '_blank');
 		} else {
 
 			var nodeID = properties['item'];
@@ -184,7 +185,7 @@
 		// Hide the menu when clicking anywhere on the page
 		$('#contextMenu').hide();
 		
-		if (properties['group'] == '998') {
+		if (properties['group'] == '500') {
 			// Click not available for apps (because they don't have storylineID)
 			return false;
 		} else {

@@ -15,7 +15,8 @@ You can also truncate the computer name to remove the domain: | project Computer
 
 To do
 -----
-Sync rules not implemented yet.
+- Sync rules not implemented yet.
+- get_threats() not implemented yet.
 """
 
 from azure.identity import ClientSecretCredential
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 _globals_initialized = False
 def init_globals():
-    global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES
+    global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES, S1_THREATS_URL
     global _globals_initialized
     if not _globals_initialized:
         DEBUG = False
@@ -43,6 +44,7 @@ def init_globals():
         WORKSPACE_NAME = get_connector_conf('microsoftsentinel', 'WORKSPACE_NAME').lower()
         RESOURCE_GROUP = get_connector_conf('microsoftsentinel', 'RESOURCE_GROUP')
         SYNC_RULES = get_connector_conf('microsoftsentinel', 'SYNC_RULES')
+        S1_THREATS_URL = get_connector_conf('sentinelone', 'S1_THREATS_URL')
         _globals_initialized = True
 
 

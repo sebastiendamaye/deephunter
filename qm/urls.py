@@ -9,6 +9,7 @@ urlpatterns = [
     path('events/<int:analytic_id>/<str:eventdate>/<str:endpointname>/', views.events, name='events'),
     path('events/<int:analytic_id>/<str:eventdate>/', views.events, name='events'),
     path('events/<int:analytic_id>/', views.events, name='events'),
+    path('threats/<str:connector>/<str:endpointname>/<str:date>/', views.threats, name='threats'),
     path('storyline/<str:storylineids>/<str:eventdate>/', views.storyline, name='storyline'),
     path('<int:analytic_id>/detail/', views.analyticdetail, name='analyticdetail'),
     path('debug', views.debug, name='debug'),

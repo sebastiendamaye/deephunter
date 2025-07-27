@@ -343,6 +343,7 @@ def tl_timeline(request, hostname):
     gid = 0 # group id
     iid = 0 # item id
     storylineid_json = {}
+    connectors_json = {}
 
     apps = ''
 
@@ -369,22 +370,31 @@ def tl_timeline(request, hostname):
             'storylineid': 'StorylineID: {}'.format(e.storylineid.replace('#', ', '))
             })
         storylineid_json[iid] = e.storylineid.split('#')
+        connectors_json[iid] = e.snapshot.analytic.connector.name
         iid += 1
     
 
-    # Populate threats (group ID = 999 for easy identification in template)
-    gid = 999
-    created_at = (datetime.today()-timedelta(days=DB_DATA_RETENTION)).isoformat()
+    # Populate threats (group ID >= 1000 for easy identification in template)
+    gid = 1000
+    sincedate = (datetime.today()-timedelta(days=DB_DATA_RETENTION)).isoformat()
 
     # Recursively call the get_threats function in each connector to build a consolidated list of threats
     for connector in all_connectors.values():
-    
-        if hasattr(connector, 'get_threats'):
+
+        connector_name = connector.__name__.split('.')[1]
+
+        # we only call get_threats() if the connector is enabled and has this method
+        if is_connector_enabled(connector_name) and hasattr(connector, 'get_threats'):
             # If the connector has a get_threats method, call it
             #try:
-            threats = connector.get_threats(hostname, created_at)
+            threats = connector.get_threats(hostname, sincedate)
+
+            logger.error('===========')
+            logger.error(threats)
+            logger.error('===========')
+
             if threats:
-                groups.append({'id':gid, 'content':f'Threats ({connector.__name__.split(".")[1]})'})
+                groups.append({'id':gid, 'content':f'Threats ({connector_name})'})
                 for threat in threats:
                     detectedat = threat['threatInfo']['identifiedAt']
                     items.append({
@@ -397,12 +407,17 @@ def tl_timeline(request, hostname):
                             threat['threatInfo']['analystVerdict'],
                             threat['threatInfo']['confidenceLevel']
                             ),
-                        'storylineid': 'StorylineID: {}'.format(threat['threatInfo']['storyline'])
+                        'storylineid': 'StorylineID: {}'.format(threat['threatInfo']['storyline']),
+                        'connector': f'Connector: {connector_name}'
                         })
                     storylineid_json[iid] = [threat['threatInfo']['storyline']]
+                    connectors_json[iid] = connector_name
                     iid += 1
             #except Exception as e:
             #    print(f"Error getting threats for {hostname}")
+        
+            # We increment the group ID for each connector to ensure unique group IDs
+            gid += 1
 
     ###
     # The below content is only available if SentinelOne connector is enabled
@@ -416,8 +431,8 @@ def tl_timeline(request, hostname):
 
             if agent_id:
             
-                # Populate applications (group ID = 998 for easy identification in template)
-                gid = 998
+                # Populate applications (group ID = 500 for easy identification in template)
+                gid = 500
                 groups.append({'id':gid, 'content':'Apps install (sentinelone)'})
                 
                 createdat = (datetime.today()-timedelta(days=DB_DATA_RETENTION))
@@ -445,7 +460,6 @@ def tl_timeline(request, hostname):
 
 
     context = {
-        'S1_THREATS_URL': get_connector_conf('sentinelone', 'S1_THREATS_URL').format(hostname),
         'hostname': hostname,
         'apps': apps,
         'groups': groups,
@@ -453,7 +467,8 @@ def tl_timeline(request, hostname):
         'items2': items2,
         'mindate': datetime.today()-timedelta(days=DB_DATA_RETENTION+1),
         'maxdate': datetime.today()+timedelta(days=1),
-        'storylineid_json': storylineid_json
+        'storylineid_json': storylineid_json,
+        'connectors_json': connectors_json,
         }
     return render(request, 'tl_timeline.html', context)
 
@@ -531,6 +546,13 @@ def events(request, analytic_id, eventdate=None, endpointname=None):
     """
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     return HttpResponseRedirect(all_connectors.get(analytic.connector.name).get_redirect_analytic_link(analytic, eventdate, endpointname))
+
+@login_required
+def threats(request, connector, endpointname, date):
+    """
+    Redirect to the threats link in the connector's data lake.
+    """
+    return HttpResponseRedirect(all_connectors.get(connector).get_redirect_threats_link(endpointname, date))
 
 @login_required
 def storyline(request, storylineids, eventdate):

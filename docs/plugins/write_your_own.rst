@@ -14,7 +14,9 @@ Plugins' settings should be stored in the database (Connector and ConnectorConf 
 Python file
 ===========
 
-The python file should be stored in the `plugins` folder and have the same name (extension excluded) as the plugin name in the database (Connector table). It should contain all mandatory methods.
+- The python file should be stored in the `plugins` folder and have the same name (extension excluded) as the plugin name in the database (Connector table).
+- The plugin name shoud not contain any space or special characters. Only use lowercase letters.
+- It should contain all mandatory methods.
 
 Methods are listed below (M/O = Mandatory / Optional).
 
@@ -59,12 +61,6 @@ Methods are listed below (M/O = Mandatory / Optional).
      - O
      - ``analytic``: Analytic object corresponding to the analytic.
      - 
-   * - ``get_threats``
-     - Get threats from your EDR for a specific hostname and a date.
-     - O
-     - * ``hostname``: Hostname of the machine to retrieve threats for.
-       * ``created_at``: Date in ISO format to filter threats created after this date.
-     - List of threats (array) or ``None`` if not found.
    * - ``get_redirect_analytic_link``
      - Get the redirect link to run the analytic in the remote data lake.
      - M
@@ -72,6 +68,18 @@ Methods are listed below (M/O = Mandatory / Optional).
        * ``date``: Date to filter the analytic by, in ISO format (range will be date-date+1day).
        * ``endpoint_name``: Name of the endpoint to filter the analytic by.
      - String containing the redirect link for the analytic.
+   * - ``get_threats``
+     - Get threats from your EDR for a specific hostname and a date.
+     - O
+     - * ``hostname``: Hostname of the machine to retrieve threats for.
+       * ``sincedate``: Date in ISO format to filter threats created after this date.
+     - List of threats (array) or ``None`` if not found. See expected below.
+   * - ``get_redirect_threats_link``
+     - Generate a link to the threats page for a specific endpoint and date. Mandatory if ``get_threats()`` method is present.
+     - M/O
+     - * ``endpoint``: Name of the endpoint to filter the analytic by.
+       * ``date``: Threat detection date, in 'YYYY-MM-DD' format.       
+     - String containing the redirect link for the threats page.
    * - ``get_token_expiration``
      - Get the expiration (in days) of the API token.
      - O
@@ -96,7 +104,7 @@ You can use the following template to create your own plugin:
 
     _globals_initialized = False
     def init_globals():
-        global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES
+        global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES, THREATS_URL
         global _globals_initialized
         if not _globals_initialized:
             DEBUG = False
@@ -106,6 +114,7 @@ You can use the following template to create your own plugin:
             # ....
             # ....
             SYNC_RULES = get_connector_conf('microsoftsentinel', 'SYNC_RULES')
+            THREATS_URL = get_connector_conf('microsoftsentinel', 'THREATS_URL')
             _globals_initialized = True
 
     def query(analytic, from_date=None, to_date=None, debug=None):
@@ -149,7 +158,6 @@ You can use the following template to create your own plugin:
         init_globals()
         return False
 
-
     def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
         """
         Generate a URL to pre-fill the query in the remote data lake.
@@ -158,3 +166,59 @@ You can use the following template to create your own plugin:
         url = ''
         return url
 
+    def get_threats(hostname, sincedate=None):
+        """
+        Get threats from remote data lake for a specific hostname and sincedate date.
+        :param hostname: Hostname of the machine to retrieve threats for.
+        :param sincedate: Date in ISO format to filter threats created after this date.
+        :return: List of threats (array) or None if not found.
+        
+        Expected output format example:
+        
+        [
+        {'threatInfo': {
+            'identifiedAt': '2025-05-29T13:36:08.167000Z',
+            'threatName': 'Suivie NDF 2024.xlsm',
+            'analystVerdict': 'true_positive',
+            'confidenceLevel': 'malicious'
+            'storyline': '',
+        }},
+        {'threatInfo': {
+            'identifiedAt': '2025-05-29T13:36:08.183000Z',
+            'threatName': 'Suivie NDF 2024 (002).xlsm',
+            'analystVerdict': 'true_positive',
+            'confidenceLevel': 'malicious',
+            'storyline': '',
+        }},
+        {'threatInfo': {
+            'identifiedAt': '2025-05-29T13:36:12.198000Z',
+            'threatName': 'A2C163C3.xlsm',
+            'analystVerdict': 'true_positive',
+            'confidenceLevel': 'malicious',
+            'storyline': '',
+        }}
+        ]
+        """
+        init_globals()
+        r = requests.get(
+            f'{S1_URL}/web/api/v2.1/threats?computerName__contains={hostname}&createdAt__gte={created_at}',
+            params = {"limit": 100},
+            headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
+            proxies=PROXY
+            )
+        return r.json()['data'] if r.status_code == 200 and r.json()['data'] else None
+
+    def get_redirect_threats_link(endpoint, date):
+        """
+        Generate a link to the threats page for a specific endpoint and date.
+        :param endpoint: The endpoint name.
+        :param date: The date for which to generate the link, in 'YYYY-MM-DD' format.
+        :return: A formatted URL string for the SentinelOne threats page.
+        """
+        init_globals()
+
+        # do your stuff
+        # ...
+
+        # you can use a URL template using the variables and replace with corect values  
+        return THREATS_URL.format(endpoint, timerange)
