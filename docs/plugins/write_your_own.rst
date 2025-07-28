@@ -172,15 +172,16 @@ You can use the following template to create your own plugin:
         :param hostname: Hostname of the machine to retrieve threats for.
         :param sincedate: Date in ISO format to filter threats created after this date.
         :return: List of threats (array) or None if not found.
-        
-        Expected output format example:
-        
-        [
+        """
+        init_globals()
+
+        # Expected output format example:
+        threats = [
         {'threatInfo': {
             'identifiedAt': '2025-05-29T13:36:08.167000Z',
             'threatName': 'Suivie NDF 2024.xlsm',
             'analystVerdict': 'true_positive',
-            'confidenceLevel': 'malicious'
+            'confidenceLevel': 'malicious',
             'storyline': '',
         }},
         {'threatInfo': {
@@ -198,15 +199,8 @@ You can use the following template to create your own plugin:
             'storyline': '',
         }}
         ]
-        """
-        init_globals()
-        r = requests.get(
-            f'{S1_URL}/web/api/v2.1/threats?computerName__contains={hostname}&createdAt__gte={created_at}',
-            params = {"limit": 100},
-            headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
-            proxies=PROXY
-            )
-        return r.json()['data'] if r.status_code == 200 and r.json()['data'] else None
+
+        return threats
 
     def get_redirect_threats_link(endpoint, date):
         """
@@ -220,5 +214,5 @@ You can use the following template to create your own plugin:
         # do your stuff
         # ...
 
-        # you can use a URL template using the variables and replace with corect values  
-        return THREATS_URL.format(endpoint, timerange)
+        # you can use a URL template using the variables and replace with corect values
+        return f"https://portal.azure.com/search?host={endpoint}&date={date}"

@@ -148,7 +148,7 @@
 		if (properties['group'] == '500') {
 			// Double click not available for apps group
 			return false;
-		} else if (properties['group'] == '1000') {
+		} else if (properties['group'] >= '1000') {
 			// Threats details
 			window.open('/threats/'+connectors[properties['item']]+'/{{ hostname }}/'+formatDate(properties['time'])+'/', '_blank');
 		} else {
