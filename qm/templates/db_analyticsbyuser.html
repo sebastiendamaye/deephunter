@@ -2,6 +2,9 @@
 <div id="analyticsByUser_chartContainer" class="chartContainer"></div>
 <script nonce="klf4do97jh">
     $(document).ready(function() {
+    function clicklegenditem_analyticbyuser(e) {
+        window.location='/qm/listanalytics/?created_by='+e.dataPoint.id;
+    }
 
         var chart = new CanvasJS.Chart("analyticsByUser_chartContainer", {
             backgroundColor: "#f9f9f9",
@@ -24,11 +27,16 @@
                 toolTipContent: "<b>{name}:</b> {y} (#percent%)",
                 dataPoints: [
                     {% for analytic in analytics_breakdown %}
-                        { y: {{ analytic.count }}, name: "{{ analytic.created_by__username }}", click: function(e) { window.location='/qm/listanalytics/?created_by={{ analytic.created_by__id }}'; } },
+                        { y: {{ analytic.count }},
+                        name: "{{ analytic.created_by__username }}",
+                        id: "{{ analytic.created_by__id }}",
+                        click: function(e) { window.location='/qm/listanalytics/?created_by={{ analytic.created_by__id }}'; } },
                     {% endfor %}
                 ]
             }],
             legend: {
+                cursor: "pointer",
+                itemclick: clicklegenditem_analyticbyuser,
                 horizontalAlign: 'right',
                 verticalAlign: 'center',
                 fontSize: 14,

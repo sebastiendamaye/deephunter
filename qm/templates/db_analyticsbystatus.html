@@ -1,6 +1,10 @@
 {% load qm_extras %}
 <div id="analyticsByStatus_chartContainer" class="chartContainer"></div>
 <script nonce="klf4do97jh">
+    function clicklegenditem_analyticbystatus(e) {
+        window.location='/qm/listanalytics/?statuses='+e.dataPoint.status;
+    }
+    
     $(document).ready(function() {
 
         var chart = new CanvasJS.Chart("analyticsByStatus_chartContainer", {
@@ -24,11 +28,17 @@
                 toolTipContent: "<b>{name}:</b> {y} (#percent%)",
                 dataPoints: [
                     {% for status in status_breakdown %}
-                        { y: {{ status.count }}, name: "{{ status.status|statuslabel }}", color: "{{ status.status|statuscolor }}", click: function(e) { window.location='/qm/listanalytics/?statuses={{ status.status }}'; } },
+                        { y: {{ status.count }},
+                        name: "{{ status.status|statuslabel }}",
+                        color: "{{ status.status|statuscolor }}",
+                        status: "{{ status.status }}",
+                        click: function(e) { window.location='/qm/listanalytics/?statuses={{ status.status }}'; } },
                     {% endfor %}
                 ]
             }],
             legend: {
+                cursor: "pointer",
+                itemclick: clicklegenditem_analyticbystatus,
                 horizontalAlign: 'right',
                 verticalAlign: 'center',
                 fontSize: 14,

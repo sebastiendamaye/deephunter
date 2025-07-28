@@ -1,5 +1,9 @@
 <div id="analyticsByConnector_chartContainer" class="chartContainer"></div>
 <script nonce="tB2h37v4d6">
+    function clicklegenditem_analyticbyconnector(e) {
+        window.location='/qm/listanalytics/?connectors='+e.dataPoint.id;
+    }
+
     $(document).ready(function() {
 
         var chart = new CanvasJS.Chart("analyticsByConnector_chartContainer", {
@@ -22,11 +26,13 @@
                 toolTipContent: "<b>{name}:</b> {y} (#percent%)",
                 dataPoints: [
                     {% for connector in connector_breakdown %}
-                        { y: {{ connector.count }}, name: "{{ connector.connector__name }}", click: function(e) { window.location='/qm/listanalytics/?connectors={{ connector.connector__id }}'; } },
+                        { y: {{ connector.count }}, name: "{{ connector.connector__name }}", id: "{{ connector.connector__id }}", click: function(e) { window.location='/qm/listanalytics/?connectors={{ connector.connector__id }}'; } },
                     {% endfor %}
                 ]
             }],
             legend: {
+                cursor: "pointer",
+                itemclick: clicklegenditem_analyticbyconnector,
                 horizontalAlign: 'right',
                 verticalAlign: 'center',
                 fontSize: 14,
