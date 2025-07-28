@@ -389,10 +389,6 @@ def tl_timeline(request, hostname):
             #try:
             threats = connector.get_threats(hostname, sincedate)
 
-            logger.error('===========')
-            logger.error(threats)
-            logger.error('===========')
-
             if threats:
                 groups.append({'id':gid, 'content':f'Threats ({connector_name})'})
                 for threat in threats:
@@ -850,7 +846,7 @@ def db_highestweightedscoretoday(request):
     highestweightedscore = qs.first()
     
     code = f"""<h3>Highest weighted score today</h3>
-        <p class="num"><a href="/qm/listanalytics/?statuses=REVIEW">{highestweightedscore['total_weighted_score']}</p>
+        <p class="num"><a href="/reports/endpoints">{highestweightedscore['total_weighted_score']}</p>
         """
     return HttpResponse(code)
 
