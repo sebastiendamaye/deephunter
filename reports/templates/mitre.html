@@ -8,7 +8,7 @@
 	<div>
 		<div class="mitre_tactic" title="{{ i.mitre_id }}">{{ i.name }}</div>
 		{% for t in i.techniques %}
-		<a target="_blank" href="https://attack.mitre.org/techniques/{{ t.mitre_id }}/">
+		<a target="_blank" href="/qm/listanalytics/?mitre_techniques={{ t.id }}">
 		<div class="mitre_{% if t.numanalytics > 0 %}green{% else %}red{% endif %}" title="{{ t.mitre_id }} - {{ t.name }}: {{ t.numanalytics }} (sub)techniques">&nbsp;</div>
 		</a>
 		{% endfor %}

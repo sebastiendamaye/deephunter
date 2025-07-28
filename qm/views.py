@@ -111,7 +111,10 @@ def list_analytics(request):
             posted_filters['threats'] = request.GET.getlist('threats')
         
         if 'mitre_techniques' in request.GET:
-            analytics = analytics.filter(mitre_techniques__pk__in=request.GET.getlist('mitre_techniques'))
+            analytics = analytics.filter(
+                Q(mitre_techniques__pk__in=request.GET.getlist('mitre_techniques'))
+                | Q(mitre_techniques__mitre_technique__pk__in=request.GET.getlist('mitre_techniques'))
+            )
             posted_filters['mitre_techniques'] = request.GET.getlist('mitre_techniques')
         
         if 'mitre_tactics' in request.GET:
@@ -195,7 +198,7 @@ def list_analytics(request):
             posted_filters['created_by'] = request.GET.getlist('created_by')
 
     # Exclude analytics that are archived
-    analytics = analytics.exclude(status='ARCH')
+    analytics = analytics.exclude(status='ARCH').distinct()
 
     for analytic in analytics:
         snapshot = Snapshot.objects.filter(analytic=analytic, date=datetime.today()-timedelta(days=1)).order_by('date')

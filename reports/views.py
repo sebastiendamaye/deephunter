@@ -176,8 +176,9 @@ def mitre(request):
             numanalytics = Analytic.objects.filter(
                 Q(mitre_techniques__mitre_id = technique.mitre_id)
                 | Q(mitre_techniques__mitre_technique__mitre_id = technique.mitre_id)
-            ).distinct().count()
+            ).exclude(status='ARCH').distinct().count()
             tmp.append({
+                'id': technique.id,
                 'mitre_id': technique.mitre_id,
                 'name': technique.name,
                 'numanalytics': numanalytics
@@ -285,7 +286,7 @@ def analytics_perfs(request):
 
 @login_required
 def query_error(request):
-    analytics = Analytic.objects.filter(query_error = True)
+    analytics = Analytic.objects.filter(query_error = True).exclude(status='ARCH')
 
     paginator = Paginator(analytics, ANALYTICS_PER_PAGE)
     page_number = int(request.GET.get('page', 1))
