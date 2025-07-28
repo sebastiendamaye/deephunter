@@ -891,18 +891,18 @@ def db_runningtasks(request):
 
 @login_required
 def db_analyticsbystatus(request):
-    status_breakdown = Analytic.objects.values('status').annotate(count=Count('id'))
+    status_breakdown = Analytic.objects.values('status').exclude(status='ARCH').annotate(count=Count('id'))
     context = { 'status_breakdown': status_breakdown, }
     return render(request, 'db_analyticsbystatus.html', context)        
 
 @login_required
 def db_analyticsbyconnector(request):
-    connector_breakdown = Analytic.objects.values('connector__id', 'connector__name').annotate(count=Count('id'))
+    connector_breakdown = Analytic.objects.values('connector__id', 'connector__name').exclude(status='ARCH').annotate(count=Count('id'))
     context = { 'connector_breakdown': connector_breakdown, }
     return render(request, 'db_analyticsbyconnector.html', context)        
 
 @login_required
 def db_analyticsbyuser(request):
-    analytics_breakdown = Analytic.objects.values('created_by__id', 'created_by__username').annotate(count=Count('id'))
+    analytics_breakdown = Analytic.objects.values('created_by__id', 'created_by__username').exclude(status='ARCH').annotate(count=Count('id'))
     context = { 'analytics_breakdown': analytics_breakdown, }
     return render(request, 'db_analyticsbyuser.html', context)        
