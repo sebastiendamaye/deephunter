@@ -133,7 +133,7 @@ def build_rule_body(analytic):
             "queryLang": "2.0",
             "severity": STAR_RULES_DEFAULTS['severity'],
             "description": "Rule Sync from DeepHunter",
-            "s1ql": analytic.query,
+            "s1ql": analytic.query.replace('\r', ' ').replace('\n', ' '), # unless you remove CR/NL, error: Wrong query Query cannot contain newlines
             "name": f"{STAR_RULES_PREFIX}{analytic.name}",
             "queryType": "events",
             "status": STAR_RULES_DEFAULTS['status']
@@ -206,7 +206,7 @@ def update_rule(analytic):
                 "data": {
                     "queryLang": "2.0",
                     "severity": severity,
-                    "s1ql": analytic.query,
+                    "s1ql": analytic.query.replace('\r', ' ').replace('\n', ' '), # unless you remove CR/NL, error: Wrong query Query cannot contain newlines
                     "name": f"{STAR_RULES_PREFIX}{analytic.name}",
                     "queryType": "events",
                     "expirationMode": "Permanent",
@@ -221,7 +221,7 @@ def update_rule(analytic):
                 "data": {
                     "queryLang": "2.0",
                     "severity": severity,
-                    "s1ql": analytic.query,
+                    "s1ql": analytic.query.replace('\r', ' ').replace('\n', ' '), # unless you remove CR/NL, error: Wrong query Query cannot contain newlines
                     "name": f"{STAR_RULES_PREFIX}{analytic.name}",
                     "queryType": "events",
                     "expirationMode": "Temporary",
