@@ -94,6 +94,10 @@
 	<div class="tokenexpiresoon">An update is available. Use the upgrade script to do the update.</div>
 {% endif %}
 
+{% if request.session.mitre_update_available %}
+	<div class="tokenexpiresoon">MITRE ATT&CK has been updated. Use the consistency check script to update your mapping.</div>
+{% endif %}
+
 {% if request.session.tokenexpires %}
 	{% for token_connector in request.session.tokenexpires %}
 		{% if token_connector.tokenexpiresin <= 0 %}

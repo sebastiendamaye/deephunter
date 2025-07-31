@@ -68,6 +68,33 @@ def is_update_available():
         return False
 
 
+def is_mitre_update_available():
+    """
+    Check if a new version of the MITRE ATT&CK framework is available.
+    The check is done by comparing the local version with the remote version.
+    Returns bool: True if an update is available, False otherwise.
+    """
+
+    try:
+        r = requests.get(
+            'https://api.github.com/repos/mitre-attack/attack-stix-data/releases/latest',
+            proxies=PROXY
+        )
+        remote_version_mitre = r.json()['tag_name']
+
+        # local version MITRE
+        with open(f'{STATIC_PATH}/VERSION_MITRE', 'r') as f:
+            local_version_mitre = f.readline().strip()
+        
+        # compare
+        if local_version_mitre != remote_version_mitre:
+            return True
+        else:
+            return False
+            
+    except:
+        return False
+
 def get_campaign_date(campaign):
     """
     Helper function to get the campaign date from the campaign name.

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
 from .models import Analytic, TasksStatus
-from qm.utils import is_update_available
+from qm.utils import is_update_available, is_mitre_update_available
 from connectors.utils import is_connector_enabled
 from qm.tasks import regenerate_stats
 import time
@@ -28,6 +28,9 @@ AUTO_STATS_REGENERATION = settings.AUTO_STATS_REGENERATION
 def user_logged_in_receiver(sender, request, user, **kwargs):
     # check if there is an update available and store it in the session
     request.session['update_available'] = is_update_available()
+
+    # check if MITRE version is updated and store it in the session
+    request.session['mitre_update_available'] = is_mitre_update_available()
 
     # checks the token expiration for all connectors and stores the results in the session
     session_tokens = []

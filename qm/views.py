@@ -691,9 +691,17 @@ def about(request):
     # local version
     with open(f'{STATIC_PATH}/VERSION', 'r') as f:
         version = f.readline().strip()
+    # commit version
+    with open(f'{STATIC_PATH}/commit_id.txt', 'r') as f:
+        version_commit = f.readline().strip()
+    # local version MITRE
+    with open(f'{STATIC_PATH}/VERSION_MITRE', 'r') as f:
+        version_mitre = f.readline().strip()
     
     context = {
-        'version': version
+        'version': version,
+        'version_commit': version_commit,
+        'version_mitre': version_mitre,
         }
     return render(request, 'about.html', context)
 

@@ -307,7 +307,7 @@ touch $APP_PATH/campaigns.log
 chmod 666 $APP_PATH/campaigns.log
 touch $APP_PATH/static/mitre.json
 chmod 666 $APP_PATH/static/mitre.json
-chmod 664 $APP_PATH/static/VERSION
+chmod 664 $APP_PATH/static/VERSION*
 chmod 664 $APP_PATH/static/commit_id.txt
 chown -R $USER $VENV_PATH
 chmod -R 775 $VENV_PATH
