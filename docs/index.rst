@@ -15,7 +15,7 @@ Contents
    intro
    install
    authentication
-   scripts
+   scripts/index
    settings
    modules/index
    reports/index
