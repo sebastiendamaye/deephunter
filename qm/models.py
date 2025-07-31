@@ -34,7 +34,10 @@ class MitreTechnique(models.Model):
     description = models.TextField(blank=True)
     
     def __str__(self):
-        return '{} - {}'.format(self.mitre_id, self.name)
+        if self.is_subtechnique:
+            return f"{self.mitre_id} - {self.mitre_technique.name} - {self.name}"
+        else:
+            return f"{self.mitre_id} - {self.name}"
     
     class Meta:
         ordering = ['mitre_id']
