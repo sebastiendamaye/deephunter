@@ -167,8 +167,16 @@
 			$('#link_admin').attr('href', '/admin/qm/analytic/'+mygroups[properties['group']]+'/change/');
 			$('#link_trend').attr('href', '/'+mygroups[properties['group']]+'/trend/');
 
-			var x = properties.pageX;
-			var y = properties.pageY;
+			var x = properties.pageX+10;
+			var y = properties.pageY-150;
+
+			// Adjust position if context menu goes out of the viewport
+			if (x + 150 > window.innerWidth) {
+				x = x - 170;
+			}
+			if (y + 190 > window.innerHeight) {
+				y = y - 150;
+			}
 
 			// Position and show the custom context menu
 			$('#contextMenu').css({
