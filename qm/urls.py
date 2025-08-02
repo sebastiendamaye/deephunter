@@ -43,4 +43,5 @@ urlpatterns = [
     path('db_runningtasks/', views.db_runningtasks, name='db_runningtasks'),
     path('db_highestweightedscoretoday/', views.db_highestweightedscoretoday, name='db_highestweightedscoretoday'),
     path('db_analyticswitherrors/', views.db_analyticswitherrors, name='db_analyticswitherrors'),
+    path('db_topendpointdistinctanalytics/', views.db_top_endpoint_distinct_analytics, name='db_top_endpoint_distinct_analytics'),
 ]

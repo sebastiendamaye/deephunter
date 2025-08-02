@@ -10,4 +10,5 @@ urlpatterns = [
     path('query_error', views.query_error, name='query_error'),
     path('rare_occurrences', views.rare_occurrences, name='rare_occurrences'),
     path('zero_occurrence', views.zero_occurrence, name='zero_occurrence'),
+    path('endpoints_most_analytics', views.endpoints_most_analytics, name='endpoints_most_analytics'),
 ]

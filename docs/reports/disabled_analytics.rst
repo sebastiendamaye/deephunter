@@ -1,7 +1,7 @@
 Auto-disabled Threat Hunting Analytics
 ######################################
 
-This report shows the list of Threat Hunting Analytics that have been automatically removed from future campaigns because they matched too many endpoints.
+This report is a shortcut to the analytics view filtered to show only the analytics that have been automatically disabled by DeepHunter due to their potential irrelevance.
 
 .. image:: ../img/reports_disabled_analytics.png
   :width: 1500

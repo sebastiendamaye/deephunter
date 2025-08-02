@@ -7,6 +7,8 @@ Reports
    stats
    perfs
    endpoints
+   endpoints_most_analytics
+   analytics_to_review
    mitre_coverage
    missing_mitre
    disabled_analytics

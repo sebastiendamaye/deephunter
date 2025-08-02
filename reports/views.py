@@ -352,3 +352,18 @@ def zero_occurrence(request):
         'total': total
     }
     return render(request, 'zero_occurrence.html', context)
+
+@login_required
+def endpoints_most_analytics(request):
+    # select TOP 50 endpoints with the most distinct analytics
+    top_endpoints = (
+        Endpoint.objects
+        .values('hostname', 'site')
+        .annotate(analytics_count=Count('snapshot__analytic', distinct=True))
+        .order_by('-analytics_count')[:50]
+    )
+
+    context = {
+        'top_endpoints': top_endpoints,
+    }
+    return render(request, 'endpoints_most_analytics.html', context)

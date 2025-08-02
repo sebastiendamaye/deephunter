@@ -901,6 +901,20 @@ def db_runningtasks(request):
     return HttpResponse(code)
 
 @login_required
+def db_top_endpoint_distinct_analytics(request):
+    top_endpoints = (
+        Endpoint.objects
+        .values('hostname', 'site')
+        .annotate(analytics_count=Count('snapshot__analytic', distinct=True))
+        .order_by('-analytics_count')
+    )
+    
+    code = f"""<h3>Most distinct analytics on single endpoint</h3>
+        <p class="num"><a href="/reports/endpoints_most_analytics">{top_endpoints.first()['analytics_count']}</p>
+        """
+    return HttpResponse(code)
+
+@login_required
 def db_analyticsbystatus(request):
     status_breakdown = Analytic.objects.values('status').exclude(status='ARCH').annotate(count=Count('id'))
     context = { 'status_breakdown': status_breakdown, }

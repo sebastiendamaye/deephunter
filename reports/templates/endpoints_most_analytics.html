@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/list_analytics.css">
+{% endblock %}
+{% block body %}
+    <h1>Top 50 endpoints with the most number of distinct analytics</h1>
+    <table class="mitre">
+        <tr>
+            <th>Hostname</th>
+            <th>Site</th>
+            <th># distinct analytics</th>
+        </tr>
+        {% for endpoint in top_endpoints %}
+            <tr>
+                <td><a href="/timeline?hostname={{ endpoint.hostname }}">{{ endpoint.hostname }}</a></td>
+                <td>{{ endpoint.site }}</td>
+                <td>{{ endpoint.analytics_count }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
