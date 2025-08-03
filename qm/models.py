@@ -163,7 +163,7 @@ class Analytic(models.Model):
     query_error = models.BooleanField(default=False, editable=False)
     query_error_message = models.TextField(blank=True, editable=False)
     next_review_date = models.DateField(blank=True, null=True, editable=False)
-    history = HistoricalRecords()
+    history = HistoricalRecords(excluded_fields=['query_error', 'query_error_message'])
     
     def __str__(self):
         return self.name
