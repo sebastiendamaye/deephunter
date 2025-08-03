@@ -2,15 +2,24 @@
 {% load qm_extras %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/bootstrap_table_expandable/bootstrap-table-expandable.css">
-<link rel="stylesheet" href="/static/css/endpoints.css">
-<link rel="stylesheet" href="/static/css/list_analytics.css">
-<script src="/static/jquery/jquery.min.js"></script>
-<script src="/static/bootstrap/js/bootstrap.min.js"></script>
-<script src="/static/bootstrap_table_expandable/bootstrap-table-expandable.js"></script>
+	<link rel="stylesheet" href="/static/bootstrap_table_expandable/bootstrap-table-expandable.css">
+	<link rel="stylesheet" href="/static/css/endpoints.css">
+	<link rel="stylesheet" href="/static/css/list_analytics.css">
+	<script src="/static/jquery/jquery.min.js"></script>
+	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+	<script src="/static/bootstrap_table_expandable/bootstrap-table-expandable.js"></script>
 {% endblock %}
 {% block body %}
-<h1>Top 20 endpoints identified in today's campaign</h1>
+<h1>Top endpoints identified in campaign</h1>
+<p>This report shows the endpoints that triggered analytics during the selected campaign. Only the first 300 endpoints are shown.</p>
+<form id="campaign_form" method="post">
+	{% csrf_token %}
+	Campaign: <select name="campaign" id="campaign_selector">
+		{% for campaign in campaigns %}
+			<option value="{{ campaign.id }}" {% if campaign.id|add:"0" == selected_campaign_id|add:"0" %}selected{% endif %}>{{ campaign.name }}</option>
+		{% endfor %}
+	</select>
+</form>
 <table class="table table-hover table-expandable table-striped">
 	<thead>
 		<tr>
@@ -59,4 +68,39 @@
 		{% endfor %}
     </tbody>
 </table>
+
+<div class="pagination">
+	<span class="step-links">
+		<span class="previous">
+			{% if endpoints.has_previous %}
+			<a href="?page={{ endpoints.previous_page_number }}">Previous</a>
+			{% endif %}
+		</span>
+
+		<span class="current">
+			{% for i in endpoints.paginator.num_pages|to_range %}
+				{% if i == endpoints.number %}
+					<span class="pagelink">{{ i }}</span>
+				{% else %}
+					<span class="pagelink"><a href="?page={{ i }}">{{ i }}</a></span>
+				{% endif %}
+			{% endfor %}
+		</span>
+
+		<span class="next">
+			{% if endpoints.has_next %}
+				<span class="next"><a href="?page={{ endpoints.next_page_number }}">Next</a></span>
+			{% endif %}
+		</span>
+	</span>
+</div>
+
+
+<script nonce="lze3k9v2h6">
+	$(document).ready(function() {
+		$('#campaign_selector').on('change', function() {
+			document.forms['campaign_form'].submit();
+		});
+	});
+</script>
 {% endblock %}

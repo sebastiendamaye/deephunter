@@ -198,23 +198,37 @@ def mitre(request):
 
 @login_required
 def endpoints(request):
+
+    # list of campaigns
+    campaigns = Campaign.objects.filter(name__startswith='daily_cron_').order_by('-name')
+
+    if request.method == 'POST':
+        # if a campaign is selected, filter endpoints by that campaign
+        selected_campaign_id = request.POST.get('campaign')
+    else:
+        # default to the most recent campaign
+        selected_campaign = campaigns.first()
+        selected_campaign_id = selected_campaign.id
+
+    campaign = get_object_or_404(Campaign, id=selected_campaign_id)
+
     # select TOP 20 endpoints for today's campaign
     endpoints = Endpoint.objects.filter(
-        snapshot__date=datetime.today()-timedelta(days=1)
-        ).values('hostname', 'site').annotate(total=Sum('snapshot__analytic__weighted_relevance')).order_by('-total')[:20]
+        snapshot__campaign=campaign
+        ).values('hostname', 'site').annotate(total=Sum('snapshot__analytic__weighted_relevance')).order_by('-total')[:300]
     data = []
     for endpoint in endpoints:
         hostname = endpoint['hostname']
         site = endpoint['site']
         analytics = Endpoint.objects.filter(
-            snapshot__date=datetime.today()-timedelta(days=1),
+            snapshot__campaign=campaign,
             hostname=hostname
             ).order_by('-snapshot__analytic__weighted_relevance')
         
         qdata = []
         for analytic in analytics:
             
-            startdate=(datetime.today()-timedelta(days=1)).strftime('%Y-%m-%d')
+            startdate=analytic.snapshot.date.strftime('%Y-%m-%d')
             xdrlink = all_connectors.get(analytic.snapshot.analytic.connector.name).get_redirect_analytic_link(analytic.snapshot.analytic, date=startdate, endpoint_name=hostname)
 
             qdata.append({
@@ -233,8 +247,15 @@ def endpoints(request):
             "total":endpoint['total'],
             "analytics":qdata
             })
+
+    paginator = Paginator(data, ANALYTICS_PER_PAGE)
+    page_number = int(request.GET.get('page', 1))
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'endpoints': data
+        'campaigns': campaigns,
+        'selected_campaign_id': selected_campaign_id,
+        'endpoints': page_obj
         }
     
     return render(request, 'endpoints.html', context)
@@ -355,15 +376,19 @@ def zero_occurrence(request):
 
 @login_required
 def endpoints_most_analytics(request):
-    # select TOP 50 endpoints with the most distinct analytics
+    # Limited to first 300 endpoints with the most analytics
     top_endpoints = (
         Endpoint.objects
         .values('hostname', 'site')
         .annotate(analytics_count=Count('snapshot__analytic', distinct=True))
-        .order_by('-analytics_count')[:50]
+        .order_by('-analytics_count')[:300]
     )
 
+    paginator = Paginator(top_endpoints, ANALYTICS_PER_PAGE)
+    page_number = int(request.GET.get('page', 1))
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'top_endpoints': top_endpoints,
+        'top_endpoints': page_obj,
     }
     return render(request, 'endpoints_most_analytics.html', context)

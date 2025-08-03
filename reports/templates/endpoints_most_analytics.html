@@ -1,11 +1,13 @@
 {% extends "base.html" %}
+{% load qm_extras %}
 
 {% block style %}
     <link rel="stylesheet" href="/static/css/base.css">
     <link rel="stylesheet" href="/static/css/list_analytics.css">
 {% endblock %}
 {% block body %}
-    <h1>Top 50 endpoints with the most number of distinct analytics</h1>
+    <h1>Top endpoints with the most number of distinct analytics</h1>
+    <p>This report shows the endpoints that have generated the most distinct analytics events. It is limited to the first 300 endpoints.</p>
     <table class="mitre">
         <tr>
             <th>Hostname</th>
@@ -20,4 +22,32 @@
             </tr>
         {% endfor %}
     </table>
+
+
+<div class="pagination">
+	<span class="step-links">
+		<span class="previous">
+			{% if top_endpoints.has_previous %}
+			<a href="?page={{ top_endpoints.previous_page_number }}">Previous</a>
+			{% endif %}
+		</span>
+
+		<span class="current">
+			{% for i in top_endpoints.paginator.num_pages|to_range %}
+				{% if i == top_endpoints.number %}
+					<span class="pagelink">{{ i }}</span>
+				{% else %}
+					<span class="pagelink"><a href="?page={{ i }}">{{ i }}</a></span>
+				{% endif %}
+			{% endfor %}
+		</span>
+
+		<span class="next">
+			{% if top_endpoints.has_next %}
+				<span class="next"><a href="?page={{ top_endpoints.next_page_number }}">Next</a></span>
+			{% endif %}
+		</span>
+	</span>
+</div>
+
 {% endblock %}
