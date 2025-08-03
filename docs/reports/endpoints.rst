@@ -3,7 +3,7 @@ Last campaign endpoints
 
 Description
 ***********
-This report shows a list of the top 20 endpoints (highest weighted scores) identified in the last campaign.
+This report shows a list of the top 300 endpoints (highest weighted scores) identified in the selected campaign. The list of endpoints is automatically refresh when a different campaign is selected from the dropdown.
 
 .. image:: ../img/reports_endpoints.png
   :width: 1000
