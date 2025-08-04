@@ -13,6 +13,7 @@ urlpatterns = [
     path('storyline/<str:storylineids>/<str:eventdate>/', views.storyline, name='storyline'),
     path('<int:analytic_id>/detail/', views.analyticdetail, name='analyticdetail'),
     path('debug', views.debug, name='debug'),
+    path('saved_searches/', views.saved_searches, name='saved_searches'),
     path('timeline', views.timeline, name='timeline'),
 
     path('tl_timeline/<str:hostname>/', views.tl_timeline, name='tl_timeline'),

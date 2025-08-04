@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/list_analytics.css" />
+{% endblock %}
+
+{% block body %}
+    <h1>Saved Searches</h1>
+    <p>To add a new saved search, apply some filters to the analytics view and click "save search".</p>
+    <table class="mitre">
+        <tr>
+            <th>Actions</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Search</th>
+            <th>Public</th>
+            <th>Locked</th>
+            <th>Created By</th>
+            <th>Publication Date</th>
+            <th>Update Date</th>
+        </tr>
+        {% for search in saved_searches %}
+            <tr>
+                <td>
+                    [<a href="/qm/listanalytics?{{ search.search }}">execute</a>]
+                    {% if not search.is_locked %}
+                        [<a href="/admin/qm/savedsearch/{{ search.id }}/change/">update</a>]
+                        [<a href="/admin/qm/savedsearch/{{ search.id }}/delete/">delete</a>]
+                    {% endif %}
+                </td>
+                <td>{{ search.name }}</td>
+                <td>{{ search.description }}</td>
+                <td>{{ search.search }}</td>
+                <td class="acenter">{% if search.is_public %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
+                <td class="acenter">{% if search.is_locked %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
+                <td>{{ search.created_by }}</td>
+                <td>{{ search.pub_date }}</td>
+                <td>{{ search.update_date }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

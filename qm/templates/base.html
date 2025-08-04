@@ -27,6 +27,7 @@
 							<ul>
 								<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/" }}" href="/qm/listanalytics/">List analytics</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin/qm/analytic/add/">Create analytic</a></li>
+								<li><a class="{{ request.path|isactiveurl:"/qm/saved_searches/" }}" href="/qm/saved_searches/">Saved searches</a></li>
 							</ul>        
 							</li>
 
@@ -45,7 +46,7 @@
 								<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/?run_daily=0&maxhosts=1" }}" href="/qm/listanalytics/?run_daily=0&maxhosts=1">Auto-disabled Analytics</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/reports/query_error" }}" href="/reports/query_error">Analytics with errors</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/reports/rare_occurrences" }}" href="/reports/rare_occurrences">Rare occurrences</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/?alreadyseen=0" }}" href="/qm/listanalytics/?alreadyseen=0">Zero occurrence</a></li>
+								<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/?alreadyseen=0" }}" href="/qm/listanalytics/?alreadyseen=0">Zero occurrences</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/reports/archived_analytics" }}" href="/admin/qm/analytic/?status__exact=ARCH">Archived analytics</a></li>
 							</ul>
 							</li>

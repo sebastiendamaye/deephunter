@@ -7,7 +7,7 @@ Interface
 *********
 Refer to the objects number for details.
 
-.. image:: ../img/analytics_interface.jpg
+.. image:: ../img/analytics_interface.png
   :width: 1500
   :alt: analytics interface
 
@@ -86,3 +86,14 @@ The list of all possible filters, broken down into sections. Expand a section an
 Create/Modify/Clone analytics
 *****************************
 Refer to `this page <../admin.html#create-modify-threat-hunting-analytics>`_.
+
+Saved Searches
+**************
+Saved searches are a way to save a search query and its filters, so you can quickly access it later. This is useful if you often search for the same criteria.
+
+There are public saved searches and private saved searches. Public saved searches are available to all users, while private saved searches are only available to the user who created them.
+
+You can also lock a search (useful for public saved searches) so that no one can modify or delete it.
+
+.. image:: ../img/saved_searches.png
+  :alt: saved searches

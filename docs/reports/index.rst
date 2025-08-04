@@ -14,5 +14,5 @@ Reports
    disabled_analytics
    query_error
    rare_occurrences
-   zero_occurrence
+   zero_occurrences
    archived_analytics

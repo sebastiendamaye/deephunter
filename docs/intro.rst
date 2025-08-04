@@ -152,6 +152,8 @@ The "run_campaigns.sh" cron job will automatically update the status of threat h
 
 You can access the list of analytics to review from the menu (``Reports > Analytics to review``). Expand the details and click the "Review" tab.
 
+To add a new saved search, apply some filters to the analytics view and click "save search".
+
 .. image:: img/review_tab.png
   :width: 800
   :alt: Review tab

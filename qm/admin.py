@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName, ThreatActor, Analytic, Snapshot, Campaign, Endpoint, Tag, TasksStatus, Category, Review
+from .models import (Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName,  
+    ThreatActor, Analytic, Snapshot, Campaign, Endpoint, Tag, TasksStatus, Category, Review, SavedSearch)
 from connectors.models import Connector
 from django.contrib.admin.models import LogEntry
 from simple_history.admin import SimpleHistoryAdmin
@@ -101,6 +102,26 @@ class TasksStatusAdmin(admin.ModelAdmin):
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'short_name', 'description')
 
+class SavedSearchAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'search', 'is_public', 'is_locked', 'created_by', 'pub_date', 'update_date')
+    search_fields = ['name', 'description']
+    list_filter = ['is_public', 'is_locked', 'created_by', 'pub_date', 'update_date']
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:  # Only set on creation
+            obj.created_by = request.user
+        obj.save()
+
+    def get_changeform_initial_data(self, request):
+        """
+        Allows initial form data to be set via GET parameters in the admin add form.
+        """
+        return {
+            key: request.GET[key]
+            for key in request.GET.keys()
+            if key in [field.name for field in self.model._meta.fields]
+        }
+
 admin.site.register(LogEntry, LogEntryAdmin)
 admin.site.register(Tag)
 admin.site.register(Country)
@@ -117,3 +138,4 @@ admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Endpoint, EndpointAdmin)
 admin.site.register(TasksStatus, TasksStatusAdmin)
 admin.site.register(Category, CategoryAdmin)
+admin.site.register(SavedSearch, SavedSearchAdmin)

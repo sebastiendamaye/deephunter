@@ -28,8 +28,8 @@
 	</div>
 	<div>{{ analytics_count }} analytics</div>
 	
-	<div class="floatleft"><h4>FILTERS</h4></div>
-	<div class="floatrightpadding">{% if posted_search or posted_filters %}[<a href="/qm/">remove filters</a>]{% endif %}</div>
+	<div>{% if posted_search or posted_filters %}[<a href="/qm/listanalytics/">Reset filters</a>] [<a href="/admin/qm/savedsearch/add/?search={{ filtered_query_string }}">Save search</a>]{% endif %}</div>
+	<div><h4>FILTERS</h4></div>
 	{% if posted_filters %}
 		<div id="divfilters">
 			{% if posted_filters.connectors %}
@@ -510,7 +510,6 @@
 		<span class="step-links">
 			<span class="previous">
 				{% if analytics.has_previous %}
-				<!--a href="?page=1{% if query_string %}&{{ query_string }}{% endif %}">&laquo; first</a-->
 				<a href="?page={{ analytics.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">Previous</a>
 				{% endif %}
 			</span>
@@ -528,7 +527,6 @@
 			<span class="next">
 				{% if analytics.has_next %}
 					<span class="next"><a href="?page={{ analytics.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">Next</a></span>
-					<!--a href="?page={{ analytics.paginator.num_pages }}{% if query_string %}&{{ query_string }}{% endif %}">last &raquo;</a-->
 				{% endif %}
 			</span>
 		</span>

@@ -12,14 +12,15 @@ import logging
 import numpy as np
 from scipy import stats
 from math import isnan
-from .models import Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor, ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category, Review
+from .models import (Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor,
+    ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category, Review, SavedSearch)
 from connectors.models import Connector
 from .tasks import regenerate_stats, regenerate_campaign
 import ipaddress
 from connectors.utils import is_connector_enabled, get_connector_conf
 from celery import current_app
 from qm.utils import get_campaign_date
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 from .forms import ReviewForm
 
 # Dynamically import all connectors
@@ -235,9 +236,24 @@ def list_analytics(request):
         del querydict['page']
     query_string = querydict.urlencode()
 
+    # for "save search" feature
+    filtered_querydict = request.GET.copy()
+    if 'page' in filtered_querydict:
+        del filtered_querydict['page']
+    if 'csrfmiddlewaretoken' in filtered_querydict:
+        del filtered_querydict['csrfmiddlewaretoken']
+    if 'search' in request.GET:
+        if request.GET['search'].strip() == '':
+            del filtered_querydict['search']
+    if filtered_querydict:
+        filtered_query_string = quote(filtered_querydict.urlencode(), safe='')
+    else:
+        filtered_query_string = ''
+
     context = {
         'analytics': page_obj,
         'query_string': query_string,
+        'filtered_query_string': filtered_query_string,
         'analytics_count': analytics_count,
         'connectors': Connector.objects.filter(visible_in_analytics=True),
         'target_os': TargetOs.objects.all(),
@@ -816,7 +832,16 @@ def analytic_review(request, analytic_id):
         'reviews': Review.objects.filter(analytic=analytic).order_by('-date'),
         }
     return render(request, 'analytic_review.html', context)
-    
+
+@login_required
+def saved_searches(request):
+    """
+    Display saved searches for the current user.
+    """
+    saved_searches = SavedSearch.objects.filter(Q(created_by=request.user) | Q(is_public=True)).order_by('name')
+    context = {'saved_searches': saved_searches}
+    return render(request, 'saved_searches.html', context)
+
 @login_required
 def db_totalnumberanalytics(request):
     analytics = Analytic.objects.exclude(status='ARCH')    
