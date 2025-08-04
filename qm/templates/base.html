@@ -39,13 +39,13 @@
 								<li><a class="{{ request.path|isactiveurl:"/reports/analytics_perfs" }}" href="/reports/analytics_perfs">Analytics perfs</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/reports/endpoints" }}" href="/reports/endpoints">Endpoints in campaigns</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/reports/endpoints_most_analytics" }}" href="/reports/endpoints_most_analytics">Endpoints w/ most analytics</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/listanalytics/?statuses=REVIEW" }}" href="/listanalytics/?statuses=REVIEW">Analytics to review</a></li>
+								<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/?statuses=REVIEW" }}" href="/qm/listanalytics/?statuses=REVIEW">Analytics to review</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/reports/mitre" }}" href="/reports/mitre">Current MITRE coverage</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/reports/missing_mitre" }}" href="/reports/missing_mitre">Missing MITRE mapping</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/?run_daily=0&maxhosts=1" }}" href="/qm/listanalytics/?run_daily=0&maxhosts=1">Auto-disabled Analytics</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/reports/query_error" }}" href="/reports/query_error">Analytics with errors</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/reports/rare_occurrences" }}" href="/reports/rare_occurrences">Rare occurrences</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/reports/zero_occurrence" }}" href="/reports/zero_occurrence">Zero occurrence</a></li>
+								<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/?alreadyseen=0" }}" href="/qm/listanalytics/?alreadyseen=0">Zero occurrence</a></li>
 								<li><a class="{{ request.path|isactiveurl:"/reports/archived_analytics" }}" href="/admin/qm/analytic/?status__exact=ARCH">Archived analytics</a></li>
 							</ul>
 							</li>

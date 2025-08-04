@@ -177,6 +177,10 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
         
         if len(data) != 0:
             
+            # there are results, we can update the last_time_seen field of the analytic
+            analytic.last_time_seen = snapshot.date
+            analytic.save()
+
             hits_endpoints = len(data)
             hits_count = 0
             

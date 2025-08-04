@@ -359,22 +359,6 @@ def rare_occurrences(request):
 
 
 @login_required
-def zero_occurrence(request):
-    analytics_without_endpoints = Analytic.objects.filter(run_daily=True).annotate(
-        endpoint_count=Count('snapshot__endpoint')).filter(endpoint_count=0)
-    total = analytics_without_endpoints.count()
-
-    paginator = Paginator(analytics_without_endpoints, ANALYTICS_PER_PAGE)
-    page_number = int(request.GET.get('page', 1))
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        'analytics': page_obj,
-        'total': total
-    }
-    return render(request, 'zero_occurrence.html', context)
-
-@login_required
 def endpoints_most_analytics(request):
     # Limited to first 300 endpoints with the most analytics
     top_endpoints = (

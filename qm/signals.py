@@ -70,12 +70,13 @@ def pre_save_handler(sender, instance, **kwargs):
         # Retrieve the current value of the field from the database
         original_instance = Analytic.objects.get(pk=instance.pk)
 
-        ### Reset counters and error flag when the "query" field of the analytic is updated
+        ### Reset counters, error flag and message, and last_time_seen when the "query" field of the analytic is updated
         if original_instance.query != instance.query:
             # reset query flag
             instance.maxhosts_count = 0
             instance.query_error = False
             instance.query_error_message = ''
+            instance.last_time_seen = None
             # we save a flag for the post_save handler to know if the query was changed
             instance._query_changed = True
 

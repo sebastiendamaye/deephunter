@@ -177,6 +177,14 @@ def list_analytics(request):
                 ).distinct()
                 posted_filters['hits'] = 0
 
+        if 'alreadyseen' in request.GET:
+            if request.GET['alreadyseen'] == '1':
+                analytics = analytics.filter(last_time_seen__isnull=False)
+                posted_filters['alreadyseen'] = 1
+            else:
+                analytics = analytics.filter(last_time_seen__isnull=True)
+                posted_filters['alreadyseen'] = 0
+
         if 'maxhosts' in request.GET:
             if request.GET['maxhosts'] == '1':
                 analytics = analytics.filter(maxhosts_count__gt=0)

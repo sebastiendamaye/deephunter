@@ -18,7 +18,8 @@
 
 <div class="m10">
 	<a href="/events/{{ analytic.id }}/" target="_blank" class="button">Run query</a>
-	<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank" class="button">Edit in admin</a></li>
+	<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank" class="button">Edit in admin</a>
+	<a href="/admin/qm/analytic/{{ analytic.id }}/history/" target="_blank" class="button">History</a>
 </div>
 
 {% if endpoints %}
@@ -35,7 +36,7 @@
 	<b>Created by: </b>{% if analytic.created_by %}{{ analytic.created_by }}{% else %}-{% endif %}
 	&nbsp;|&nbsp;<b>Created on: </b>{{ analytic.pub_date }}
 	&nbsp;|&nbsp;<b>Last modified: </b>{{ analytic.update_date }}
-	&nbsp;[<a href="/admin/qm/analytic/{{ analytic.id }}/history/" target="_blank">history</a>]
+	&nbsp;|&nbsp;<b>Last time seen: </b>{{ analytic.last_time_seen }}
 </div>
 <div class="ml40">
 	<b>Tags: </b>{% if analytic.tags %}{% for tag in analytic.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}

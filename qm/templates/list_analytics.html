@@ -37,66 +37,79 @@
 					<button class="button_filter" id="button_checkconnector_{{ v }}">CONNECTOR:{{ v|connectoridtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.categories %}
 				{% for v in posted_filters.categories %}
 					<button class="button_filter" id="button_checkcategory_{{ v }}">CAT:{{ v|categoryidtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.target_os %}
 				{% for v in posted_filters.target_os %}
 					<button class="button_filter" id="button_checkos_{{ v }}">OS:{{ v|osidtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.actors %}
 				{% for v in posted_filters.actors %}
 					<button class="button_filter" id="button_checkactor_{{ v }}" title="{{ v|actoridtotitle }}">ACTOR:{{ v|actoridtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.source_countries %}
 				{% for v in posted_filters.source_countries %}
 					<button class="button_filter" id="button_checksourcecountry_{{ v }}">SOURCE COUNTRY:{{ v|sourcecountryidtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.threats %}
 				{% for v in posted_filters.threats %}
 					<button class="button_filter" id="button_checkthreat_{{ v }}" title="{{ v|threatidtotitle }}">THREAT:{{ v|threatidtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.vulnerabilities %}
 				{% for v in posted_filters.vulnerabilities %}
 					<button class="button_filter" id="button_checkvuln_{{ v }}">VULN:{{ v|vulnidtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.tags %}
 				{% for v in posted_filters.tags %}
 					<button class="button_filter" id="button_checktag_{{ v }}">TAG:{{ v|tagidtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.mitre_tactics %}
 				{% for v in posted_filters.mitre_tactics %}
 					<button class="button_filter" id="button_checktactic_{{ v }}" title="{{ v|tacticidtotitle }}">TACTIC:{{ v|tacticidtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.mitre_techniques %}
 				{% for v in posted_filters.mitre_techniques %}
 					<button class="button_filter" id="button_checktechnique_{{ v }}" title="{{ v|techniqueidtotitle }}">TECHNIQUE:{{ v|techniqueidtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.confidence %}
 				{% for v in posted_filters.confidence %}
 					<button class="button_filter" id="button_checkconfidence_{{ v }}">CONFIDENCE:{{ v|confidencelabel }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.relevance %}
 				{% for v in posted_filters.relevance %}
 					<button class="button_filter" id="button_checkrelevance_{{ v }}">RELEVANCE:{{ v|confidencelabel }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.statuses %}
 				{% for v in posted_filters.statuses %}
 					<button class="button_filter" id="button_checkstatus_{{ v }}">STATUS:{{ v }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
+			
 			{% if posted_filters.run_daily == 0 or posted_filters.run_daily == 1 %}
 				{% if posted_filters.run_daily|slugify == '1' %}
 					<button class="button_filter" id="button_checkrundaily_1">RUN_DAILY:yes&nbsp;&nbsp;<b>x</b></button>
@@ -104,6 +117,7 @@
 					<button class="button_filter" id="button_checkrundaily_0">RUN_DAILY:no&nbsp;&nbsp;<b>x</b></button>
 				{% endif %}
 			{% endif %}
+			
 			{% if posted_filters.create_rule == 0 or posted_filters.create_rule == 1 %}
 				{% if posted_filters.create_rule|slugify == '1' %}
 					<button class="button_filter" id="button_checkcreaterule_1">CREATE_RULE:yes&nbsp;&nbsp;<b>x</b></button>
@@ -111,6 +125,7 @@
 					<button class="button_filter" id="button_checkcreaterule_0">CREATE_RULE:no&nbsp;&nbsp;<b>x</b></button>
 				{% endif %}
 			{% endif %}
+			
 			{% if posted_filters.dynamic_query == 0 or posted_filters.dynamic_query == 1 %}
 				{% if posted_filters.dynamic_query|slugify == '1' %}
 					<button class="button_filter" id="button_checkdynamicquery_1">DYNAMIC_QUERY:yes&nbsp;&nbsp;<b>x</b></button>
@@ -118,6 +133,7 @@
 					<button class="button_filter" id="button_checkdynamicquery_0">DYNAMIC_QUERY:no&nbsp;&nbsp;<b>x</b></button>
 				{% endif %}
 			{% endif %}
+			
 			{% if posted_filters.hits == 0 or posted_filters.hits == 1 %}
 				{% if posted_filters.hits|slugify == '1' %}
 					<button class="button_filter" id="button_checkhits_1">HITS:yes&nbsp;&nbsp;<b>x</b></button>
@@ -125,6 +141,15 @@
 					<button class="button_filter" id="button_checkhits_0">HITS:no&nbsp;&nbsp;<b>x</b></button>
 				{% endif %}
 			{% endif %}
+			
+			{% if posted_filters.alreadyseen == 0 or posted_filters.alreadyseen == 1 %}
+				{% if posted_filters.alreadyseen|slugify == '1' %}
+					<button class="button_filter" id="button_checkalreadyseen_1">ALREADY_SEEN:yes&nbsp;&nbsp;<b>x</b></button>
+				{% else %}
+					<button class="button_filter" id="button_checkalreadyseen_0">ALREADY_SEEN:no&nbsp;&nbsp;<b>x</b></button>
+				{% endif %}
+			{% endif %}
+			
 			{% if posted_filters.maxhosts == 0 or posted_filters.maxhosts == 1 %}
 				{% if posted_filters.maxhosts|slugify == '1' %}
 					<button class="button_filter" id="button_checkmaxhosts_1">MAXHOSTS:yes&nbsp;&nbsp;<b>x</b></button>
@@ -132,6 +157,7 @@
 					<button class="button_filter" id="button_checkmaxhosts_0">MAXHOSTS:no&nbsp;&nbsp;<b>x</b></button>
 				{% endif %}
 			{% endif %}
+			
 			{% if posted_filters.queryerror == 0 or posted_filters.queryerror == 1 %}
 				{% if posted_filters.queryerror|slugify == '1' %}
 					<button class="button_filter" id="button_checkqueryerror_1">QUERY_ERROR:yes&nbsp;&nbsp;<b>x</b></button>
@@ -139,6 +165,7 @@
 					<button class="button_filter" id="button_checkqueryerror_0">QUERY_ERROR:no&nbsp;&nbsp;<b>x</b></button>
 				{% endif %}
 			{% endif %}
+			
 			{% if posted_filters.created_by %}
 				{% for v in posted_filters.created_by %}
 					<button class="button_filter" id="button_checkcreatedby_{{ v }}">AUTHOR:{{ v|useridtoname }}&nbsp;&nbsp;<b>x</b></button>
@@ -370,6 +397,19 @@
 				<input class="form-check-input" type="radio" id="checkhits0" name="hits" value="0"
 					{% if posted_filters.hits|slugify == '0' %} checked{% endif %} />
 				<label class="form-check-label" for="checkhits0">no</label>
+			</div>
+
+			<br />
+			<h5>Already seen</h5>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" id="checkalreadyseen1" name="alreadyseen" value="1"
+					{% if posted_filters.alreadyseen|slugify == '1' %} checked{% endif %} />
+				<label class="form-check-label" for="checkalreadyseen1">yes</label>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" id="checkalreadyseen0" name="alreadyseen" value="0"
+					{% if posted_filters.alreadyseen|slugify == '0' %} checked{% endif %} />
+				<label class="form-check-label" for="checkalreadyseen0">no</label>
 			</div>
 
 			<br />

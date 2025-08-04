@@ -1,8 +1,7 @@
 Threat Hunting Analytics with zero occurrence
 #############################################
 
-This report shows Threat Hunting Analytics (with the "run_daily" flag set) that never matched any endpoint.
+This report shows Threat Hunting Analytics that never matched any endpoint, beyond the data retention (thanks to the "last_time_seen" field). Notice that this field is automatically reset when the "query" field of an analytic is changed.
 
 .. image:: ../img/reports_zero_occurrence.png
-  :width: 1500
   :alt: img
