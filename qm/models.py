@@ -164,7 +164,10 @@ class Analytic(models.Model):
     query_error_message = models.TextField(blank=True, editable=False)
     next_review_date = models.DateField(blank=True, null=True, editable=False)
     last_time_seen = models.DateField(blank=True, null=True, editable=False)
-    history = HistoricalRecords(excluded_fields=['query_error', 'query_error_message', 'last_time_seen', 'next_review_date'])
+    history = HistoricalRecords(
+        excluded_fields=['query_error', 'query_error_message', 'last_time_seen', 'next_review_date'],
+        m2m_fields=[tags, mitre_techniques, threats, actors, target_os, vulnerabilities]
+        )
     
     def __str__(self):
         return self.name
