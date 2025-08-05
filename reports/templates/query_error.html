@@ -28,7 +28,7 @@
 			[<a target="_blank" href="/{{ analytic.id }}/trend/">stats</a>]
 			[<a target="_blank" href="/events/{{ analytic.id }}/">run query</a>]
 		</td>
-		<td>{{ analytic.connector.name }}</td>
+		<td>{{ analytic.connector_name }}</td>
 		<td title="DESCRIPTION:&#013;===========&#013;{{ analytic.description }}&#013;&#013;QUERY:&#013;===========&#013;{{analytic.query}}">{{ analytic.name }}</td>
 		<td><div class="{{ analytic.status|lower }}">{{ analytic.status }}</div></td>
 		<td class="acenter">{{ analytic.maxhosts_count }}</td>
@@ -39,10 +39,10 @@
 				<img src="/static/admin/img/icon-no.svg" alt="no" />
 			{% endif %}
 		</td>
-		<td>{% if 'error' in analytic.query_error_message %}
-			<div class="msg_error">ERROR</div>
-		{% else %}
+		<td>{% if analytic.error_is_info %}
 			<div class="msg_warning">INFO</div>
+		{% else %}
+			<div class="msg_error">ERROR</div>
 		{% endif %}</td>
 		<td><pre>{{ analytic.query_error_message }}</pre></td>
 		<td>{{ analytic.query_error_date }}</td>

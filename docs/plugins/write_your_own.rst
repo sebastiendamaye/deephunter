@@ -85,6 +85,11 @@ Methods are listed below (M/O = Mandatory / Optional).
      - O
      - 
      - Integer (number of days) or None (if failure).
+   * - ``error_is_info``
+     - Check if the query error message is an informational message (INFO) instead of an ERROR.
+     - M
+     - ``error``: The error message to check.
+     - Boolean indicating whether the error is informational.
 
 Template
 ********
@@ -104,7 +109,8 @@ You can use the following template to create your own plugin:
 
     _globals_initialized = False
     def init_globals():
-        global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES, THREATS_URL
+        global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, \
+              WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES, THREATS_URL, QUERY_ERROR_INFO
         global _globals_initialized
         if not _globals_initialized:
             DEBUG = False
@@ -115,6 +121,7 @@ You can use the following template to create your own plugin:
             # ....
             SYNC_RULES = get_connector_conf('microsoftsentinel', 'SYNC_RULES')
             THREATS_URL = get_connector_conf('microsoftsentinel', 'THREATS_URL')
+            QUERY_ERROR_INFO = get_connector_conf('microsoftsentinel', 'QUERY_ERROR_INFO')
             _globals_initialized = True
 
     def query(analytic, from_date=None, to_date=None, debug=None):
@@ -216,3 +223,16 @@ You can use the following template to create your own plugin:
 
         # you can use a URL template using the variables and replace with corect values
         return f"https://portal.azure.com/search?host={endpoint}&date={date}"
+
+  def error_is_info(error):
+      """ 
+      Check if the query error message is an informational message (INFO) instead of an ERROR.
+      This is determined with a regular expression provided by the QUERY_ERROR_INFO setting.
+      :param error: The error message to check.
+      :return: True if the error is an informational message, False otherwise.
+      """
+      init_globals()
+      if QUERY_ERROR_INFO:
+          if re.search(QUERY_ERROR_INFO, error):
+              return True
+      return False

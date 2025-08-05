@@ -307,7 +307,24 @@ def analytics_perfs(request):
 
 @login_required
 def query_error(request):
-    analytics = Analytic.objects.filter(query_error = True).exclude(status='ARCH').order_by('-query_error_date')
+    analytics_with_errors = Analytic.objects.filter(query_error = True).exclude(status='ARCH').order_by('-query_error_date')
+
+    analytics = []
+    for analytic in analytics_with_errors:
+        analytics.append({
+            'id': analytic.id,
+            'name': analytic.name,
+            'description': analytic.description,
+            'query': analytic.query,
+            'status': analytic.status,
+            'maxhosts_count': analytic.maxhosts_count,
+            'connector_name': analytic.connector.name,
+            'run_daily': analytic.run_daily,
+            'error': analytic.query_error,
+            'error_is_info': all_connectors.get(analytic.connector.name).error_is_info(analytic.query_error_message),
+            'query_error_message': analytic.query_error_message,
+            'query_error_date': analytic.query_error_date,
+        })
 
     paginator = Paginator(analytics, ANALYTICS_PER_PAGE)
     page_number = int(request.GET.get('page', 1))

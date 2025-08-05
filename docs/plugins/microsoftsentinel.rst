@@ -100,3 +100,13 @@ WORKSPACE_NAME
 .. code-block:: python
 
     WORKSPACE_NAME = "myWorkspaceName"
+
+QUERY_ERROR_INFO
+================
+- **Type**: string
+- **Description**: Regular expression to identify if the query error message is an informational message (INFO) instead of an ERROR. This can be used to filter out non-critical errors in the logs. If empty, all messages will be considered errors.
+- **Example**:
+
+.. code-block:: python
+
+    QUERY_ERROR_INFO = ".*(INFO|DEBUG).*"

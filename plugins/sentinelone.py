@@ -6,6 +6,7 @@ from connectors.utils import get_connector_conf
 from django.conf import settings
 import logging
 import requests
+import re
 from time import sleep
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, quote_plus
@@ -16,8 +17,9 @@ logger = logging.getLogger(__name__)
 
 _globals_initialized = False
 def init_globals():
-    global DEBUG, PROXY, DB_DATA_RETENTION, CAMPAIGN_MAX_HOSTS_THRESHOLD, DISABLE_RUN_DAILY_ON_ERROR
-    global S1_URL, S1_TOKEN, S1_THREATS_URL, XDR_URL, XDR_PARAMS, SYNC_STAR_RULES, STAR_RULES_PREFIX, STAR_RULES_DEFAULTS
+    global DEBUG, PROXY, DB_DATA_RETENTION, CAMPAIGN_MAX_HOSTS_THRESHOLD, DISABLE_RUN_DAILY_ON_ERROR, \
+            S1_URL, S1_TOKEN, S1_THREATS_URL, XDR_URL, XDR_PARAMS, SYNC_STAR_RULES, STAR_RULES_PREFIX, \
+            STAR_RULES_DEFAULTS, QUERY_ERROR_INFO
     global _globals_initialized
     if not _globals_initialized:
         DEBUG = False
@@ -40,6 +42,7 @@ def init_globals():
             'treatAsThreat': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_TREATASTHREAT'), # Undefined(or empty)|Suspicious|Malicious.
             'networkQuarantine': get_connector_conf('sentinelone', 'STAR_RULES_DEFAULT_NETWORKQUARANTINE') # true|false
         }
+        QUERY_ERROR_INFO = get_connector_conf('sentinelone', 'QUERY_ERROR_INFO')
         _globals_initialized = True
 
 
@@ -471,3 +474,16 @@ def get_redirect_threats_link(endpoint, date):
         )
  
     return S1_THREATS_URL.format(endpoint, timerange)
+
+def error_is_info(error):
+    """ 
+    Check if the query error message is an informational message (INFO) instead of an ERROR.
+    This is determined with a regular expression provided by the QUERY_ERROR_INFO setting.
+    :param error: The error message to check.
+    :return: True if the error is an informational message, False otherwise.
+    """
+    init_globals()
+    if QUERY_ERROR_INFO:
+        if re.search(QUERY_ERROR_INFO, error):
+            return True
+    return False

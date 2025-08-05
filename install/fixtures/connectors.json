@@ -311,6 +311,16 @@
     },
     {
         "model": "connectors.connectorconf",
+        "pk": 49,
+        "fields": {
+            "connector": 1,
+            "key": "QUERY_ERROR_INFO",
+            "value": "",
+            "description": "Regular expression to filter what should be considered INFO instead of ERROR in query error message"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
         "pk": 58,
         "fields": {
             "connector": 3,
@@ -407,6 +417,16 @@
             "key": "WORKSPACE_NAME",
             "value": "MyWorkspaceName",
             "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 72,
+        "fields": {
+            "connector": 5,
+            "key": "QUERY_ERROR_INFO",
+            "value": "",
+            "description": "Regular expression to filter what should be considered INFO instead of ERROR in query error message"
         }
     }
 ]

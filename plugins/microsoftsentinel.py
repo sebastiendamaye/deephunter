@@ -26,13 +26,15 @@ from connectors.utils import get_connector_conf, gzip_base64_urlencode, manage_a
 import logging
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote
+import re
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
 
 _globals_initialized = False
 def init_globals():
-    global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES, S1_THREATS_URL
+    global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, \
+            WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES, QUERY_ERROR_INFO
     global _globals_initialized
     if not _globals_initialized:
         DEBUG = False
@@ -44,7 +46,7 @@ def init_globals():
         WORKSPACE_NAME = get_connector_conf('microsoftsentinel', 'WORKSPACE_NAME').lower()
         RESOURCE_GROUP = get_connector_conf('microsoftsentinel', 'RESOURCE_GROUP')
         SYNC_RULES = get_connector_conf('microsoftsentinel', 'SYNC_RULES')
-        S1_THREATS_URL = get_connector_conf('sentinelone', 'S1_THREATS_URL')
+        QUERY_ERROR_INFO = get_connector_conf('microsoftsentinel', 'QUERY_ERROR_INFO')
         _globals_initialized = True
 
 
@@ -189,3 +191,16 @@ def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
     )
 
     return url
+
+def error_is_info(error):
+    """ 
+    Check if the query error message is an informational message (INFO) instead of an ERROR.
+    This is determined with a regular expression provided by the QUERY_ERROR_INFO setting.
+    :param error: The error message to check.
+    :return: True if the error is an informational message, False otherwise.
+    """
+    init_globals()
+    if QUERY_ERROR_INFO:
+        if re.search(QUERY_ERROR_INFO, error):
+            return True
+    return False
