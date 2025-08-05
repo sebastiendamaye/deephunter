@@ -76,6 +76,7 @@ def pre_save_handler(sender, instance, **kwargs):
             instance.maxhosts_count = 0
             instance.query_error = False
             instance.query_error_message = ''
+            instance.query_error_date = None
             instance.last_time_seen = None
             # we save a flag for the post_save handler to know if the query was changed
             instance._query_changed = True

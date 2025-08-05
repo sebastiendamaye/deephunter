@@ -19,6 +19,7 @@
 		<th>Run daily</th>
 		<th>Category</th>
 		<th>Message</th>
+		<th>Error date</th>
 	</tr>
 {% for analytic in analytics %}
 	<tr>
@@ -44,6 +45,7 @@
 			<div class="msg_warning">INFO</div>
 		{% endif %}</td>
 		<td><pre>{{ analytic.query_error_message }}</pre></td>
+		<td>{{ analytic.query_error_date }}</td>
 	</tr>	
 {% endfor %}
 </table>

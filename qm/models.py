@@ -162,10 +162,11 @@ class Analytic(models.Model):
     maxhosts_count = models.IntegerField(default=0, help_text="Counts how many times max hosts threshold is reached")
     query_error = models.BooleanField(default=False, editable=False)
     query_error_message = models.TextField(blank=True, editable=False)
+    query_error_date = models.DateTimeField(blank=True, null=True, editable=False)
     next_review_date = models.DateField(blank=True, null=True, editable=False)
     last_time_seen = models.DateField(blank=True, null=True, editable=False)
     history = HistoricalRecords(
-        excluded_fields=['query_error', 'query_error_message', 'last_time_seen', 'next_review_date'],
+        excluded_fields=['query_error', 'query_error_message', 'query_error_date', 'last_time_seen', 'next_review_date'],
         m2m_fields=[tags, mitre_techniques, threats, actors, target_os, vulnerabilities]
         )
     

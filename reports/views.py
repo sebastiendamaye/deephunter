@@ -307,7 +307,7 @@ def analytics_perfs(request):
 
 @login_required
 def query_error(request):
-    analytics = Analytic.objects.filter(query_error = True).exclude(status='ARCH')
+    analytics = Analytic.objects.filter(query_error = True).exclude(status='ARCH').order_by('-query_error_date')
 
     paginator = Paginator(analytics, ANALYTICS_PER_PAGE)
     page_number = int(request.GET.get('page', 1))

@@ -7,6 +7,7 @@ import re
 import gzip
 import base64
 import urllib.parse
+from datetime import datetime
 from io import BytesIO
 from django.conf import settings
 import logging
@@ -94,6 +95,10 @@ def manage_analytic_error(analytic, error_message):
     analytic.query_error = True
     if len(error_message) > 500:
         error_message = "{} [...] {}".format(error_message[:250], error_message[-250:])
+
+    # Analytic query error date is always set to today, even if the campaign is regenerated retroactively
+    # this is because we want to know when the error occurred exactly to investigate potential issues with the data lake
+    analytic.query_error_date = datetime.today()
 
     analytic.query_error_message = error_message
     # if "error" message, and configured to auto-disable analytic,

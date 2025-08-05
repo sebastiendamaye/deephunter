@@ -140,6 +140,7 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
         # we assume that analytic won't fail (flag will be set later if analytic fails)
         analytic.query_error = False
         analytic.query_error_message = ''
+        analytic.query_error_date = None
         analytic.save()
                 
         # store current time (used to update snapshot runtime)
