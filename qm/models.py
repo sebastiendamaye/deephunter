@@ -159,7 +159,7 @@ class Analytic(models.Model):
     dynamic_query = models.BooleanField(default=False)
     anomaly_threshold_count = models.IntegerField(default=2, help_text="Value range from 0 to 3. The higher the less sensitive")
     anomaly_threshold_endpoints = models.IntegerField(default=2, help_text="Value range from 0 to 3. The higher the less sensitive")
-    maxhosts_count = models.IntegerField(default=0, help_text="Counts how many times max hosts threshold is reached")
+    maxhosts_count = models.IntegerField(default=0, editable=False, help_text="Counts how many times max hosts threshold is reached")
     query_error = models.BooleanField(default=False, editable=False)
     query_error_message = models.TextField(blank=True, editable=False)
     query_error_date = models.DateTimeField(blank=True, null=True, editable=False)
