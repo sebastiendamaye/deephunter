@@ -45,4 +45,17 @@ urlpatterns = [
     path('db_highestweightedscoretoday/', views.db_highestweightedscoretoday, name='db_highestweightedscoretoday'),
     path('db_analyticswitherrors/', views.db_analyticswitherrors, name='db_analyticswitherrors'),
     path('db_topendpointdistinctanalytics/', views.db_top_endpoint_distinct_analytics, name='db_top_endpoint_distinct_analytics'),
+
+    path('qm/edit_description_initial/<int:analytic_id>/', views.edit_description_initial, name='edit_description_initial'),
+    path('qm/edit_description_form/<int:analytic_id>/', views.edit_description_form, name='edit_description_form'),
+    path('qm/edit_description_submit/<int:analytic_id>/', views.edit_description_submit, name='edit_description_submit'),
+
+    path('qm/edit_notes_initial/<int:analytic_id>/', views.edit_notes_initial, name='edit_notes_initial'),
+    path('qm/edit_notes_form/<int:analytic_id>/', views.edit_notes_form, name='edit_notes_form'),
+    path('qm/edit_notes_submit/<int:analytic_id>/', views.edit_notes_submit, name='edit_notes_submit'),
+
+    path('qm/edit_query_initial/<int:analytic_id>/', views.edit_query_initial, name='edit_query_initial'),
+    path('qm/edit_query_form/<int:analytic_id>/', views.edit_query_form, name='edit_query_form'),
+    path('qm/edit_query_submit/<int:analytic_id>/', views.edit_query_submit, name='edit_query_submit'),
+
 ]

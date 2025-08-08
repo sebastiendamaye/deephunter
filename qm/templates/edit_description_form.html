@@ -1,0 +1,13 @@
+<form hx-post="/qm/edit_description_submit/{{ analytic_id }}/" hx-target="this" hx-swap="outerHTML">
+    {% csrf_token %}
+    <div>{{ form.description }}</div>
+    <div>{{ form.description.errors }}</div>
+    <div>
+        <button class="inlineedit" type="submit">
+            <img src="/static/admin/img/icon-yes.svg" /> Submit
+        </button>
+        <button class="inlineedit" hx-get="/qm/edit_description_initial/{{ analytic_id }}/">
+            <img src="/static/admin/img/icon-deletelink.svg" /> Cancel
+        </button>
+    </div>
+</form>

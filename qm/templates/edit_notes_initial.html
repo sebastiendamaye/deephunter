@@ -1,0 +1,7 @@
+{% load markup_tags %}
+<div hx-target="this" hx-swap="outerHTML">
+    <button class="inlineedit" hx-get="/qm/edit_notes_form/{{ analytic_id }}/">
+        <img src="/static/admin/img/icon-changelink.svg" /> edit
+    </button>
+    {{ analytic_notes|apply_markup:"markdown" }}
+</div>

@@ -1,0 +1,15 @@
+<form hx-post="/qm/edit_query_submit/{{ analytic_id }}/" hx-target="this" hx-swap="outerHTML">
+    {% csrf_token %}
+    <div>{{ form.query }}</div>
+    <div>{{ form.query.errors }}</div>
+    <div>{{ form.columns }}</div>
+    <div>{{ form.columns.errors }}</div>
+    <div>
+        <button class="inlineedit" type="submit">
+            <img src="/static/admin/img/icon-yes.svg" /> Submit
+        </button>
+        <button class="inlineedit" hx-get="/qm/edit_query_initial/{{ analytic_id }}/">
+            <img src="/static/admin/img/icon-deletelink.svg" /> Cancel
+        </button>
+    </div>
+</form>

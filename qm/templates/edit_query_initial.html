@@ -1,0 +1,7 @@
+{% load markup_tags %}
+<div hx-target="this" hx-swap="outerHTML">
+    <button class="inlineedit" hx-get="/qm/edit_query_form/{{ analytic_id }}/">
+        <img src="/static/admin/img/icon-changelink.svg" /> edit
+    </button>
+    <pre>{{ analytic_query }}{% if analytic_columns %}<br />{{ analytic_columns }}{% endif %}</pre>
+</div>

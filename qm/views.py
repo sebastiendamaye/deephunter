@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
+from django.middleware.csrf import get_token
 from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta, timezone
@@ -21,7 +22,7 @@ from connectors.utils import is_connector_enabled, get_connector_conf
 from celery import current_app
 from qm.utils import get_campaign_date
 from urllib.parse import urlencode, quote
-from .forms import ReviewForm
+from .forms import ReviewForm, EditAnalyticDescriptionForm, EditAnalyticNotesForm, EditAnalyticQueryForm
 
 # Dynamically import all connectors
 import importlib
@@ -964,3 +965,97 @@ def db_analyticsbyuser(request):
     analytics_breakdown = Analytic.objects.values('created_by__id', 'created_by__username').exclude(status='ARCH').annotate(count=Count('id'))
     context = { 'analytics_breakdown': analytics_breakdown, }
     return render(request, 'db_analyticsbyuser.html', context)        
+
+
+@login_required
+def edit_description_initial(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    context = {
+        "analytic_description": analytic.description,
+        "analytic_id": analytic.id
+    }
+    return render(request, 'edit_description_initial.html', context)
+
+@login_required
+def edit_description_form(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    context = {
+        "form": EditAnalyticDescriptionForm(initial={'description': analytic.description}),
+        "analytic_id": analytic.id,
+    }
+    return render(request, 'edit_description_form.html', context)
+
+@login_required
+def edit_description_submit(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    if request.method == "POST":
+        form = EditAnalyticDescriptionForm(request.POST, instance=analytic)
+        if form.is_valid():
+            form.save()
+        else:
+            return render(request, 'edit_description_form.html', {'analytic_id': analytic.id})
+    return HttpResponseRedirect(f"/qm/edit_description_initial/{analytic.id}")
+
+@login_required
+def edit_notes_initial(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    context = {
+        "analytic_notes": analytic.notes,
+        "analytic_id": analytic.id
+    }
+    return render(request, 'edit_notes_initial.html', context)
+
+@login_required
+def edit_notes_form(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    context = {
+        "form": EditAnalyticNotesForm(initial={'notes': analytic.notes}),
+        "analytic_id": analytic.id,
+    }
+    return render(request, 'edit_notes_form.html', context)
+
+@login_required
+def edit_notes_submit(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    if request.method == "POST":
+        form = EditAnalyticNotesForm(request.POST, instance=analytic)
+        if form.is_valid():
+            form.save()
+        else:
+            return render(request, 'edit_notes_form.html', {'analytic_id': analytic.id})
+    return HttpResponseRedirect(f"/qm/edit_notes_initial/{analytic.id}")
+
+@login_required
+def edit_query_initial(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    context = {
+        "analytic_query": analytic.query,
+        "analytic_columns": analytic.columns,
+        "analytic_id": analytic.id
+    }
+    return render(request, 'edit_query_initial.html', context)
+
+@login_required
+def edit_query_form(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    context = {
+        "form": EditAnalyticQueryForm(
+            initial={
+                'query': analytic.query,
+                'columns': analytic.columns
+            }
+        ),
+        "analytic_id": analytic.id,
+    }
+    return render(request, 'edit_query_form.html', context)
+
+@login_required
+def edit_query_submit(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    if request.method == "POST":
+        form = EditAnalyticQueryForm(request.POST, instance=analytic)
+        if form.is_valid():
+            form.save()
+        else:
+            return render(request, 'edit_query_form.html', {'analytic_id': analytic.id})
+    return HttpResponseRedirect(f"/qm/edit_query_initial/{analytic.id}")

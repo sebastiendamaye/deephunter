@@ -1,0 +1,9 @@
+/*
+.ui-tabs .ui-tabs-nav {
+  background-color: wheat;
+}
+*/
+
+.ui-tabs .ui-tabs-active {
+  background-color: #2596be;
+}

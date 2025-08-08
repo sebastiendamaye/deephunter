@@ -405,3 +405,11 @@ div.arch {
 	border-radius: 5px;
 	text-align: center;
 }
+
+
+button.inlineedit {
+	border: solid 1px #ccc;
+	padding: 5px 10px;
+	border-radius: 5px;
+	cursor: pointer;
+}	
