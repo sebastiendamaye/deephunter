@@ -8,7 +8,7 @@ The ``run_campaign.sh`` script is a launcher for running:
 
 - "dynamic" threat hunting analytics (e.g., `vulnerable_driver_name_detected_loldriver.py <vulnerable_driver_name_detected_loldriver.html>`_),
 - `campaign.sh <campaign.html>`_, and
-- `review.sh <review.html>`_.
+- `review.py <review.html>`_.
 
 Below is the code of this launcher:
 

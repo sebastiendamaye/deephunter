@@ -57,7 +57,7 @@ DeepHunter (from v2.0) has been designed to connect to the any data lake, provid
 Architecture
 ************
 .. image:: img/deephunter_architecture.jpg
-  :width: 600
+  :width: 800
   :alt: DeepHunter architecture diagram
 
 Campaigns and Statistics
@@ -136,23 +136,36 @@ DeepHunter can synchronize its threat hunting analytics with a remote data lake,
 Modifications on analytics (creation, modification, deletion) are monitored via the *signals*. It triggers pre-save and post-save controls, with the following logic:
 
 .. image:: img/sync_rule_logic.jpg
-  :width: 800
+  :width: 1000
   :alt: Sync rule logic
 
 Analytic Workflow
 *****************
 
+Workflow
+========
+
 Because threat hunting analytics may become obsolete with time, or need to be updated, DeepHunter has a workflow to manage the lifecycle of threat hunting analytics. The workflow is as follows:
 
 .. image:: img/analytics_workflow.png
-  :width: 800
+  :width: 1000
   :alt: Analytics workflow
 
-The "run_campaigns.sh" cron job will automatically update the status of threat hunting analytics that need to be reviewed, based on their last review date.
+Statuses
+========
+Analytic can have the following statuses:
+
+- **DRAFT**: Analytic newly created, under observation, not yet fully tested.
+- **PUB**: Published analytic, fully tested, and considered production ready. After some time, it will automatically move to **REVIEW**.
+- **REVIEW**: Analytic that was in **PUB** status for some time, and neeeds to be reviewed. Use the `review tab <#the-review-process>`_ to move forward.
+- **PENDING**: Analytic that has been reviewed, and is no longer considered valid for production. The run_daily flag will be automatically unset, and the analytic query should be updated ASAP.
+- **ARCH**: archived analytics. They will no longer appear in DeepHunter modules and reports, but are still in the database. To restore an archived analytic, refer to this `section <reports/archived_analytics.html#archived-analytics>`_.
+
+The "review" process
+====================
+The `run_campaigns.sh <scripts/run_campaign.html>`_ cron job will automatically update the status of threat hunting analytics that need to be reviewed, based on their last review date (defined with the `DAYS_BEFORE_REVIEW <settings.html#days-before-review>`_ setting).
 
 You can access the list of analytics to review from the menu (``Reports > Analytics to review``). Expand the details and click the "Review" tab.
-
-To add a new saved search, apply some filters to the analytics view and click "save search".
 
 .. image:: img/review_tab.png
   :width: 800
