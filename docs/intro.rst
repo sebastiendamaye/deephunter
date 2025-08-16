@@ -52,7 +52,7 @@ DeepHunter is an application developed by threat hunters for threat hunters, in 
 
 What data lakes are supported?
 ******************************
-DeepHunter (from v2.0) has been designed to connect to the any data lake, provided there is a connector, or you develop one. There are already connectors for `SentinelOne <https://www.sentinelone.com/>`_ EDR and for Microsoft Sentinel, but this list is expected to grow. You are very welcome to contribute.
+DeepHunter (from v2.0) has been designed to connect to the any data lake, provided there is a `connector <plugins/index.html>`_ (aka *plugin*), or you `develop <plugins/write_your_own.html>`_ one. There are already connectors for `SentinelOne <plugins/sentinelone.html>`_ EDR and for `Microsoft Sentinel <plugins/microsoftsentinel.html>`_, but this list is expected to grow. You are very welcome to contribute.
 
 Architecture
 ************
