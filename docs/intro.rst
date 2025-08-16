@@ -44,7 +44,7 @@ DeepHunter is a Threat Hunting platform that features:
 
 Who is DeepHunter for?
 **********************
-DeepHunter is an application developed by threat hunters for threat hunters, in order to automate the execution of threat hunting queries, and prioritize threat hunts. It is not intended to replace the EDR or the SDL, but it will dramatically help threat hunters organize their threat hunting campaigns. Targeted populations are:
+DeepHunter is an application developed by threat hunters for threat hunters, in order to automate the execution of threat hunting queries, and prioritize threat hunts. It is not intended to replace your EDR, your SIEM or your SDL, but it will dramatically help threat hunters organize their threat hunting campaigns. Targeted populations are:
 
 - **Threat Hunters**: DeepHunter may quickly become your day-to-day threat hunting platform.
 - **SOC analysts**: DeepHunter timeline module can help you triage incidents, or correlate a reported incident with other artifacts.
