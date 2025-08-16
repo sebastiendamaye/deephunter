@@ -82,14 +82,10 @@ table.mitre th {
 }
 
 .float-container {
-    /*
-	border: 3px solid #fff;
-    */
 	padding: 20px;
-  display: flex;
-  justify-content: space-around;
-  flex-flow: row nowrap;
-
+  	display: flex;
+  	justify-content: space-around;
+  	flex-flow: row nowrap;
 }
 
 .float-child {
@@ -413,3 +409,44 @@ button.inlineedit {
 	border-radius: 5px;
 	cursor: pointer;
 }	
+
+.flex-container {
+	display: flex;
+	padding: 20px;
+	height: 100vh;
+}
+
+.flex_left {
+	flex: 0 0 800px;
+	padding: 20px;
+	height: 100vh;
+	overflow-y: auto; /* Enable vertical scrolling if the content exceeds the screen height */
+}
+
+}
+.flex_right {
+	flex: 1; /* Takes the remaining space */
+	padding: 20px;
+	/*border: solid 3px #eee;*/
+	width: 100%;
+}
+
+div.preview {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+
+    font-family: "Courier New", Courier, monospace;
+    font-size: 15px;
+    background-color: #f4f4f4;
+    padding: 10px;
+    border-radius: 4px;
+    color: #333;
+}
+
+table.w750 {
+	width: 750px;
+}
+
+div.pad5 {
+	padding-left:5px;
+}

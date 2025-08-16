@@ -34,7 +34,7 @@ def campaigns_stats(request):
     stats = []
     seconds_in_day = 24 * 60 * 60
     
-    connectors = Connector.objects.filter(visible_in_analytics=True)
+    connectors = Connector.objects.filter(domain="analytics")
     
     # initialize connector stats with empty lists
     connector_stats = {}

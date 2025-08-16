@@ -8,5 +8,5 @@ Tools
    vt_hash_checker
    vt_ip_checker
    whois
-   mb_hash_checker.rst
+   mb_hash_checker
    develop_your_own

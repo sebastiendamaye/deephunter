@@ -1,9 +1,4 @@
-/*
-.ui-tabs .ui-tabs-nav {
-  background-color: wheat;
-}
-*/
-
 .ui-tabs .ui-tabs-active {
-  background-color: #2596be;
+    background-color: #1e81b0;
+    border: 1px solid #154c79;
 }

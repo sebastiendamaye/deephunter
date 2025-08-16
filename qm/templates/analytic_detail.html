@@ -42,6 +42,9 @@
 		<div class="ml40">
 			<b>Tags: </b>{% if analytic.tags %}{% for tag in analytic.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
 		</div>
+		<div class="ml40">
+			<b>Repo: </b>{% if analytic.repo %}{{ analytic.repo.name }}{% else %}-{% endif %}
+		</div>
 
 		<h1>DESCRIPTION</h1>
 		<div class="description" hx-get="/qm/edit_description_initial/{{ analytic.id }}/" hx-trigger="load"></div>

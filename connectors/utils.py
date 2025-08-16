@@ -45,6 +45,18 @@ def is_connector_enabled(connector_name):
     except Connector.DoesNotExist:
         return False
 
+def is_connector_for_analytics(connector_name):
+    """
+    Check if a connector is for analytics.
+    
+    :param connector_name: Name of the connector.
+    :return: True if the connector is for analytics, False otherwise.
+    """
+    try:
+        connector = Connector.objects.get(name=connector_name)
+        return connector.domain == "analytics"
+    except Connector.DoesNotExist:
+        return False
 
 def is_valid_md5(hash: str) -> bool:
     pattern = r'^[a-z-A-Z0-9]{32}$'

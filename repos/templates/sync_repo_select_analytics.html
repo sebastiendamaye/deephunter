@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load repos_extras %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/list_analytics.css" />
+    <script src="/static/js/htmx.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<h1><a href="/repos/listrepos/">Repos</a> > Sync {{ repo.name }}</h1>
+
+<p>Select the analytics you would like to import.</p>
+
+<div class="flex-container">
+    <div class="flex_left">
+        <form method="post" action="/repos/syncrepo/{{ repo.id }}/sync/">
+            {% csrf_token %}
+            <table class="mitre w750">
+                <tr>
+                    <th>&nbsp;</th>
+                    <th colspan="2">
+                        <div class="pad5">
+                            <input type="checkbox" id="checkall" />
+                            <label for="checkall">Select All</label>
+                        </div>
+                    </th>
+                </tr>
+                {% for content in contents %}
+                    <tr>
+                        <td class="acenter"><button hx-get="/repos/preview/{{ content.download_url|encode_url }}/" hx-target="#preview" class="button">Preview</button></td>
+                        <td class="acenter"><input id="analytic{{ content.name }}" type="checkbox" name="analytics" value="{{ content.name }}" /></td>
+                        <td><label for="analytic{{ content.name }}">{{ content.name }}</label></td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <p class="m10"><button type="submit" class="button">Import Selected Analytics</button></p>
+        </form>
+    </div>
+    <div class="flex_right">
+        <h2>Preview</h2>
+        <div class="preview" id="preview"></div>
+    </div>
+</div>
+<script nonce="wc5jdl92ml">
+    document.addEventListener('DOMContentLoaded', function() {
+        var checkall = document.getElementById('checkall');
+        checkall.addEventListener('change', function() {
+            var checkboxes = document.querySelectorAll('input[type="checkbox"][name="analytics"]');
+            checkboxes.forEach(function(box) {
+                box.checked = checkall.checked;
+            });
+        });
+    });
+</script>
+{% endblock %}

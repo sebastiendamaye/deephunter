@@ -2,7 +2,8 @@ from django import template
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import stringfilter
 from django.contrib.auth.models import User
-from qm.models import Country, TargetOs, ThreatActor, ThreatName, Vulnerability, MitreTactic, MitreTechnique, Tag, Category, Review, Analytic
+from qm.models import (Country, TargetOs, ThreatActor, ThreatName, Vulnerability,
+    MitreTactic, MitreTechnique, Tag, Category, Review, Analytic, Repo)
 from connectors.models import Connector
 from django.conf import settings
 
@@ -34,6 +35,11 @@ def cvecolor(base_score):
         myclass = 'none'
     
     return myclass
+
+@register.filter
+def repoidtoname(id):
+    v = get_object_or_404(Repo, pk=id)
+    return v.name
 
 @register.filter
 def connectoridtoname(id):

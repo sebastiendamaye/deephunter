@@ -1,10 +1,15 @@
 from django.db import models
 
 class Connector(models.Model):
+    DOMAIN_CHOICES = [
+        ('analytics', 'Analytics'),
+        ('repos', 'Repos'),
+    ]
+
     name = models.CharField(max_length=20, unique=True)
     description = models.TextField(blank=True)
     enabled = models.BooleanField(default=False)
-    visible_in_analytics = models.BooleanField(default=False, help_text="Should this connector be visible in threat hunting analytics?")
+    domain = models.CharField(max_length=20, choices=DOMAIN_CHOICES, blank=True)
 
     def __str__(self):
         return self.name
@@ -17,3 +22,4 @@ class ConnectorConf(models.Model):
 
     def __str__(self):
         return f"{self.connector.name}:{self.key}"
+

@@ -22,10 +22,10 @@
         {% for search in saved_searches %}
             <tr>
                 <td>
-                    [<a href="/qm/listanalytics?{{ search.search }}">execute</a>]
+                    <a href="/qm/listanalytics?{{ search.search }}" class="button">execute</a>
                     {% if not search.is_locked %}
-                        [<a href="/admin/qm/savedsearch/{{ search.id }}/change/">update</a>]
-                        [<a href="/admin/qm/savedsearch/{{ search.id }}/delete/">delete</a>]
+                        <a href="/admin/qm/savedsearch/{{ search.id }}/change/" class="button">update</a>
+                        <a href="/admin/qm/savedsearch/{{ search.id }}/delete/" class="button">delete</a>
                     {% endif %}
                 </td>
                 <td>{{ search.name }}</td>

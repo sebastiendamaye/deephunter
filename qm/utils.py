@@ -6,7 +6,6 @@ import numpy as np
 from scipy import stats
 from math import isnan
 import requests
-from connectors.utils import is_connector_enabled
 
 # Dynamically import all connectors
 import importlib

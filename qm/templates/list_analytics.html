@@ -27,8 +27,13 @@
 		<button type="submit"><i class="fa fa-search"></i></button>
 	</div>
 	<div>{{ analytics_count }} analytics</div>
-	
-	<div>{% if posted_search or posted_filters %}[<a href="/qm/listanalytics/">Reset filters</a>] [<a href="/admin/qm/savedsearch/add/?search={{ filtered_query_string }}">Save search</a>]{% endif %}</div>
+
+	<div>
+		{% if posted_search or posted_filters %}
+			<a href="/qm/listanalytics/" class="button">Reset filters</a>
+			<a href="/admin/qm/savedsearch/add/?search={{ filtered_query_string }}" class="button">Save search</a>
+		{% endif %}
+	</div>
 	<div><h4>FILTERS</h4></div>
 	{% if posted_filters %}
 		<div id="divfilters">
@@ -37,7 +42,13 @@
 					<button class="button_filter" id="button_checkconnector_{{ v }}">CONNECTOR:{{ v|connectoridtoname }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
-			
+
+			{% if posted_filters.repos %}
+				{% for v in posted_filters.repos %}
+					<button class="button_filter" id="button_checkrepo_{{ v }}">REPO:{{ v|repoidtoname }}&nbsp;&nbsp;<b>x</b></button>
+				{% endfor %}
+			{% endif %}
+
 			{% if posted_filters.categories %}
 				{% for v in posted_filters.categories %}
 					<button class="button_filter" id="button_checkcategory_{{ v }}">CAT:{{ v|categoryidtoname }}&nbsp;&nbsp;<b>x</b></button>
@@ -183,6 +194,17 @@
 				<input class="form-check-input" type="checkbox" id="checkconnector{{ connector.id }}" name="connectors" value="{{ connector.id }}"
 					{% if connector.id|slugify in posted_filters.connectors %} checked{% endif %}>
 				<label class="form-check-label" for="checkconnector{{ connector.id }}" title="{{ connector.description }}"">{{ connector.name }}</label>
+			</div>
+			{% endfor %}
+		</td></tr>
+
+		<tr><td><div class="filter">Repos</div></td></tr>
+		<tr><td>
+			{% for repo in repos %}
+			<div class="form-check">
+				<input class="form-check-input" type="checkbox" id="checkrepo{{ repo.id }}" name="repos" value="{{ repo.id }}"
+					{% if repo.id|slugify in posted_filters.repos %} checked{% endif %}>
+				<label class="form-check-label" for="checkrepo{{ repo.id }}" title="{{ repo.url }}">{{ repo.name }}</label>
 			</div>
 			{% endfor %}
 		</td></tr>

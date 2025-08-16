@@ -14,11 +14,11 @@ import numpy as np
 from scipy import stats
 from math import isnan
 from .models import (Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor,
-    ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category, Review, SavedSearch)
+    ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category, Review, SavedSearch, Repo)
 from connectors.models import Connector
 from .tasks import regenerate_stats, regenerate_campaign
 import ipaddress
-from connectors.utils import is_connector_enabled, get_connector_conf
+from connectors.utils import is_connector_enabled, is_connector_for_analytics, get_connector_conf
 from celery import current_app
 from qm.utils import get_campaign_date
 from urllib.parse import urlencode, quote
@@ -77,6 +77,10 @@ def list_analytics(request):
         if 'connectors' in request.GET:
             analytics = analytics.filter(connector__pk__in=request.GET.getlist('connectors'))
             posted_filters['connectors'] = request.GET.getlist('connectors')
+
+        if 'repos' in request.GET:
+            analytics = analytics.filter(repo__pk__in=request.GET.getlist('repos'))
+            posted_filters['repos'] = request.GET.getlist('repos')
 
         if 'categories' in request.GET:
             analytics = analytics.filter(category__pk__in=request.GET.getlist('categories'))
@@ -256,7 +260,8 @@ def list_analytics(request):
         'query_string': query_string,
         'filtered_query_string': filtered_query_string,
         'analytics_count': analytics_count,
-        'connectors': Connector.objects.filter(visible_in_analytics=True),
+        'connectors': Connector.objects.filter(domain="analytics"),
+        'repos': Repo.objects.all(),
         'target_os': TargetOs.objects.all(),
         'vulnerabilities': Vulnerability.objects.all(),
         'tags': Tag.objects.all(),
@@ -412,7 +417,7 @@ def tl_timeline(request, hostname):
         connector_name = connector.__name__.split('.')[1]
 
         # we only call get_threats() if the connector is enabled and has this method
-        if is_connector_enabled(connector_name) and hasattr(connector, 'get_threats'):
+        if is_connector_enabled(connector_name) and is_connector_for_analytics(connector_name) and hasattr(connector, 'get_threats'):
             # If the connector has a get_threats method, call it
             #try:
             threats = connector.get_threats(hostname, sincedate)

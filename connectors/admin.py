@@ -1,10 +1,9 @@
 from django.contrib import admin
 from .models import Connector, ConnectorConf
-from django.conf import settings
 
 class ConnectorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'enabled', 'visible_in_analytics')
-    list_filter = ['name', 'description']
+    list_display = ('name', 'description', 'enabled', 'domain')
+    list_filter = ['name', 'description', 'domain']
     search_fields = ['name', 'description']
 
 class ConnectorConfAdmin(admin.ModelAdmin):

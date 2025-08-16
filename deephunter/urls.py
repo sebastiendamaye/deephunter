@@ -17,4 +17,5 @@ urlpatterns = [
     path('extensions/', include('extensions.urls')),
     path('reports/', include('reports.urls')),
     path('connectors/', include('connectors.urls')),
+    path('repos/', include('repos.urls')),
 ]

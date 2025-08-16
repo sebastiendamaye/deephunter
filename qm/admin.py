@@ -11,8 +11,8 @@ admin.site.site_header = 'DeepHunter_'
 admin.site.index_title = 'DeepHunter_'
 
 class AnalyticAdmin(SimpleHistoryAdmin):
-    list_display = ('name', 'update_date', 'created_by', 'status', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'query_error_date', 'maxhosts_count', 'connector', 'query', 'last_time_seen')
-    list_filter = ['status', 'created_by', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'maxhosts_count', 'dynamic_query', 'query_error', 'query_error_date', 'last_time_seen', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name', 'target_os', 'tags__name', 'connector']
+    list_display = ('name', 'update_date', 'created_by', 'status', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'query_error_date', 'maxhosts_count', 'connector', 'query', 'last_time_seen', 'repo')
+    list_filter = ['repo', 'status', 'created_by', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'maxhosts_count', 'dynamic_query', 'query_error', 'query_error_date', 'last_time_seen', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name', 'target_os', 'tags__name', 'connector']
     search_fields = ['name', 'description', 'notes', 'emulation_validation']
     filter_horizontal = ('mitre_techniques', 'threats', 'actors', 'target_os', 'vulnerabilities', 'tags')
     history_list_display = ['query']
@@ -21,7 +21,7 @@ class AnalyticAdmin(SimpleHistoryAdmin):
     # Only show connectors that are flagged for TH analytics
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "connector":
-            kwargs["queryset"] = Connector.objects.filter(visible_in_analytics=True)
+            kwargs["queryset"] = Connector.objects.filter(domain="analytics")
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change): 

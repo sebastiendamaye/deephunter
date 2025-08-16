@@ -1,7 +1,9 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.core.exceptions import ValidationError
 from simple_history.models import HistoricalRecords
 from connectors.models import Connector
+from repos.models import Repo
 
 class Country(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -129,6 +131,7 @@ class Analytic(models.Model):
     ]
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True, help_text="Description, Markdown syntax")
+    repo = models.ForeignKey(Repo, on_delete=models.SET_NULL, null=True, blank=True, help_text="Repo this analytic has been created from")
     notes = models.TextField(blank=True, help_text="Threat hunting notes, Markdown syntax")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     pub_date = models.DateTimeField(auto_now_add=True)
@@ -143,7 +146,7 @@ class Analytic(models.Model):
         db_persist=False
     )
     connector = models.ForeignKey(Connector, on_delete=models.CASCADE, help_text="Connector to use for this analytic")
-    query = models.TextField()
+    query = models.TextField(blank=False)
     columns = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag, blank=True)
     mitre_techniques = models.ManyToManyField(MitreTechnique, blank=True)
@@ -188,7 +191,14 @@ class Analytic(models.Model):
                 return True  # At least one field changed
         return False  # No changes
 
+    def clean(self):
+        super().clean()
+        if self.query.strip() == '':
+            raise ValidationError({'query': 'Query cannot be empty.'})
+        
     def save(self, *args, **kwargs):
+        # force check query is not an empty string
+        self.full_clean()
         # To prevent simple-history from logging useless entries (when no change)
         # we only call save method if there is a real change
         if self.has_changed():
