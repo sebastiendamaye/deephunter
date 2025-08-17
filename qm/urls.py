@@ -57,5 +57,9 @@ urlpatterns = [
     path('qm/edit_query_initial/<int:analytic_id>/', views.edit_query_initial, name='edit_query_initial'),
     path('qm/edit_query_form/<int:analytic_id>/', views.edit_query_form, name='edit_query_form'),
     path('qm/edit_query_submit/<int:analytic_id>/', views.edit_query_submit, name='edit_query_submit'),
-
+    
+    path('qm/statusbutton/<int:analytic_id>/', views.status_button, name='status_button'),
+    path('qm/changestatus/<int:analytic_id>/<str:updated_status>/', views.change_status, name='change_status'),
+    path('qm/deleteanalytic/<int:analytic_id>/', views.delete_analytic, name='delete_analytic'),
+    path('qm/rundailycheckbox/<int:analytic_id>/', views.rundailycheckbox, name='rundailycheckbox'),
 ]

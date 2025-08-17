@@ -18,9 +18,10 @@
 	<div id="details_{{ analytic.id }}">
 
 		<div class="m10">
-			<a href="/events/{{ analytic.id }}/" target="_blank" class="button">Run query</a>
+			<a href="/qm/events/{{ analytic.id }}/" target="_blank" class="button">Run query</a>
 			<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank" class="button">Edit in admin</a>
 			<a href="/admin/qm/analytic/{{ analytic.id }}/history/" target="_blank" class="button">History</a>
+			<span class="pad20"><a href="/qm/deleteanalytic/{{ analytic.id }}/" class="buttonred">Delete</a></span>
 		</div>
 
 		{% if endpoints %}

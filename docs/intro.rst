@@ -151,6 +151,10 @@ Because threat hunting analytics may become obsolete with time, or need to be up
   :width: 1000
   :alt: Analytics workflow
 
+.. note::
+
+  Notice that bypassing the workflow logic and forcing statuses can be done via the admin panel, if necessary.
+
 Statuses
 ========
 Analytic can have the following statuses:
@@ -160,6 +164,11 @@ Analytic can have the following statuses:
 - **REVIEW**: Analytic that was in **PUB** status for some time, and neeeds to be reviewed. Use the `review tab <#the-review-process>`_ to move forward.
 - **PENDING**: Analytic that has been reviewed, and is no longer considered valid for production. The run_daily flag will be automatically unset, and the analytic query should be updated ASAP.
 - **ARCH**: archived analytics. They will no longer appear in DeepHunter modules and reports, but are still in the database. To restore an archived analytic, refer to this `section <reports/archived_analytics.html#archived-analytics>`_.
+
+Clicking on the status in the analytic view will show a dropdown from which you can choose a new status. Choices are different depending on the current status and the run_daily_lock flag.
+
+.. image:: img/analytic_status_dropdown.png
+  :alt: analytic status dropdown
 
 The "review" process
 ====================

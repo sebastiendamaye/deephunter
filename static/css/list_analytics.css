@@ -363,43 +363,55 @@ table.review td {
 
 /* Div styles for analytic status */
 
-div.draft {
-	width: 70px;
+div.draft, button.draft {
+	font-size: 13px;
+	width: 80px;
 	background: #A9C9FF;
 	padding: 1px;
 	border-radius: 5px;
 	text-align: center;
+	border: none;
+	color: #000;
 }
-div.pub {
-	width: 70px;
+div.pub, button.pub {
+	font-size: 13px;
+	width: 80px;
 	background: #28A745;
 	padding: 1px;
 	color: #fff;
 	border-radius: 5px;
 	text-align: center;
+	border: none;
 }
-div.review {
-	width: 70px;
+div.review, button.review {
+	font-size: 13px;
+	width: 80px;
 	background: #FFC107;
 	padding: 1px;
 	border-radius: 5px;
 	text-align: center;
+	border: none;
+	color: #000;
 }
-div.pending {
-	width: 70px;
+div.pending, button.pending {
+	font-size: 13px;
+	width: 80px;
 	background: #FF6F00;
 	padding: 1px;
 	border-radius: 5px;
 	color: #fff;
 	text-align: center;
+	border: none;
 }
-div.arch {
-	width: 70px;
+div.arch, button.arch {
+	font-size: 13px;
+	width: 80px;
 	background: #6C757D;
 	padding: 1px;
 	color: #fff;
 	border-radius: 5px;
 	text-align: center;
+	border: none;
 }
 
 
@@ -449,4 +461,9 @@ table.w750 {
 
 div.pad5 {
 	padding-left:5px;
+}
+
+.pad20 {
+	color: red;
+	padding-left:20px;
 }

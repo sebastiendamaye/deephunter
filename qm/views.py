@@ -4,10 +4,11 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
 from django.middleware.csrf import get_token
 from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
+from django.urls import reverse
 from datetime import datetime, timedelta, timezone
 import logging
 import numpy as np
@@ -20,7 +21,7 @@ from .tasks import regenerate_stats, regenerate_campaign
 import ipaddress
 from connectors.utils import is_connector_enabled, is_connector_for_analytics, get_connector_conf
 from celery import current_app
-from qm.utils import get_campaign_date
+from qm.utils import get_campaign_date, get_available_statuses
 from urllib.parse import urlencode, quote
 from .forms import ReviewForm, EditAnalyticDescriptionForm, EditAnalyticNotesForm, EditAnalyticQueryForm
 
@@ -1064,3 +1065,56 @@ def edit_query_submit(request, analytic_id):
         else:
             return render(request, 'edit_query_form.html', {'analytic_id': analytic.id})
     return HttpResponseRedirect(f"/qm/edit_query_initial/{analytic.id}")
+
+@login_required
+def status_button(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    
+    # List of statuses to be shown, depending on current status and defined workflow
+    statuses = get_available_statuses(analytic)
+
+    context = {
+        "analytic": analytic,
+        "statuses": statuses,
+    }
+    return render(request, 'status_button.html', context)
+
+@login_required
+def change_status(request, analytic_id, updated_status):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    
+    # sanitize user input to only allow valid statuses
+    if updated_status not in get_available_statuses(analytic):
+        return HttpResponseForbidden("Invalid status")
+
+    if updated_status == 'PUB_RUNDAILY':
+        analytic.run_daily = True
+        updated_status = 'PUB'
+    if updated_status == 'PUB_NO_RUNDAILY':
+        analytic.run_daily = False
+        updated_status = 'PUB'
+
+    analytic.status = updated_status
+    analytic.save()
+    
+    context = {
+        "analytic": analytic,
+    }
+    return render(request, 'status_button.html', context)
+
+@login_required
+def delete_analytic(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    analytic.delete()
+    return HttpResponseRedirect(reverse('list_analytics'))
+
+@login_required
+def rundailycheckbox(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    if analytic.run_daily:
+        if analytic.run_daily_lock:
+            return HttpResponse('<img src="/static/images/lock.png" width="20" />')
+        else:
+            return HttpResponse('<img src="/static/admin/img/icon-yes.svg" />')
+    else:
+        return HttpResponse('<img src="/static/admin/img/icon-no.svg" />')

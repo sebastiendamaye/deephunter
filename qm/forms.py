@@ -6,7 +6,7 @@ class ReviewForm(forms.ModelForm):
         model = Review
         exclude = ['analytic', 'reviewer']
         widgets = {
-            'comments': forms.Textarea(attrs={'rows': 2}),
+            'comments': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
         }
 
     def clean(self):

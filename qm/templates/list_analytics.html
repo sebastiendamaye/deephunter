@@ -2,18 +2,20 @@
 {% load qm_extras %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/bootstrap_table_expandable/bootstrap-table-expandable.css">
-<link rel="stylesheet" href="/static/jquery_table_sorter/theme.materialize.min.css" />
-<link rel="stylesheet" href="/static/jquery_table_sorter/theme.default.min.css" />
-<link rel="stylesheet" href="/static/css/list_analytics.css" />
-<link rel="stylesheet" href="/static/css/trend.css" />
-<script src="/static/jquery/jquery.min.js"></script>
-<script src="/static/jquery_table_sorter/jquery.tablesorter.min.js"></script>
-<script src="/static/bootstrap/js/bootstrap.min.js"></script>
-<script src="/static/bootstrap_table_expandable/bootstrap-table-expandable.js"></script>
-<script src="/static/jquery_sparkline/jquery.sparkline.min.js"></script>
-<script src="/static/canvasjs/jquery.canvasjs.min.js"></script>
-<script src="/static/js/htmx.min.js"></script>
+	<link rel="stylesheet" href="/static/bootstrap_table_expandable/bootstrap-table-expandable.css">
+	<link rel="stylesheet" href="/static/jquery_table_sorter/theme.materialize.min.css" />
+	<link rel="stylesheet" href="/static/jquery_table_sorter/theme.default.min.css" />
+	<link rel="stylesheet" href="/static/css/list_analytics.css" />
+	<link rel="stylesheet" href="/static/css/trend.css" />
+	<link rel="stylesheet" href="/static/css/repos.css" />
+
+	<script src="/static/jquery/jquery.min.js"></script>
+	<script src="/static/jquery_table_sorter/jquery.tablesorter.min.js"></script>
+	<script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="/static/bootstrap_table_expandable/bootstrap-table-expandable.js"></script>
+	<script src="/static/jquery_sparkline/jquery.sparkline.min.js"></script>
+	<script src="/static/canvasjs/jquery.canvasjs.min.js"></script>
+	<script src="/static/js/htmx.min.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -506,11 +508,11 @@
         <td><button id="b_{{ analytic.id }}" class="btn btn-default toggle-row"><i class="fa fa-chevron-right"></i></button></td>
         <td>{{ analytic.name }}</td>
 		<td>{{ analytic.connector.name }}</td>
-        <td class="acenter"><div class="{{ analytic.status|lower }}">{{ analytic.status }}</div></td>
+        <td class="acenter"><div id="analytic_status_{{ analytic.id }}" class="dropdown" hx-get="/qm/statusbutton/{{ analytic.id }}/" hx-trigger="load, every 10s"></div></td>
         <td class="acenter">{{ analytic.category.short_name }}</td>
         <td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
         <td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>
-		<td class="acenter">{% if analytic.run_daily %}{% if analytic.run_daily_lock %}<img src="/static/images/lock.png" width="20" />{% else %}<img src="/static/admin/img/icon-yes.svg" />{% endif %}{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
+        <td class="acenter"><div id="analytic_rundaily_{{ analytic.id }}" hx-get="/qm/rundailycheckbox/{{ analytic.id }}/" hx-trigger="load, every 10s"></div></td>
 		<td class="acenter">{% if analytic.create_rule %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
 		<td class="acenter">{% if analytic.dynamic_query %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
 		<td class="acenter">{{ analytic.maxhosts_count }}</td>

@@ -78,8 +78,11 @@ def pre_save_handler(sender, instance, **kwargs):
             instance.query_error_message = ''
             instance.query_error_date = None
             instance.last_time_seen = None
-            # we save a flag for the post_save handler to know if the query was changed
+            # we save a flag for the post_save handler to know if the query was changed (used for stats regeneration in post_save handler)
             instance._query_changed = True
+            # Workflow automation: if status is PENDING and query is changed, analytic status automatically set to DRAFT
+            if instance.status == 'PENDING':
+                instance.status = 'DRAFT'
 
         # Only apply if "need_to_sync_rule" function returns True (defined in the connector settings)
         if all_connectors.get(instance.connector.name).need_to_sync_rule():
@@ -115,10 +118,13 @@ def pre_save_handler(sender, instance, **kwargs):
         else:
             instance.next_review_date = None
 
-    # When analytics are archived, automatically remove the run_daily flag
+    # When analytic is archived or pending, automatically remove the run_daily flag
     if instance.status == 'ARCH' or instance.status == 'PENDING':
         instance.run_daily = False
 
+    # If run_daily_lock is set, run_daily should automatically be set
+    if instance.run_daily_lock and not instance.run_daily:
+        instance.run_daily = True
 
 # This handler is triggered after an "Analytic" object is saved
 @receiver(post_save, sender=Analytic)

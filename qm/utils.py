@@ -299,3 +299,39 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
 
     # Delete Celery task in DB if celery is used
     task_status.delete()
+
+
+def get_available_statuses(analytic):
+    statuses = {}
+    if analytic.status == "DRAFT":
+        statuses = {
+            "PUB_RUNDAILY": "Publish (run daily set)",
+            "PUB_NO_RUNDAILY": "Publish (run daily unset)",
+            "ARCH": "Archive",
+            }
+    elif analytic.status == "PUB":
+        # if analytic is locked, it's protected against review
+        if analytic.run_daily_lock:
+            statuses = {
+                "ARCH": "Archive",
+                }
+        else:
+            statuses = {
+                "REVIEW": "To review",
+                "ARCH": "Archive",
+                }
+    elif analytic.status == "REVIEW":
+        statuses = {
+            }
+    elif analytic.status == "PENDING":
+        statuses = {
+            "DRAFT": "Draft",
+            }
+    elif analytic.status == "ARCH":
+        statuses = {
+            "DRAFT": "Draft",
+            "PUB_RUNDAILY": "Publish (run daily set)",
+            "PUB_NO_RUNDAILY": "Publish (run daily unset)",
+            "REVIEW": "To review",
+            }
+    return statuses
