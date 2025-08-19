@@ -36,6 +36,7 @@ urlpatterns = [
     path('db_analyticsrunintodaycampaign/', views.db_analyticsrunintodaycampaign, name='db_analyticsrunintodaycampaign'),
     path('db_analyticsmatchingintodaycampaign/', views.db_analyticsmatchingintodaycampaign, name='db_analyticsmatchingintodaycampaign'),
     path('db_analyticstoreview/', views.db_analyticstoreview, name='db_analyticstoreview'),
+    path('db_analyticspending/', views.db_analyticspending, name='db_analyticspending'),
     path('db_archivedanalytics/', views.db_archivedanalytics, name='db_archivedanalytics'),
     path('db_analyticsbystatus/', views.db_analyticsbystatus, name='db_analyticsbystatus'),
     path('db_analyticsbyconnector/', views.db_analyticsbyconnector, name='db_analyticsbyconnector'),

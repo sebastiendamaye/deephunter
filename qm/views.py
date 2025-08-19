@@ -853,6 +853,15 @@ def db_analyticstoreview(request):
     return HttpResponse(code)
 
 @login_required
+def db_analyticspending(request):
+    analytics = Analytic.objects.filter(status='PENDING')
+    
+    code = f"""<h3>Analytics pending</h3>
+        <p class="num"><a href="/qm/listanalytics/?statuses=PENDING">{analytics.count()}</p>
+        """
+    return HttpResponse(code)
+
+@login_required
 def db_analyticswitherrors(request):
     analytics = Analytic.objects.filter(query_error=True).exclude(
         query_error_message__contains='"status":"FINISHED"').exclude(
