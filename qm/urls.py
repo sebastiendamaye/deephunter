@@ -31,7 +31,6 @@ urlpatterns = [
     path('managecampaigns', views.managecampaigns, name='managecampaigns'),
     path('regencampaign/<str:campaign_name>/', views.regencampaign, name='regencampaign'),
     path('regencampaignstatus/<str:campaign_name>/', views.regencampaignstatus, name='regencampaignstatus'),
-    path('review/<int:analytic_id>/', views.analytic_review, name='analytic_review'),
 
     path('db_totalnumberanalytics/', views.db_totalnumberanalytics, name='db_totalnumberanalytics'),
     path('db_analyticsrunintodaycampaign/', views.db_analyticsrunintodaycampaign, name='db_analyticsrunintodaycampaign'),
@@ -46,20 +45,25 @@ urlpatterns = [
     path('db_analyticswitherrors/', views.db_analyticswitherrors, name='db_analyticswitherrors'),
     path('db_topendpointdistinctanalytics/', views.db_top_endpoint_distinct_analytics, name='db_top_endpoint_distinct_analytics'),
 
-    path('qm/edit_description_initial/<int:analytic_id>/', views.edit_description_initial, name='edit_description_initial'),
-    path('qm/edit_description_form/<int:analytic_id>/', views.edit_description_form, name='edit_description_form'),
-    path('qm/edit_description_submit/<int:analytic_id>/', views.edit_description_submit, name='edit_description_submit'),
+    path('edit_description_initial/<int:analytic_id>/', views.edit_description_initial, name='edit_description_initial'),
+    path('edit_description_form/<int:analytic_id>/', views.edit_description_form, name='edit_description_form'),
+    path('edit_description_submit/<int:analytic_id>/', views.edit_description_submit, name='edit_description_submit'),
 
-    path('qm/edit_notes_initial/<int:analytic_id>/', views.edit_notes_initial, name='edit_notes_initial'),
-    path('qm/edit_notes_form/<int:analytic_id>/', views.edit_notes_form, name='edit_notes_form'),
-    path('qm/edit_notes_submit/<int:analytic_id>/', views.edit_notes_submit, name='edit_notes_submit'),
+    path('edit_notes_initial/<int:analytic_id>/', views.edit_notes_initial, name='edit_notes_initial'),
+    path('edit_notes_form/<int:analytic_id>/', views.edit_notes_form, name='edit_notes_form'),
+    path('edit_notes_submit/<int:analytic_id>/', views.edit_notes_submit, name='edit_notes_submit'),
 
-    path('qm/edit_query_initial/<int:analytic_id>/', views.edit_query_initial, name='edit_query_initial'),
-    path('qm/edit_query_form/<int:analytic_id>/', views.edit_query_form, name='edit_query_form'),
-    path('qm/edit_query_submit/<int:analytic_id>/', views.edit_query_submit, name='edit_query_submit'),
+    path('edit_query_initial/<int:analytic_id>/', views.edit_query_initial, name='edit_query_initial'),
+    path('edit_query_form/<int:analytic_id>/', views.edit_query_form, name='edit_query_form'),
+    path('edit_query_submit/<int:analytic_id>/', views.edit_query_submit, name='edit_query_submit'),
     
-    path('qm/statusbutton/<int:analytic_id>/', views.status_button, name='status_button'),
-    path('qm/changestatus/<int:analytic_id>/<str:updated_status>/', views.change_status, name='change_status'),
-    path('qm/deleteanalytic/<int:analytic_id>/', views.delete_analytic, name='delete_analytic'),
-    path('qm/rundailycheckbox/<int:analytic_id>/', views.rundailycheckbox, name='rundailycheckbox'),
+    path('statusbutton/<int:analytic_id>/', views.status_button, name='status_button'),
+    path('changestatus/<int:analytic_id>/<str:updated_status>/', views.change_status, name='change_status'),
+    path('deleteanalytic/<int:analytic_id>/', views.delete_analytic, name='delete_analytic'),
+    path('rundailycheckbox/<int:analytic_id>/', views.rundailycheckbox, name='rundailycheckbox'),
+
+    path('review_page/<int:analytic_id>/', views.review_page, name='review_page'),
+    path('submit_review/<int:analytic_id>/', views.submit_review, name='submit_review'),
+    path('reviews_table/<int:analytic_id>/', views.reviews_table, name='reviews_table'),
+
 ]

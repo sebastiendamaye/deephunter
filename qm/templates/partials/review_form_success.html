@@ -1,0 +1,9 @@
+<div id="form-container">
+    <p>Review submitted successfully!</p>
+</div>
+
+<!-- Trigger table refresh after success -->
+<div hx-get="{% url 'review_page' analytic.id %}" 
+     hx-target="#table-container_{{ analytic.id }}" 
+     hx-swap="outerHTML" 
+     hx-trigger="load"></div>

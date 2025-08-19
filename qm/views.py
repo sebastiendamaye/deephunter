@@ -783,64 +783,6 @@ def regencampaignstatus(request, campaign_name):
         return HttpResponse(f'<button hx-get="/regencampaign/{campaign_name}/" class="buttonred">Regenerate</button>')
 
 @login_required
-def analytic_review(request, analytic_id):
-    analytic = get_object_or_404(Analytic, pk=analytic_id)
-
-    if request.method == "POST":
-        form = ReviewForm(request.POST)
-        if form.is_valid():
-            # commit set to False to simulate save and check errors
-            review = form.save(commit=False)
-            review.analytic = analytic
-            review.reviewer = request.user
-            review.save()
-
-            msg = ''
-            if form.cleaned_data['decision'] == 'PENDING':
-                analytic.status = 'PENDING'
-                # run_daily flag will be set to False automatically (signals)
-                analytic.next_review_date = None
-                analytic.save()
-                msg = " and analytic status updated to 'Pending Update'"
-            elif form.cleaned_data['decision'] == 'KEEP':
-                analytic.status = 'PUB'
-                # next_review_date will be set automatically (signals)
-                analytic.save()
-                msg = " and analytic status updated to 'Published'"
-            elif form.cleaned_data['decision'] == 'LOCK':
-                analytic.status = 'PUB'
-                analytic.run_daily_lock = True
-                analytic.next_review_date = None
-                analytic.save()
-                msg = " and analytic status updated to 'Published' and locked"
-            elif form.cleaned_data['decision'] == 'ARCH':
-                analytic.status = 'ARCH'
-                analytic.next_review_date = None
-                # run_daily flag will be set to False automatically (signals)
-                msg = " and analytic archived"
-                analytic.save()
-            elif form.cleaned_data['decision'] == 'DEL':
-                msg = " and analytic deleted"
-                analytic.delete()
-
-            return HttpResponse(f'Review saved{ msg }')
-        else:
-            return HttpResponse(
-                'Review failed: {}'.format(''.join([v[0] for k, v in form.errors.items()]))
-                )
-            
-    else:
-        form = ReviewForm()
-    
-    context = {
-        'analytic': analytic,
-        'days_before_review': DAYS_BEFORE_REVIEW,
-        'form': form,
-        'reviews': Review.objects.filter(analytic=analytic).order_by('-date'),
-        }
-    return render(request, 'analytic_review.html', context)
-
-@login_required
 def saved_searches(request):
     """
     Display saved searches for the current user.
@@ -1118,3 +1060,72 @@ def rundailycheckbox(request, analytic_id):
             return HttpResponse('<img src="/static/admin/img/icon-yes.svg" />')
     else:
         return HttpResponse('<img src="/static/admin/img/icon-no.svg" />')
+
+
+def review_page(request, analytic_id):
+    form = ReviewForm()
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    reviews = Review.objects.filter(analytic=analytic).order_by('-date')
+    context = {
+        "form": form,
+        "analytic": analytic,
+        "reviews": reviews,
+    }
+    return render(request, 'review_page.html', context)
+
+
+@login_required
+def submit_review(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    form = ReviewForm(request.POST)
+
+    if form.is_valid():
+        reviews = Review.objects.filter(analytic=analytic).order_by('-date'),
+
+        # commit set to False to simulate save and check errors
+        review = form.save(commit=False)
+        review.analytic = analytic
+        review.reviewer = request.user
+        review.save()
+
+        if form.cleaned_data['decision'] == 'PENDING':
+            analytic.status = 'PENDING'
+            # run_daily flag will be set to False automatically (signals)
+            analytic.next_review_date = None
+            analytic.save()
+        elif form.cleaned_data['decision'] == 'KEEP':
+            analytic.status = 'PUB'
+            # next_review_date will be set automatically (signals)
+            analytic.save()
+        elif form.cleaned_data['decision'] == 'LOCK':
+            analytic.status = 'PUB'
+            analytic.run_daily_lock = True
+            analytic.next_review_date = None
+            analytic.save()
+        elif form.cleaned_data['decision'] == 'ARCH':
+            analytic.status = 'ARCH'
+            analytic.next_review_date = None
+            # run_daily flag will be set to False automatically (signals)
+            analytic.save()
+        elif form.cleaned_data['decision'] == 'DEL':
+            analytic.delete()
+
+        return render(request, 'partials/review_form_success.html', {
+            'analytic': analytic,
+            'reviews': reviews,
+        })
+        
+    else:
+        return render(request, 'partials/review_form.html', {
+            'analytic': analytic,
+            'form': form,
+        })
+            
+@login_required
+def reviews_table(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    reviews = Review.objects.filter(analytic=analytic).order_by('-date')
+    return render(request, 'partials/reviews_table.html', {
+        'analytic': analytic,
+        'reviews': reviews,
+    })

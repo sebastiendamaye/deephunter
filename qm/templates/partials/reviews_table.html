@@ -1,0 +1,16 @@
+{% load qm_extras %}
+
+{% if reviews %}
+    <table class="review">
+        {% for review in reviews %}
+            <tr>
+                <td>{{ review.date|date:"M. j, Y" }}</td>
+                <td>{{ review.reviewer }}</td>
+                <td><b>{{ review.decision|get_review_label }}</b></td>
+                <td>{{ review.comments }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No review yet.</p>
+{% endif %}
