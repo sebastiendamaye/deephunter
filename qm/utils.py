@@ -326,6 +326,7 @@ def get_available_statuses(analytic):
     elif analytic.status == "PENDING":
         statuses = {
             "DRAFT": "Draft",
+            "ARCH": "Archive",
             }
     elif analytic.status == "ARCH":
         statuses = {
