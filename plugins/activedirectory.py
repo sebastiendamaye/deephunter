@@ -3,11 +3,8 @@ Active Directory connector
 """
 
 from connectors.utils import get_connector_conf
-import logging
 from ldap3 import Server, Connection, ALL
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
+from notifications.utils import add_error_notification
 
 _globals_initialized = False
 def init_globals():
@@ -55,5 +52,5 @@ def ldap_search(username):
     if conn.entries:
         return conn.entries[0]
     else:
-        logger.warning(f"No LDAP entry found for user {username}")
+        add_error_notification(f"Active Directory connector: No LDAP entry found for user {username}")
         return None

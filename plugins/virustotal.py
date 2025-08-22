@@ -3,13 +3,10 @@ VirusTotal connector
 """
 
 from connectors.utils import get_connector_conf, is_valid_md5, is_valid_sha1, is_valid_sha256, is_valid_ip
-import logging
 import requests
 from django.conf import settings
 import vt
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
+from notifications.utils import add_error_notification
 
 _globals_initialized = False
 def init_globals():
@@ -41,7 +38,7 @@ def check_hash(hash):
             return file
         
         except Exception as e:
-            logger.error(f"Error checking hash {hash}: {e}")
+            add_error_notification(f"VirusTotal connector: Error checking hash {hash}: {e}")
             if DEBUG:
                 raise e
             return None
@@ -70,11 +67,11 @@ def check_ip(ip):
             return response.json()['data']
         
         except Exception as e:
-            logger.error(f"Error checking IP {ip}: {e}")
+            add_error_notification(f"VirusTotal connector: Error checking IP {ip}: {e}")
             if DEBUG:
                 raise e
             return None
     else:
-        logger.error(f"invalid IP {ip}")
+        add_error_notification(f"VirusTotal connector: invalid IP {ip}")
         return None
     

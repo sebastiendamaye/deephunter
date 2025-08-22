@@ -67,7 +67,6 @@
 							<ul>
 								<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin">Admin interface</a></li>
 								{% if request.user.is_superuser %}
-									<li><a class="{{ request.path|isactiveurl:"/debug" }}" href="/debug">Debug</a></li>
 									<li><a class="{{ request.path|isactiveurl:"/connectors/connectorconf/" }}" href="/connectors/connectorconf">Connectors</a></li>
 									<li><a class="{{ request.path|isactiveurl:"/qm/managecampaigns" }}" href="/qm/managecampaigns">Manage campaigns</a></li>
 									<li><a class="{{ request.path|isactiveurl:"/repos/listrepos/" }}" href="/repos/listrepos/">Manage repos</a></li>

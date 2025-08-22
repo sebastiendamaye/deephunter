@@ -10,9 +10,8 @@ import urllib.parse
 from datetime import datetime
 from io import BytesIO
 from django.conf import settings
-import logging
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
+
+from notifications.utils import add_error_notification
 
 DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
 
@@ -100,13 +99,14 @@ def manage_analytic_error(analytic, error_message):
     :param analytic: Analytic object that failed.
     :param error_message: Error message to log and save.
     """
-
-    logger.error(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
     
     # if error, we set the query_error flag and save the error message
     analytic.query_error = True
     if len(error_message) > 500:
         error_message = "{} [...] {}".format(error_message[:250], error_message[-250:])
+
+    # Send error as notification
+    add_error_notification(error_message)
 
     # Analytic query error date is always set to today, even if the campaign is regenerated retroactively
     # this is because we want to know when the error occurred exactly to investigate potential issues with the data lake

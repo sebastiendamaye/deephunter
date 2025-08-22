@@ -1,11 +1,8 @@
-import requests
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
-from django.middleware.csrf import get_token
 from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -347,13 +344,6 @@ def analyticdetail(request, analytic_id):
         'progress': progress
         }
     return render(request, 'analytic_detail.html', context)
-
-@login_required
-@permission_required("qm.delete_campaign")
-def debug(request):
-    f = open('{}/campaigns.log'.format(BASE_DIR), 'r', encoding='utf-8', errors='replace')
-    context = {'debug': f.read()}
-    return render(request, 'debug.html', context)
 
 @login_required
 def timeline(request):

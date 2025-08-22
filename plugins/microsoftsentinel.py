@@ -23,13 +23,10 @@ from azure.identity import ClientSecretCredential
 from azure.monitor.query import LogsQueryClient
 from azure.monitor.query import LogsQueryStatus
 from connectors.utils import get_connector_conf, gzip_base64_urlencode, manage_analytic_error
-import logging
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote
 import re
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
+from notifications.utils import add_debug_notification
 
 _globals_initialized = False
 def init_globals():
@@ -103,7 +100,6 @@ def query(analytic, from_date=None, to_date=None, debug=None):
     except Exception as e:
         if debug or DEBUG:
             print(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
-        logger.error(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info. Error: {e}")
         manage_analytic_error(analytic, e.message)
         return []
 
@@ -115,8 +111,8 @@ def query(analytic, from_date=None, to_date=None, debug=None):
                 res.append([row[0], '', row[1], ''])
         return res
     else:
-        if DEBUG:
-            logger.error(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
+        if debug or DEBUG:
+            print(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
         manage_analytic_error(analytic, response.error)
         return []
 

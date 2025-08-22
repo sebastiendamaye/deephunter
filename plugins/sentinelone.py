@@ -4,16 +4,13 @@ SentinelOne connector
 
 from connectors.utils import get_connector_conf
 from django.conf import settings
-import logging
 import requests
 import re
 from time import sleep
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, quote_plus
 from connectors.utils import manage_analytic_error
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
+from notifications.utils import add_error_notification
 
 _globals_initialized = False
 def init_globals():
@@ -151,7 +148,7 @@ def build_rule_body(analytic):
         # if expiration is set in settings, it means mode is Temporary.
         # We compute the target date
         body['data']['expirationMode'] = 'Temporary'
-        body['data']['expiration'] = (datetime.utcnow()+timedelta(days=int(STAR_RULES_DEFAULTS['expiration']))).strftime("%Y-%m-%dT%H:%M:%S.000000Z")
+        body['data']['expiration'] = (datetime.now()+timedelta(days=int(STAR_RULES_DEFAULTS['expiration']))).strftime("%Y-%m-%dT%H:%M:%S.000000Z")
     else:
         # Empty string or 0 value set for expiration in settings means Permanent
         body['data']['expirationMode'] = 'Permanent'
@@ -450,7 +447,7 @@ def get_token_expiration():
     else:
         if DEBUG:
             print(f"[ ERROR ] Failed to retrieve token expiration date: {r.text}")
-        logger.error(f"Failed to retrieve token expiration date: {r.text}")
+        add_error_notification(f"SentinelOne connector: Failed to retrieve token expiration date: {r.text}")
         return None
 
 

@@ -12,7 +12,6 @@ urlpatterns = [
     path('threats/<str:connector>/<str:endpointname>/<str:date>/', views.threats, name='threats'),
     path('storyline/<str:storylineids>/<str:eventdate>/', views.storyline, name='storyline'),
     path('<int:analytic_id>/detail/', views.analyticdetail, name='analyticdetail'),
-    path('debug', views.debug, name='debug'),
     path('saved_searches/', views.saved_searches, name='saved_searches'),
     path('timeline', views.timeline, name='timeline'),
 

@@ -10,6 +10,7 @@ import requests
 from celery import shared_task
 from django.shortcuts import get_object_or_404
 from time import sleep
+from notifications.utils import add_info_notification, add_success_notification
 
 # Dynamically import all connectors
 import importlib
@@ -34,6 +35,7 @@ logger = logging.getLogger(__name__)
 @shared_task()
 def regenerate_stats(analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
+    add_info_notification(f'Regenerate stats task started for analytic "{analytic.name}"')
 
     # we assume that analytic won't fail (flag will be set later if analytic fails)
     analytic.query_error = False
@@ -180,6 +182,7 @@ def regenerate_stats(analytic_id):
     # Delete Celery task in DB
     celery_status.delete()
 
+    add_success_notification(f'Regenerate stats task for analytic "{analytic.name}" successfully completed.')
 
 @shared_task()
 def regenerate_campaign(campaigndate):

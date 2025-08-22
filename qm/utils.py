@@ -6,6 +6,7 @@ import numpy as np
 from scipy import stats
 from math import isnan
 import requests
+from notifications.utils import add_info_notification, add_success_notification
 
 # Dynamically import all connectors
 import importlib
@@ -106,7 +107,8 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
     if not campaigndate:
         # If no date provided, use today
         campaigndate = datetime.now()
-    
+
+    add_info_notification(f"Running campaign for date: {campaigndate.strftime('%Y-%m-%d')}")
     campaign_name = 'daily_cron_{}'.format(campaigndate.strftime("%Y-%m-%d"))
 
     if celery:
@@ -299,6 +301,8 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
 
     # Delete Celery task in DB if celery is used
     task_status.delete()
+
+    add_success_notification(f"Campaign for date {campaigndate.strftime('%Y-%m-%d')} complete")
 
 
 def get_available_statuses(analytic):
