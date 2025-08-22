@@ -4,7 +4,7 @@ optimize_db.sh
 Description
 ***********
 
-The ``optimize_db.sh`` script is used to optimize the database after the ``run_campaign.sh`` script is executed.
+The ``optimize_db.sh`` script is used to optimize the database after the ``orchestrator.sh`` script is executed.
 
 Crontab
 *******

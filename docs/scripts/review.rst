@@ -16,5 +16,5 @@ You can set the ``DEBUG`` flag to `True` to see more detailed output during exec
 Execution
 *********
 
-This script is automatically started by the `run_campaign.sh <run_campaign.html>`_ script. It relies on the ``runscript`` command of the ``django-extensions`` package to be executed.
+This script is automatically started by the `orchestrator.sh <orchestrator.html>`_ script. It relies on the ``runscript`` command of the ``django-extensions`` package to be executed.
 

@@ -467,3 +467,7 @@ div.pad5 {
 	color: red;
 	padding-left:20px;
 }
+
+.padaround {
+	padding: 10px;
+}

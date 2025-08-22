@@ -172,7 +172,7 @@ Clicking on the status in the analytic view will show a dropdown from which you 
 
 The "review" process
 ====================
-The `run_campaigns.sh <scripts/run_campaign.html>`_ cron job will automatically update the status of threat hunting analytics that need to be reviewed, based on their last review date (defined with the `DAYS_BEFORE_REVIEW <settings.html#days-before-review>`_ setting).
+The `orchestrator.sh <scripts/orchestrator.html>`_ cron job will automatically update the status of threat hunting analytics that need to be reviewed, based on their last review date (defined with the `DAYS_BEFORE_REVIEW <settings.html#days-before-review>`_ setting).
 
 You can access the list of analytics to review from the menu (``Reports > Analytics to review``). Expand the details and click the "Review" tab.
 

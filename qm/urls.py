@@ -27,7 +27,6 @@ urlpatterns = [
     path('<int:analytic_id>/deletestats/', views.deletestats, name='deletestats'),
     path('netview', views.netview, name='netview'),
     path('about', views.about, name='about'),
-    path('notifications', views.notifications, name='notifications'),
     path('managecampaigns', views.managecampaigns, name='managecampaigns'),
     path('regencampaign/<str:campaign_name>/', views.regencampaign, name='regencampaign'),
     path('regencampaignstatus/<str:campaign_name>/', views.regencampaignstatus, name='regencampaignstatus'),

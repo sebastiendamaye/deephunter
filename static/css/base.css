@@ -211,3 +211,43 @@ h1>a {
 	font-size: 20px;
 	color: #417690; /*#21c488;*/
 }
+
+/* Notifications icon and badge on menu */
+.fa-bell {
+	width:15px;
+}
+.iconClass{
+  position: relative;
+}
+.iconClass span{
+  position: absolute;
+  background: #f00;
+  top: 5px;
+  right: -20px;
+  display: block;
+}
+span.badge {
+	font-size: 8pt;
+}
+
+/* Notifications page */
+.fa-fw {
+	width:25px;
+}
+div.notification-date {
+	font-size: 10pt;
+	font-weight: bold;
+	/*color: #666;*/
+	padding-bottom: 5px;
+}
+div.notification-read-button {
+	padding-top: 10px;
+}
+
+
+.padright20 {
+	padding-right: 20px;
+}
+.pad20 {
+	padding: 20px;
+}

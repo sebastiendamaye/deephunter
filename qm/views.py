@@ -716,9 +716,7 @@ def netview(request):
     return render(request, 'netview.html', context)
 
 @login_required
-def about(request):
-    messages.add_message(request, messages.INFO, "DeepHunter will always remain DeepHunter!")
-    
+def about(request):    
     # local version
     with open(f'{STATIC_PATH}/VERSION', 'r') as f:
         version = f.readline().strip()
@@ -735,12 +733,6 @@ def about(request):
         'version_mitre': version_mitre,
         }
     return render(request, 'about.html', context)
-
-@login_required
-def notifications(request):
-    context = {}
-    return render(request, 'notifications.html', context)
-
 
 @login_required
 def managecampaigns(request):

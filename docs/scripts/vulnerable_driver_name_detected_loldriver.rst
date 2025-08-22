@@ -9,4 +9,4 @@ The ``vulnerable_driver_name_detected_loldriver.py`` script is an example of a `
 Execution
 *********
 
-This script is automatically started by the `run_campaign.sh <run_campaign.html>`_ script. It relies on the ``runscript`` command of the ``django-extensions`` package to be executed.
+This script is automatically started by the `orchestrator.sh <orchestrator.html>`_ script. It relies on the ``runscript`` command of the ``django-extensions`` package to be executed.

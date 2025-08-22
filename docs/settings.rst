@@ -317,6 +317,39 @@ REPO_SYNC_DEFAULT_RUN_DAILY
 
 	REPO_SYNC_DEFAULT_RUN_DAILY = True
 
+NOTIFICATIONS_RECIPIENTS
+************************
+
+- **Type**: dictionary
+- **Description**: List of users and groups to send notifications to for each notification level.
+- **Example**:
+
+.. code-block:: python
+
+	NOTIFICATIONS_RECIPIENTS = {
+		'debug':   {'users': ['admin'], 'groups': []},
+		'info':    {'users': ['admin'], 'groups': ['manager', 'viewer']},
+		'success': {'users': [''], 'groups': ['manager']},
+		'warning': {'users': [''], 'groups': ['']},
+		'error':   {'users': [''], 'groups': ['']},
+	}
+
+AUTO_DELETE_NOTIFICATIONS_AFTER
+*******************************
+
+- **Type**: dictionary
+- **Description**: Notifications auto deleted after x days for each notification level.
+- **Example**:
+
+.. code-block:: python
+
+	AUTO_DELETE_NOTIFICATIONS_AFTER = {
+		'debug':   1,
+		'info':    7,
+		'success': 7,
+		'warning': 30,
+		'error':   30,
+	}
 
 PROXY
 *****

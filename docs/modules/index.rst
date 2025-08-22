@@ -10,3 +10,4 @@ Modules
    timeline
    netview
    manage_campaigns
+   notifications

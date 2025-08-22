@@ -18,4 +18,5 @@ urlpatterns = [
     path('reports/', include('reports.urls')),
     path('connectors/', include('connectors.urls')),
     path('repos/', include('repos.urls')),
+    path('notifications/', include('notifications.urls')),
 ]

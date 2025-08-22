@@ -108,11 +108,28 @@ REPO_SYNC_CREATE_FIELD_IF_NOT_EXIST = {
 REPO_SYNC_DEFAULT_STATUS = "DRAFT"
 REPO_SYNC_DEFAULT_RUN_DAILY = False
 
+# List of users and groups to send notifications to for each notification level
+NOTIFICATIONS_RECIPIENTS = {
+    'debug':   {'users': ['admin'], 'groups': []},
+    'info':    {'users': ['admin'], 'groups': ['manager', 'viewer']},
+    'success': {'users': [''], 'groups': ['manager']},
+    'warning': {'users': [''], 'groups': ['']},
+    'error':   {'users': [''], 'groups': ['']},
+}
+# Notifications auto deleted after x days for each notification level
+AUTO_DELETE_NOTIFICATIONS_AFTER = {
+    'debug':   1,
+    'info':    7,
+    'success': 7,
+    'warning': 30,
+    'error':   30,
+}
+
 # Proxy settings
 PROXY = {
     'http': 'http://proxy:port',
     'https': 'http://proxy:port'
-    }
+}
 
 # Keep ModelBackend around for per-user permissions and local superuser (admin)
 AUTHENTICATION_BACKENDS = [
@@ -136,6 +153,7 @@ INSTALLED_APPS = [
     'reports',
     'connectors',
     'repos',
+    'notifications',
 ]
 
 MIDDLEWARE = [

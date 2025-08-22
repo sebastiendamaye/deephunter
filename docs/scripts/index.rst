@@ -22,7 +22,7 @@ List of scripts
    campaign
    mitre_consistency_check
    optimize_db
-   run_campaign
+   orchestrator
    review
    upgrade
    vulnerable_driver_name_detected_loldriver

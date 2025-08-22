@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/static/css/base.css">
 	{% block style %}{% endblock %}
+	<script src="/static/js/htmx.min.js"></script>
 	{{ redirect_to_login_immediately }}
 </head>
 <body>
@@ -84,7 +85,12 @@
 							</li>
 							
 							<li><a href="/logout">Log out</a></li>
-							{% if messages %}<li><a href="/notifications"><i class="fa-solid fa-bell"></i></a></li>{% endif %}
+							<li>
+								<a href="/notifications" class="iconClass">
+									<i class="fa-solid fa-bell"></i>
+									<span class="badge badge-light" hx-get="/notifications/get_number_notifications/" hx-trigger="load, every 10s"></span>
+								</a>
+							</li>
 
 						</ul>
 					</nav>
@@ -93,24 +99,6 @@
 		</div>
     </div>
 </section>
-
-{% if request.session.update_available %}
-	<div class="tokenexpiresoon">An update is available. Use the upgrade script to do the update.</div>
-{% endif %}
-
-{% if request.session.mitre_update_available %}
-	<div class="tokenexpiresoon">MITRE ATT&CK has been updated. Use the consistency check script to update your mapping.</div>
-{% endif %}
-
-{% if request.session.tokenexpires %}
-	{% for token_connector in request.session.tokenexpires %}
-		{% if token_connector.tokenexpiresin <= 0 %}
-			<div class="tokenexpired">The {{ token_connector.connector }} token has expired.</div>
-		{% elif token_connector.tokenexpiresin <= 7 %}
-			<div class="tokenexpiresoon">The {{ token_connector.connector }} token expires in {{ token_connector.tokenexpiresin }} day{% if token_connector.tokenexpiresin > 1 %}s{% endif %}.</div>
-		{% endif %}
-	{% endfor %}
-{% endif %}
 
 {% block body %}{% endblock %}
 </body>

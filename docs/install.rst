@@ -176,7 +176,7 @@ You can use the crontab in ``install/scripts/crontab``.
 .. code-block:: sh
 	
 	# m h  dom mon dow   command
-	1  0 * * *      /data/deephunter/qm/scripts/run_campaign.sh
+	1  0 * * *      /data/deephunter/qm/scripts/orchestrator.sh
 	0  2 * * *      /data/deephunter/qm/scripts/optimize_db.sh
 	0  4 * * *      /data/deephunter/qm/scripts/backup.sh
 

@@ -1,10 +1,10 @@
-run_campaign.sh (launcher script)
+orchestrator.sh (launcher script)
 #################################
 
 Description
 ***********
 
-The ``run_campaign.sh`` script is a launcher for running:
+The ``orchestrator.sh`` script is a launcher for running:
 
 - "dynamic" threat hunting analytics (e.g., `vulnerable_driver_name_detected_loldriver.py <vulnerable_driver_name_detected_loldriver.html>`_),
 - `campaign.sh <campaign.html>`_, and
@@ -22,7 +22,7 @@ Below is the code of this launcher:
     /data/venv/bin/python3 manage.py runscript review
     deactivate
 
-- **campaign.py**: Daily campaigns script, started from ``run_campaign.sh``. It relies on the ``runscript`` command of the ``django-extensions`` package.
+- **campaign.py**: Daily campaigns script, started from ``orchestrator.sh``. It relies on the ``runscript`` command of the ``django-extensions`` package.
 
 
 Crontab
@@ -33,4 +33,4 @@ It is recommended to schedule it using cron jobs to automate the backup process.
 .. code-block:: shell
 
     # m h  dom mon dow   command
-    1  0 * * *      /data/deephunter/qm/scripts/run_campaign.sh
+    1  0 * * *      /data/deephunter/qm/scripts/orchestrator.sh

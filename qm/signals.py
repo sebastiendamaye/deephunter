@@ -8,6 +8,7 @@ from .models import Analytic, TasksStatus
 from qm.utils import is_update_available, is_mitre_update_available
 from connectors.utils import is_connector_enabled
 from qm.tasks import regenerate_stats
+from notifications.utils import del_notification_by_uid, add_info_notification, add_error_notification, add_warning_notification
 import time
 
 # Dynamically import all connectors
@@ -26,14 +27,21 @@ AUTO_STATS_REGENERATION = settings.AUTO_STATS_REGENERATION
 # This function is called after a user logs in
 @receiver(user_logged_in)
 def user_logged_in_receiver(sender, request, user, **kwargs):
-    # check if there is an update available and store it in the session
-    request.session['update_available'] = is_update_available()
+    # check if there is an update available and add a notification if applicable
+    if is_update_available():
+        add_info_notification("An update is available for DeepHunter. Use the upgrade script to do the update.", uid="update_available_deephunter")
+    else:
+        # remove all notifications related to deephunter update
+        del_notification_by_uid("update_available_deephunter")
 
-    # check if MITRE version is updated and store it in the session
-    request.session['mitre_update_available'] = is_mitre_update_available()
+    # check if MITRE version is updated and add a notification if applicable
+    if is_mitre_update_available():
+        add_info_notification("MITRE ATT&CK has been updated. Use the consistency check script to update your mapping.", uid="update_available_mitre")
+    else:
+        # remove all notifications related to MITRE update
+        del_notification_by_uid("update_available_mitre")
 
-    # checks the token expiration for all connectors and stores the results in the session
-    session_tokens = []
+    # checks the token expiration for all connectors and add a notification if applicable
     for connector in all_connectors.values():
         # only make the check if plugin is enabled and method get_token_expiration() exists
         connector_name = connector.__name__.split('.')[1]
@@ -41,8 +49,15 @@ def user_logged_in_receiver(sender, request, user, **kwargs):
             expires_in = connector.get_token_expiration()
             # check if function returns a number
             if isinstance(expires_in, (int, float)):
-                session_tokens.append({'connector': connector_name, 'tokenexpiresin': expires_in})
-    request.session['tokenexpires'] = session_tokens
+                # delete previous message and create new one with updated #days before expiration
+                del_notification_by_uid(f"tokenexpires_{connector_name}")
+                if expires_in <= 0:
+                    add_error_notification(f"Token for {connector_name} has expired.", uid=f"tokenexpires_{connector_name}")
+                elif expires_in <= 7:
+                    add_warning_notification(f"Token for {connector_name} expires in {expires_in} days.", uid=f"tokenexpires_{connector_name}")
+            else:
+                # remove notifications related to token expiration for the connector
+                del_notification_by_uid(f"tokenexpires_{connector_name}")
 
 # This function is already defined in the views, but expects the request param that is not available in the signal handler.
 # So we cloned this function here so that it can be called from the signal handler.

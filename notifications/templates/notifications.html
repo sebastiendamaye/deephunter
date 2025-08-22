@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load notifications_extras %}
+
+{% block style %}
+    <link rel="stylesheet" type="text/css" href="/static/css/list_analytics.css">
+    <script src="/static/fontawesome/all.min.js"></script>
+{% endblock %}
+
+
+{% block body %}
+<div class="padaround">
+    {% if notifications %}
+        <div class="pad20"><a href="/notifications/mark_read/all/"><button class="buttonred">Mark all as read</button></a></div>
+
+        {% for usernotification in notifications %}
+
+            <div class="alert alert-{{ usernotification.notification.level|bootstrap_level }} d-flex flex-row">
+                <div class="padright20"><i class="fas fa-fw fa-{{ usernotification.notification.level|fontawesome_level }} mr-3 mt-1"></i></div>
+                <div>
+                    <div class="notification-date">{{ usernotification.notification.created_at }}</div>
+                    <div class="notification-message">{{ usernotification.notification.message }}</div>
+                    <div class="notification-read-button"><a href="/notifications/mark_read/{{ usernotification.id }}/"><button class="button">Mark as read</button></a></div>
+                </div>
+            </div>
+
+        {% endfor %}
+    {% else %}
+        <p>You have no notifications.</p>
+    {% endif %}
+</div>
+{% endblock %}
