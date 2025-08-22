@@ -3,14 +3,10 @@ GitHub connector
 Used for repo sync with GitHub
 """
 
-import logging
 from urllib.parse import urlparse
 import requests
 from django.conf import settings
 from pathlib import Path
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
 
 _globals_initialized = False
 def init_globals():

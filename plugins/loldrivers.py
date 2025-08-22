@@ -3,13 +3,9 @@ LOLDrivers connector
 """
 
 from connectors.utils import get_connector_conf
-import logging
 import requests
 from django.conf import settings
 from bs4 import BeautifulSoup
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
 
 _globals_initialized = False
 def init_globals():

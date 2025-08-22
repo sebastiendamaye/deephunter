@@ -1,16 +1,13 @@
 from django.conf import settings
 from qm.models import Analytic
 from datetime import datetime, timedelta
-import logging
+from notifications.utils import add_info_notification
 
 # Workflow settings
 DAYS_BEFORE_REVIEW = settings.DAYS_BEFORE_REVIEW
 DISABLE_ANALYTIC_ON_REVIEW = settings.DISABLE_ANALYTIC_ON_REVIEW
 
 DEBUG = False
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
 
 def run():
 
@@ -32,3 +29,5 @@ def run():
 
         analytic.save()
 
+    add_info_notification(f"{analytics.count()} analytics marked as 'to be reviewed'")
+    

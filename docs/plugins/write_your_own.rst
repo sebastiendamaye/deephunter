@@ -100,12 +100,8 @@ You can use the following template to create your own plugin:
 
     # Imports
     from connectors.utils import get_connector_conf, gzip_base64_urlencode, manage_analytic_error
-    import logging
     from datetime import datetime, timedelta, timezone
     from urllib.parse import quote, unquote
-
-    # Get an instance of a logger
-    logger = logging.getLogger(__name__)
 
     _globals_initialized = False
     def init_globals():

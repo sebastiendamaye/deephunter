@@ -304,7 +304,6 @@ Create the directories and fix permissions:
 	$ sudo mkdir /var/log/celery/
 	$ sudo chown celery:celery /var/log/celery/
 	$ chmod -R 755 /data
-	$ chmod 666 /data/deephunter/campaigns.log 
 	$ chmod 666 /data/deephunter/static/mitre.json 
 	$ chmod 666 /data/deephunter/static/tokendate.txt
 

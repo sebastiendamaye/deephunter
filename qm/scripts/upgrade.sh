@@ -303,8 +303,6 @@ echo -e "[\033[90mINFO\033[0m] DB MIGRATIONS COMPLETE"
 # Restore permissions
 echo -n -e "[\033[90mINFO\033[0m] RESTORING PERMISSIONS ........................... "
 chmod -R 775 $APP_PATH
-touch $APP_PATH/campaigns.log
-chmod 666 $APP_PATH/campaigns.log
 touch $APP_PATH/static/mitre.json
 chmod 666 $APP_PATH/static/mitre.json
 chmod 664 $APP_PATH/static/VERSION*

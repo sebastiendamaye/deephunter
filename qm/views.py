@@ -7,7 +7,6 @@ from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
 from django.urls import reverse
 from datetime import datetime, timedelta, timezone
-import logging
 import numpy as np
 from scipy import stats
 from math import isnan
@@ -21,6 +20,7 @@ from celery import current_app
 from qm.utils import get_campaign_date, get_available_statuses
 from urllib.parse import urlencode, quote
 from .forms import ReviewForm, EditAnalyticDescriptionForm, EditAnalyticNotesForm, EditAnalyticQueryForm
+from notifications.utils import add_error_notification
 
 # Dynamically import all connectors
 import importlib
@@ -44,10 +44,6 @@ ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
 DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
 ANALYTICS_PER_PAGE = settings.ANALYTICS_PER_PAGE
 DAYS_BEFORE_REVIEW = settings.DAYS_BEFORE_REVIEW
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
-
 
 @login_required
 def dashboards(request):
@@ -610,8 +606,8 @@ def cancelregen(request, taskid):
         celery_status.delete()
         return HttpResponse('stopping...')
     except Exception as e:
-        logging.error(f"Revoke failed: {e}")
-        return HttpResponse('Error terminating Celery Task: {}'.format(e))
+        add_error_notification(f'Cancel stats regeneration: Error terminating Celery Task: {e}')
+        return HttpResponse(f'Error terminating Celery Task: {e}')
 
 @login_required
 @permission_required("qm.delete_campaign")

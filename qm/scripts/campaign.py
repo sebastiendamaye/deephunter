@@ -2,14 +2,10 @@ from django.conf import settings
 from datetime import datetime, timedelta
 from qm.models import Snapshot, Campaign
 from qm.utils import run_campaign
-import logging
 
 DB_DATA_RETENTION = settings.DB_DATA_RETENTION
 
 DEBUG = False
-
-# Get an instance of a logger
-logger = logging.getLogger(__name__)
 
 def run():
 

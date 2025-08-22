@@ -6,7 +6,7 @@ import numpy as np
 from scipy import stats
 from math import isnan
 import requests
-from notifications.utils import add_info_notification, add_success_notification
+from notifications.utils import add_info_notification, add_success_notification, add_warning_notification
 
 # Dynamically import all connectors
 import importlib
@@ -223,10 +223,14 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
         
         # When the max_hosts threshold is reached (by default 1000)
         if hits_endpoints >= CAMPAIGN_MAX_HOSTS_THRESHOLD:
+            # Send notification
+            add_info_notification(f"Max number of hosts reached for analytic {analytic.name}")
             # Update the maxhost counter if reached
             analytic.maxhosts_count += 1
             # if threshold is reached
             if analytic.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
+                # notification
+                add_warning_notification(f"Max hosts threshold reached for analytic {analytic.name}")
                 # If DISABLE_RUN_DAILY is set and run_daily_lock is not set, we disable the run_daily flag for the analytic
                 if ON_MAXHOSTS_REACHED['DISABLE_RUN_DAILY'] and not analytic.run_daily_lock:
                     analytic.run_daily = False
