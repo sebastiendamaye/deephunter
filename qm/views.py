@@ -1082,6 +1082,9 @@ def submit_review(request, analytic_id):
             analytic.save()
         elif form.cleaned_data['decision'] == 'KEEP':
             analytic.status = 'PUB'
+            # Bug #186 - "Keep it running" option during review should automatically enable "run_daily" flag if unset
+            if not analytic.run_daily:
+                analytic.run_daily = True
             # next_review_date will be set automatically (signals)
             analytic.save()
         elif form.cleaned_data['decision'] == 'LOCK':
