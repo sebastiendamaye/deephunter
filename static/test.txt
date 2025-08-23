@@ -1,2 +1,0 @@
-Bug #189 - Update on commit is broken
-This is a test file
