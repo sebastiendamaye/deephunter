@@ -60,7 +60,7 @@ def query(analytic, from_date=None, to_date=None, debug=None):
     :param analytic: Analytic object corresponding to the threat hunting analytic.
     :param from_date: Optional start date for the query. Date received in isoformat.
     :param to_date: Optional end date for the query. Date received in isoformat.
-    :return: The result of the query (array with 4 fields: endpoint.name, NULL, number of hits, NULL), or empty array if the query failed.
+    :return: The result of the query (array with 4 fields: endpoint.name, NULL, number of hits, NULL), or "ERROR" if the query failed.
     """
     
     init_globals()
@@ -101,7 +101,7 @@ def query(analytic, from_date=None, to_date=None, debug=None):
         if debug or DEBUG:
             print(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
         manage_analytic_error(analytic, e.message)
-        return []
+        return "ERROR"
 
     # Handle response
     if response.status == LogsQueryStatus.SUCCESS:
@@ -114,7 +114,7 @@ def query(analytic, from_date=None, to_date=None, debug=None):
         if debug or DEBUG:
             print(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
         manage_analytic_error(analytic, response.error)
-        return []
+        return "ERROR"
 
 def need_to_sync_rule():
     """

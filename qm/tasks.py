@@ -66,6 +66,10 @@ def regenerate_stats(analytic_id):
         fromdate = (todate - timedelta(days=1))
         data = all_connectors.get(analytic.connector.name).query(analytic, fromdate.isoformat(), todate.isoformat())
 
+        # if error, we exit the for loop
+        if data == "ERROR":
+            break
+
         # store current time (used to update snapshot runtime)
         end_runtime = datetime.now()
 

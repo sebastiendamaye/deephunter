@@ -108,7 +108,7 @@ def query(analytic, from_date=None, to_date=None, debug=None):
         
         manage_analytic_error(analytic, r.text)
 
-        return []
+        return "ERROR"
 
 def need_to_sync_rule():
     """

@@ -40,7 +40,7 @@ Methods are listed below (M/O = Mandatory / Optional).
      - * ``analytic``: Analytic object corresponding to the threat hunting analytic
        * ``from_date``: Optional start date for the query. Date received in isoformat.
        * ``to_date``: Optional end date for the query. Date received in isoformat.
-     - The result of the query (array with 4 fields: endpoint.name, NULL, number of hits, NULL), or empty array if the query failed.
+     - The result of the query (array with 4 fields: endpoint.name, NULL, number of hits, NULL), or "ERROR" if the query failed.
    * - ``need_to_sync_rule``
      - Check if the rule needs to be synced with Microsoft Sentinel. This is determined by the SYNC_RULES setting.
      - M
@@ -130,7 +130,7 @@ You can use the following template to create your own plugin:
         
         # .... Return a list of 4 fields:
         # .... endpoint.name, NULL, number of hits, NULL)
-        # .... or empty array if the query failed
+        # .... or "ERROR" if the query failed
 
     def need_to_sync_rule():
         """
