@@ -29,6 +29,7 @@ AUTO_STATS_REGENERATION = settings.AUTO_STATS_REGENERATION
 def user_logged_in_receiver(sender, request, user, **kwargs):
     # check if there is an update available and add a notification if applicable
     if is_update_available():
+        del_notification_by_uid("update_available_deephunter")
         add_info_notification("An update is available for DeepHunter. Use the upgrade script to do the update.", uid="update_available_deephunter")
     else:
         # remove all notifications related to deephunter update
@@ -36,6 +37,7 @@ def user_logged_in_receiver(sender, request, user, **kwargs):
 
     # check if MITRE version is updated and add a notification if applicable
     if is_mitre_update_available():
+        del_notification_by_uid("update_available_mitre")
         add_info_notification("MITRE ATT&CK has been updated. Use the consistency check script to update your mapping.", uid="update_available_mitre")
     else:
         # remove all notifications related to MITRE update
