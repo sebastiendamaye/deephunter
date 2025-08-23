@@ -216,17 +216,6 @@ ON_MAXHOSTS_REACHED
 		"DELETE_STATS": False
 	}
 
-DISABLE_RUN_DAILY_ON_ERROR
-**************************
-
-- **Type**: boolean.
-- **Description**: Automatically remove analytic from future campaigns if it failed during a campaign or statistics regeneration process.
-- **Example**: 
-
-.. code-block:: python
-
-	DISABLE_RUN_DAILY_ON_ERROR = True
-
 ANALYTICS_PER_PAGE
 ******************
 

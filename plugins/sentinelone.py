@@ -14,7 +14,7 @@ from notifications.utils import add_error_notification
 
 _globals_initialized = False
 def init_globals():
-    global DEBUG, PROXY, DB_DATA_RETENTION, CAMPAIGN_MAX_HOSTS_THRESHOLD, DISABLE_RUN_DAILY_ON_ERROR, \
+    global DEBUG, PROXY, DB_DATA_RETENTION, CAMPAIGN_MAX_HOSTS_THRESHOLD, \
             S1_URL, S1_TOKEN, S1_THREATS_URL, XDR_URL, XDR_PARAMS, SYNC_STAR_RULES, STAR_RULES_PREFIX, \
             STAR_RULES_DEFAULTS, QUERY_ERROR_INFO
     global _globals_initialized
@@ -23,7 +23,6 @@ def init_globals():
         PROXY = settings.PROXY
         DB_DATA_RETENTION = settings.DB_DATA_RETENTION
         CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
-        DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
         S1_URL = get_connector_conf('sentinelone', 'S1_URL')
         S1_TOKEN = get_connector_conf('sentinelone', 'S1_TOKEN')
         S1_THREATS_URL = get_connector_conf('sentinelone', 'S1_THREATS_URL')

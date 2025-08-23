@@ -10,11 +10,7 @@ import urllib.parse
 from datetime import datetime
 from io import BytesIO
 from django.conf import settings
-
 from notifications.utils import add_error_notification
-
-DISABLE_RUN_DAILY_ON_ERROR = settings.DISABLE_RUN_DAILY_ON_ERROR
-
 
 def get_connector_conf(connector_name, conf_name):
     """
@@ -113,9 +109,12 @@ def manage_analytic_error(analytic, error_message):
     analytic.query_error_date = datetime.today()
 
     analytic.query_error_message = error_message
-    # if "error" message, and configured to auto-disable analytic,
-    # remove analytic from future campaigns (until query field is updated)
-    if "error" in error_message.lower() and DISABLE_RUN_DAILY_ON_ERROR:
-        analytic.run_daily = False
+    # if "error" message, we remove the run_daily flag and set status to PENDING
+    if "error" in error_message.lower():
+        if analytic.run_daily:
+            analytic.run_daily = False
+        if analytic.run_daily_lock:
+            analytic.run_daily_lock = False
+        analytic.status = "PENDING"
     # we save analytic
     analytic.save()

@@ -82,8 +82,6 @@ ON_MAXHOSTS_REACHED = {
     "DISABLE_RUN_DAILY": True,
     "DELETE_STATS": True
 }
-# Automatically remove analytic from future campaigns if it failed
-DISABLE_RUN_DAILY_ON_ERROR = True
 
 # Analytics per page in the list view
 ANALYTICS_PER_PAGE = 50
