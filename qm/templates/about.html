@@ -1,14 +1,28 @@
 {% extends "base.html" %}
 
+{% block style %}
+  <link rel="stylesheet" type="text/css" href="/static/css/list_analytics.css" />
+{% endblock %}
+
 {% block body %}
+<div class="padaround">
 <pre>
-  _____  ______ ______ _____  _    _ _    _ _   _ _______ ______ _____  
- |  __ \|  ____|  ____|  __ \| |  | | |  | | \ | |__   __|  ____|  __ \ 
- | |  | | |__  | |__  | |__) | |__| | |  | |  \| |  | |  | |__  | |__) |
- | |  | |  __| |  __| |  ___/|  __  | |  | | . ` |  | |  |  __| |  _  / 
- | |__| | |____| |____| |    | |  | | |__| | |\  |  | |  | |____| | \ \ 
- |_____/|______|______|_|    |_|  |_|\____/|_| \_|  |_|  |______|_|  \_\
- Version: {{ version }} ({{ version_commit }})
- MITRE version: {{ version_mitre }}
+  ____                  _   _             _            
+ |  _ \  ___  ___ _ __ | | | |_   _ _ __ | |_ ___ _ __ 
+ | | | |/ _ \/ _ \ '_ \| |_| | | | | '_ \| __/ _ \ '__|
+ | |_| |  __/  __/ |_) |  _  | |_| | | | | ||  __/ |   
+ |____/ \___|\___| .__/|_| |_|\__,_|_| |_|\__\___|_|   
+                 |_|                                   
 </pre>
+<table class="mitre">
+  <tr>
+    <th>DeepHunter</th>
+    <td><a href="https://github.com/sebastiendamaye/deephunter/releases/tag/{{ version }}" target="_blank">{{ version }}</a> ({{ version_commit }})</td>
+  </tr>
+  <tr>
+    <th>MITRE</th>
+    <td><a href="https://github.com/mitre-attack/attack-stix-data/releases" target="_blank">{{ version_mitre }}</a></td>
+  </tr>
+</table>
+</div>
 {% endblock %}
