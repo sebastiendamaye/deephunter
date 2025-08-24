@@ -102,8 +102,8 @@ def manage_analytic_error(analytic, error_message):
         error_message = "{} [...] {}".format(error_message[:250], error_message[-250:])
 
     # Send error as notification
-    del_notification_by_uid(f"error_analytic_{analytic.id}")
-    add_error_notification(error_message, uid=f"error_analytic_{analytic.id}")
+    del_notification_by_uid(f"error_analytic_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
+    add_error_notification(error_message, uid=f"error_analytic_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
 
     # Analytic query error date is always set to today, even if the campaign is regenerated retroactively
     # this is because we want to know when the error occurred exactly to investigate potential issues with the data lake
