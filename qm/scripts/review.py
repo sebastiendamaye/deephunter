@@ -29,5 +29,6 @@ def run():
 
         analytic.save()
 
-    add_info_notification(f"{analytics.count()} analytics marked as 'to be reviewed'")
+    if analytics.count() > 0:
+        add_info_notification(f"{analytics.count()} analytics marked as 'to be reviewed'")
     
