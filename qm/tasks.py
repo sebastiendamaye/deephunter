@@ -9,7 +9,7 @@ import requests
 from celery import shared_task
 from django.shortcuts import get_object_or_404
 from time import sleep
-from notifications.utils import add_info_notification, add_success_notification, add_warning_notification
+from notifications.utils import add_info_notification, add_success_notification, add_warning_notification, del_notification_by_uid
 
 # Dynamically import all connectors
 import importlib
@@ -123,7 +123,8 @@ def regenerate_stats(analytic_id):
         # When the max_hosts threshold is reached (by default 1000)
         if hits_endpoints >= CAMPAIGN_MAX_HOSTS_THRESHOLD:
             # Send notification
-            add_info_notification(f"Max number of hosts reached for analytic {analytic.name}")
+            del_notification_by_uid(f"max_number_hosts_reached_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
+            add_info_notification(f"Max number of hosts reached for analytic {analytic.name}", uid=f"max_number_hosts_reached_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
             # Update the maxhost counter if reached
             analytic.maxhosts_count += 1
             # if threshold is reached
