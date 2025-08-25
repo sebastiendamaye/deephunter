@@ -783,7 +783,10 @@ def saved_searches_table(request):
 @login_required
 def saved_search_form(request, search_id=None):
     if search_id:
-        saved_search = get_object_or_404(SavedSearch, pk=search_id, is_locked=False)
+        saved_search = get_object_or_404(SavedSearch, pk=search_id)
+        # Only allow update if owned by the user or (public and unlocked)
+        if not (saved_search.created_by == request.user or (saved_search.is_public and not saved_search.is_locked)):
+            return HttpResponseForbidden("You do not have permission to update this saved search.")
         initial = {}
     else:
         saved_search = None
@@ -798,6 +801,7 @@ def saved_search_form(request, search_id=None):
             obj = form.save(commit=False)
             if not saved_search:
                 obj.created_by = request.user
+
             obj.save()
             return HttpResponseRedirect(reverse('saved_searches'))
     else:
@@ -811,9 +815,13 @@ def saved_search_form(request, search_id=None):
 
 @login_required
 def delete_saved_search(request, search_id):
-    saved_search = get_object_or_404(SavedSearch, pk=search_id, is_locked=False)
-    saved_search.delete()
-    return HttpResponseRedirect(reverse('saved_searches'))
+    saved_search = get_object_or_404(SavedSearch, pk=search_id)
+    # Only allow delete if owned by the user or (public and unlocked)
+    if (saved_search.created_by == request.user or (saved_search.is_public and not saved_search.is_locked)):
+        saved_search.delete()
+        return HttpResponseRedirect(reverse('saved_searches'))
+    else:
+        return HttpResponseForbidden("You do not have permission to delete this saved search.")
 
 @login_required
 def db_totalnumberanalytics(request):
