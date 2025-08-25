@@ -3,3 +3,14 @@ label {
     width: 80px;
     display: inline-block;
 }
+
+span.helptext {
+    font-style: italic;
+    color: #ccc;
+}
+
+table.form td,
+table.form th {
+    vertical-align: top;
+    padding: 5px;
+}

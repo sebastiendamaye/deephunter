@@ -19,7 +19,7 @@ from connectors.utils import is_connector_enabled, is_connector_for_analytics, g
 from celery import current_app
 from qm.utils import get_campaign_date, get_available_statuses
 from urllib.parse import urlencode, quote
-from .forms import ReviewForm, EditAnalyticDescriptionForm, EditAnalyticNotesForm, EditAnalyticQueryForm
+from .forms import ReviewForm, EditAnalyticDescriptionForm, EditAnalyticNotesForm, EditAnalyticQueryForm, SavedSearchForm
 from notifications.utils import add_error_notification
 
 # Dynamically import all connectors
@@ -779,6 +779,41 @@ def saved_searches_table(request):
         saved_searches = SavedSearch.objects.filter(Q(created_by=request.user) | Q(is_public=True)).order_by('name')
     context = {'saved_searches': saved_searches}
     return render(request, 'partials/saved_searches_table.html', context)
+
+@login_required
+def saved_search_form(request, search_id=None):
+    if search_id:
+        saved_search = get_object_or_404(SavedSearch, pk=search_id, is_locked=False)
+        initial = {}
+    else:
+        saved_search = None
+        # Get the initial search value from GET parameters
+        initial = {}
+        if 'search' in request.GET:
+            initial['search'] = request.GET['search']
+
+    if request.method == "POST":
+        form = SavedSearchForm(request.POST, instance=saved_search)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            if not saved_search:
+                obj.created_by = request.user
+            obj.save()
+            return HttpResponseRedirect(reverse('saved_searches'))
+    else:
+        form = SavedSearchForm(instance=saved_search, initial=initial)
+    
+    context = {
+        "form": form,
+        "saved_search": saved_search
+    }
+    return render(request, "saved_search_form.html", context)
+
+@login_required
+def delete_saved_search(request, search_id):
+    saved_search = get_object_or_404(SavedSearch, pk=search_id, is_locked=False)
+    saved_search.delete()
+    return HttpResponseRedirect(reverse('saved_searches'))
 
 @login_required
 def db_totalnumberanalytics(request):

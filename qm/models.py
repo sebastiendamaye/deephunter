@@ -272,7 +272,7 @@ class Review(models.Model):
         ordering = ['-date', 'analytic__name']
 
 class SavedSearch(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     search = models.TextField()
     is_public = models.BooleanField(default=False, help_text="Public searches are visible to all users while private searches are only visible to the creator.")

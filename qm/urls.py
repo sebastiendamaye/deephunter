@@ -14,6 +14,10 @@ urlpatterns = [
     path('<int:analytic_id>/detail/', views.analyticdetail, name='analyticdetail'),
     path('saved_searches/', views.saved_searches, name='saved_searches'),
     path('saved_searches_table/', views.saved_searches_table, name='saved_searches_table'),
+    path('saved_searches/add/', views.saved_search_form, name='saved_search_form'),
+    path('saved_searches/<int:search_id>/change/', views.saved_search_form, name='saved_search_form'),
+    path('saved_searches/<int:search_id>/delete/', views.delete_saved_search, name='delete_saved_search'),
+
     path('timeline', views.timeline, name='timeline'),
 
     path('tl_timeline/<str:hostname>/', views.tl_timeline, name='tl_timeline'),

@@ -111,16 +111,6 @@ class SavedSearchAdmin(admin.ModelAdmin):
             obj.created_by = request.user
         obj.save()
 
-    def get_changeform_initial_data(self, request):
-        """
-        Allows initial form data to be set via GET parameters in the admin add form.
-        """
-        return {
-            key: request.GET[key]
-            for key in request.GET.keys()
-            if key in [field.name for field in self.model._meta.fields]
-        }
-
 admin.site.register(LogEntry, LogEntryAdmin)
 admin.site.register(Tag)
 admin.site.register(Country)

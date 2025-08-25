@@ -1,5 +1,5 @@
 from django import forms
-from .models import Review, Analytic
+from .models import Review, Analytic, SavedSearch
 
 class ReviewForm(forms.ModelForm):
     class Meta:
@@ -58,4 +58,13 @@ class EditAnalyticQueryForm(forms.ModelForm):
         query = cleaned_data.get('query')
         columns = cleaned_data.get('columns')
         return cleaned_data
-    
+
+class SavedSearchForm(forms.ModelForm):
+    class Meta:
+        model = SavedSearch
+        fields = ['name', 'description', 'search', 'is_public', 'is_locked']
+        widgets = {
+            'name': forms.TextInput(attrs={'size': 100}),
+            'description': forms.Textarea(attrs={'rows': 3, 'cols': 100}),
+            'search': forms.Textarea(attrs={'rows': 3, 'cols': 100}),
+        }

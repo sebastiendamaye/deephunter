@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" type="text/css" href="/static/css/list_analytics.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/repos.css" />
+{% endblock %}
+
+{% block body %}
+<div class="padaround">
+    {% if saved_search %}
+        <h1>Update your search</h1>
+    {% else %}
+        <h1>Save a new search</h1>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <table class="form">
+            {{ form.as_table }}
+        </table>
+        <button type="submit" class="button">Save</button>
+        <a href="/qm/saved_searches/" class="button">Cancel</a>
+    </form>
+</div>
+{% endblock %}
