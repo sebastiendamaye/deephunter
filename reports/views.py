@@ -7,6 +7,7 @@ from django.db.models import Q, Sum, Count
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta
 from qm.models import Analytic, Snapshot, Campaign, MitreTactic, MitreTechnique, Endpoint, Connector
+from notifications.utils import add_debug_notification
 
 # Dynamically import all connectors
 import importlib
@@ -307,24 +308,32 @@ def analytics_perfs(request):
 
 @login_required
 def query_error(request):
-    analytics_with_errors = Analytic.objects.filter(query_error = True).exclude(status='ARCH').order_by('-query_error_date')
+    context = {}
+    return render(request, 'query_error.html', context)
 
+@login_required
+def query_error_table(request):
+    analytics_with_errors = Analytic.objects.filter(query_error = True).exclude(status='ARCH').order_by('-query_error_date')
+    include_info = request.GET.get('include_info', 'off') == 'on'  # Get checkbox value
+    
     analytics = []
     for analytic in analytics_with_errors:
-        analytics.append({
-            'id': analytic.id,
-            'name': analytic.name,
-            'description': analytic.description,
-            'query': analytic.query,
-            'status': analytic.status,
-            'maxhosts_count': analytic.maxhosts_count,
-            'connector_name': analytic.connector.name,
-            'run_daily': analytic.run_daily,
-            'error': analytic.query_error,
-            'error_is_info': all_connectors.get(analytic.connector.name).error_is_info(analytic.query_error_message),
-            'query_error_message': analytic.query_error_message,
-            'query_error_date': analytic.query_error_date,
-        })
+        error_is_info = all_connectors.get(analytic.connector.name).error_is_info(analytic.query_error_message)
+        if (not error_is_info) or (error_is_info and include_info):
+            analytics.append({
+                'id': analytic.id,
+                'name': analytic.name,
+                'description': analytic.description,
+                'query': analytic.query,
+                'status': analytic.status,
+                'maxhosts_count': analytic.maxhosts_count,
+                'connector_name': analytic.connector.name,
+                'run_daily': analytic.run_daily,
+                'error': analytic.query_error,
+                'error_is_info': error_is_info,
+                'query_error_message': analytic.query_error_message,
+                'query_error_date': analytic.query_error_date,
+            })
 
     paginator = Paginator(analytics, ANALYTICS_PER_PAGE)
     page_number = int(request.GET.get('page', 1))
@@ -334,7 +343,8 @@ def query_error(request):
         'analytics': page_obj
         }
     
-    return render(request, 'query_error.html', context)
+    return render(request, 'partials/query_error_table.html', context)
+
 
 @login_required
 def rare_occurrences(request):

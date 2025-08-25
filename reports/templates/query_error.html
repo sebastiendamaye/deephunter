@@ -1,79 +1,39 @@
 {% extends "base.html" %}
-{% load qm_extras %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/css/list_analytics.css" />
+	<link rel="stylesheet" href="/static/css/list_analytics.css" />
+    <script src="/static/fontawesome/all.min.js"></script>
 {% endblock %}
 
 {% block body %}
-<h1>Threat Hunting Analytics with errors</h1>
-<p>This report shows the list of Threat Hunting Analytics that have failed due to errors.</p>
-<p>Notice that updating the "query" field of threat hunting analytics will automatically remove the error flag and message. These threat hunting analytics will no longer appear in this report.</p>
-<table class="mitre">
-	<tr>
-		<th>Admin/Stats/Run</th>
-		<th>Connector</th>
-		<th>Analytic</th>
-		<th>Status</th>
-		<th>Maxhosts Count</th>
-		<th>Run daily</th>
-		<th>Category</th>
-		<th>Message</th>
-		<th>Error date</th>
-	</tr>
-{% for analytic in analytics %}
-	<tr>
-		<td>
-			[<a target="_blank" href="/admin/qm/analytic/{{ analytic.id }}/change/">admin</a>]
-			[<a target="_blank" href="/{{ analytic.id }}/trend/">stats</a>]
-			[<a target="_blank" href="/events/{{ analytic.id }}/">run query</a>]
-		</td>
-		<td>{{ analytic.connector_name }}</td>
-		<td title="DESCRIPTION:&#013;===========&#013;{{ analytic.description }}&#013;&#013;QUERY:&#013;===========&#013;{{analytic.query}}">{{ analytic.name }}</td>
-		<td><div class="{{ analytic.status|lower }}">{{ analytic.status }}</div></td>
-		<td class="acenter">{{ analytic.maxhosts_count }}</td>
-		<td class="acenter">
-			{% if analytic.run_daily %}
-				<img src="/static/admin/img/icon-yes.svg" alt="yes" />
-			{% else %}
-				<img src="/static/admin/img/icon-no.svg" alt="no" />
-			{% endif %}
-		</td>
-		<td>{% if analytic.error_is_info %}
-			<div class="msg_warning">INFO</div>
-		{% else %}
-			<div class="msg_error">ERROR</div>
-		{% endif %}</td>
-		<td><pre>{{ analytic.query_error_message }}</pre></td>
-		<td>{{ analytic.query_error_date }}</td>
-	</tr>	
-{% endfor %}
-</table>
+<div class="padaround">
+	<h1>Threat Hunting Analytics with errors</h1>
 
-<div class="pagination">
-	<span class="step-links">
-		<span class="previous">
-			{% if analytics.has_previous %}
-			<a href="?page={{ analytics.previous_page_number }}">Previous</a>
-			{% endif %}
-		</span>
+	<div class="alert alert-info d-flex flex-row">
+		<div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+		<div>
+			<div class="notification-message">
+				<ul>
+					<li>This report shows the list of Threat Hunting Analytics that have failed due to errors.</li>
+					<li>Notice that updating the "query" field of threat hunting analytics will automatically remove the error flag and message. These threat hunting analytics will no longer appear in this report.</li>
+				</ul>
+			</div>
+		</div>
+	</div>
 
-		<span class="current">
-			{% for i in analytics.paginator.num_pages|to_range %}
-				{% if i == analytics.number %}
-					<span class="pagelink">{{ i }}</span>
-				{% else %}
-					<span class="pagelink"><a href="?page={{ i }}">{{ i }}</a></span>
-				{% endif %}
-			{% endfor %}
-		</span>
+	<form id="filter-form">
+		<label>
+			<input type="checkbox" id="include-info" name="include_info" 
+				hx-get="{% url 'query_error_table' %}" 
+				hx-target="#message-table" 
+				hx-include="#filter-form" 
+				hx-trigger="load, change">
+			Include INFO messages
+		</label>
+	</form>
 
-		<span class="next">
-			{% if analytics.has_next %}
-				<span class="next"><a href="?page={{ analytics.next_page_number }}">Next</a></span>
-			{% endif %}
-		</span>
-	</span>
+	<div id="message-table">
+		{% include 'partials/query_error_table.html' %}
+	</div>
 </div>
-
 {% endblock %}
