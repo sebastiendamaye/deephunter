@@ -762,11 +762,23 @@ def regencampaignstatus(request, campaign_name):
 @login_required
 def saved_searches(request):
     """
+    Loads the saved searches page.
+    """
+    context = {}
+    return render(request, 'saved_searches.html', context)
+
+@login_required
+def saved_searches_table(request):
+    """
     Display saved searches for the current user.
     """
-    saved_searches = SavedSearch.objects.filter(Q(created_by=request.user) | Q(is_public=True)).order_by('name')
+    only_show_user_saved_searches = request.GET.get('only_show_user_saved_searches', 'off') == 'on'  # Get checkbox value
+    if only_show_user_saved_searches:
+        saved_searches = SavedSearch.objects.filter(created_by=request.user).order_by('name')
+    else:
+        saved_searches = SavedSearch.objects.filter(Q(created_by=request.user) | Q(is_public=True)).order_by('name')
     context = {'saved_searches': saved_searches}
-    return render(request, 'saved_searches.html', context)
+    return render(request, 'partials/saved_searches_table.html', context)
 
 @login_required
 def db_totalnumberanalytics(request):

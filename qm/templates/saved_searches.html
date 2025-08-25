@@ -2,41 +2,31 @@
 
 {% block style %}
     <link rel="stylesheet" href="/static/css/list_analytics.css" />
+    <script src="/static/fontawesome/all.min.js"></script>
 {% endblock %}
 
 {% block body %}
     <h1>Saved Searches</h1>
-    <p>To add a new saved search, apply some filters to the analytics view and click "save search".</p>
-    <table class="mitre">
-        <tr>
-            <th>Actions</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Search</th>
-            <th>Public</th>
-            <th>Locked</th>
-            <th>Created By</th>
-            <th>Publication Date</th>
-            <th>Update Date</th>
-        </tr>
-        {% for search in saved_searches %}
-            <tr>
-                <td>
-                    <a href="/qm/listanalytics?{{ search.search }}" class="button">execute</a>
-                    {% if not search.is_locked %}
-                        <a href="/admin/qm/savedsearch/{{ search.id }}/change/" class="button">update</a>
-                        <a href="/admin/qm/savedsearch/{{ search.id }}/delete/" class="button">delete</a>
-                    {% endif %}
-                </td>
-                <td>{{ search.name }}</td>
-                <td>{{ search.description }}</td>
-                <td>{{ search.search }}</td>
-                <td class="acenter">{% if search.is_public %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
-                <td class="acenter">{% if search.is_locked %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
-                <td>{{ search.created_by }}</td>
-                <td>{{ search.pub_date }}</td>
-                <td>{{ search.update_date }}</td>
-            </tr>
-        {% endfor %}
-    </table>
+
+	<div class="alert alert-info d-flex flex-row">
+		<div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+        <div class="notification-message">
+            To add a new saved search, apply some filters to the <a href="/qm/listanalytics">analytics view</a> and click the "Save search" button.
+        </div>
+	</div>
+
+	<form id="filter-form">
+		<label>
+			<input type="checkbox" id="only-show-user-saved-searches" name="only_show_user_saved_searches" 
+				hx-get="{% url 'saved_searches_table' %}" 
+				hx-target="#saved-searches-table" 
+				hx-include="#filter-form" 
+				hx-trigger="load, change">
+			Only show my saved searches
+		</label>
+	</form>
+
+    <div id="saved-searches-table">
+        {% include "partials/saved_searches_table.html" %}
+    </div>
 {% endblock %}

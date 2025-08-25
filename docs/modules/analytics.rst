@@ -95,5 +95,7 @@ There are public saved searches and private saved searches. Public saved searche
 
 You can also lock a search (useful for public saved searches) so that no one can modify or delete it.
 
+The checkbox acts as a toggle to switch between all saved searches or only saved searches created by the logged in user. By default, all saved searches are shown.
+
 .. image:: ../img/saved_searches.png
   :alt: saved searches
