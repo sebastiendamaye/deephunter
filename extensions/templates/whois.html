@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block style %}
+	<link rel="stylesheet" href="/static/css/list_analytics.css" />
+{% endblock %}
 
 {% block body %}
 <div class="margin10">
@@ -9,7 +12,7 @@
 	{% csrf_token %}
 	<label for="ip">IP address:</label>
 	<input type="text" id="ip" name="ip" value="{{ ip }}" />
-	<input type="submit" value="Whois" />
+	<input type="submit" value="Whois" class="button" />
 </form>
 <p>&nbsp;</p>
 {% if output %}

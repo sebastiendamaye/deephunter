@@ -2,9 +2,10 @@
 {% load qm_extras %}
 
 {% block style %}
-<link rel="stylesheet" href="/static/css/list_analytics.css" />
-<script src="/static/jquery/jquery.min.js"></script>
-<script src="/static/jquery_sparkline/jquery.sparkline.min.js"></script>
+	<link rel="stylesheet" href="/static/css/list_analytics.css" />
+{% endblock %}
+{% block js %}
+	<script src="/static/jquery_sparkline/jquery.sparkline.min.js"></script>
 {% endblock %}
 
 {% block body %}

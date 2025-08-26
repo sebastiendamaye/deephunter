@@ -5,13 +5,30 @@
 	<meta charset="utf-8">
 	<meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
 	<link rel="stylesheet" href="/static/fontawesome/all.min.css" />
-	<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-	<link rel="stylesheet" href="/static/css/base.css">
+	<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="/static/css/base.css" />
+	<link rel="stylesheet" href="/static/toastr/toastr.min.css" />
 	{% block style %}{% endblock %}
+
+    <script src="/static/jquery/jquery.min.js"></script>
 	<script src="/static/js/htmx.min.js"></script>
+	<script src="/static/toastr/toastr.js"></script>
+	{% block js %}{% endblock %}
+	
 	{{ redirect_to_login_immediately }}
 </head>
 <body>
+
+    <!-- Notifications container -->
+    <div id="notifications" 
+         hx-get="{% url 'get_notifications' %}" 
+         hx-trigger="load, every 10s" 
+         hx-target="#notifications" 
+         hx-swap="none">
+        <!-- Notifications will be dynamically injected here -->
+    </div>
+
+
 
 <section>
     <div class="rt-container">
@@ -99,6 +116,51 @@
     </div>
 </section>
 
+
+
 {% block body %}{% endblock %}
+
+
+	<script nonce="k0bc3z4fg1">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Toastr with default options (optional)
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right", // Top right corner
+                "preventDuplicates": true,
+                "showDuration": "300", // Duration for showing the toast
+                "hideDuration": "1000", // Duration for hiding the toast
+                "timeOut": "5000", // Time before the toast disappears (5 seconds)
+                "extendedTimeOut": "1000"
+            };
+        });
+
+let shownNotifications = new Set();
+
+document.body.addEventListener('htmx:afterRequest', function(evt) {
+    if (evt.detail.target.id === "notifications") {
+        try {
+            let data = JSON.parse(evt.detail.xhr.responseText);
+            if (data.notifications) {
+                data.notifications.forEach(function(n) {
+                    if (!shownNotifications.has(n.id)) {
+                        toastr[n.level](n.message);
+                        shownNotifications.add(n.id);
+                    }
+                });
+            }
+        } catch (e) {
+			// Not JSON, ignore
+            //console.log(e);
+        }
+    }
+});
+    </script>
+
+
+
 </body>
 </html>

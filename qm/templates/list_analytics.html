@@ -8,14 +8,14 @@
 	<link rel="stylesheet" href="/static/css/list_analytics.css" />
 	<link rel="stylesheet" href="/static/css/trend.css" />
 	<link rel="stylesheet" href="/static/css/repos.css" />
+{% endblock %}
 
-	<script src="/static/jquery/jquery.min.js"></script>
+{% block js %}
 	<script src="/static/jquery_table_sorter/jquery.tablesorter.min.js"></script>
 	<script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
 	<script src="/static/bootstrap_table_expandable/bootstrap-table-expandable.js"></script>
 	<script src="/static/jquery_sparkline/jquery.sparkline.min.js"></script>
 	<script src="/static/canvasjs/jquery.canvasjs.min.js"></script>
-	<script src="/static/js/htmx.min.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -560,12 +560,14 @@
 </div>
 </div>
 
-<script src="/static/js/list_analytics.js"></script>
-<script type="text/javascript" nonce="hf7hgo1ilm">
-$(function() {
-	{% for analytic in analytics %}
-		$('#sparkline_{{ analytic.id }}').sparkline({{ analytic.sparkline }});
-	{% endfor %}
-});
-</script>
+	<script src="/static/js/list_analytics.js"></script>
+
+	<script type="text/javascript" nonce="hf7hgo1ilm">
+	$(function() {
+		{% for analytic in analytics %}
+			$('#sparkline_{{ analytic.id }}').sparkline({{ analytic.sparkline }});
+		{% endfor %}
+	});
+	</script>
+
 {% endblock %}

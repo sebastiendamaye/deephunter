@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block style %}
+	<link rel="stylesheet" href="/static/css/list_analytics.css" />
+{% endblock %}
 
 {% block body %}
 <div class="margin10">
@@ -9,7 +12,7 @@
 	{% csrf_token %}
 	<label for="hashes">List of IPs (1 per line):</label>
 	<br /><textarea id="ips" class="hash" name="ips">{% if ips %}{{ ips }}{% endif %}</textarea>
-	<br /><input type="submit" value="Check IPs" />
+	<br /><input type="submit" value="Check IPs" class="button" />
 </form>
 <p>&nbsp;</p>
 {% if output %}

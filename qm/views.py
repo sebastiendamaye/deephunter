@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render
+from django.template.loader import render_to_string
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, permission_required
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
 from django.urls import reverse
@@ -12,6 +13,7 @@ from scipy import stats
 from math import isnan
 from .models import (Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor,
     ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category, Review, SavedSearch, Repo)
+from notifications.models import UserNotification
 from connectors.models import Connector
 from .tasks import regenerate_stats, regenerate_campaign
 import ipaddress
@@ -1173,3 +1175,23 @@ def reviews_table(request, analytic_id):
         'analytic': analytic,
         'reviews': reviews,
     })
+
+
+@login_required
+def get_notifications(request):
+    # Since notifications are polled every 10s, we only want to show notifications
+    # that are younger than 10 seconds ago
+    usernotifications = UserNotification.objects.filter(
+        user=request.user,
+        is_read=False,
+        notification__created_at__gte=datetime.now() - timedelta(seconds=10)
+    ).order_by('-notification__created_at')
+    notifications_list = [
+        {
+            "id": n.id,
+            "message": n.notification.message,
+            "level": n.notification.level,
+        }
+        for n in usernotifications
+    ]
+    return JsonResponse({"notifications": notifications_list})

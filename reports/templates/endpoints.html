@@ -5,10 +5,12 @@
 	<link rel="stylesheet" href="/static/bootstrap_table_expandable/bootstrap-table-expandable.css">
 	<link rel="stylesheet" href="/static/css/endpoints.css">
 	<link rel="stylesheet" href="/static/css/list_analytics.css">
-	<script src="/static/jquery/jquery.min.js"></script>
+{% endblock %}
+{% block js %}
 	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
 	<script src="/static/bootstrap_table_expandable/bootstrap-table-expandable.js"></script>
 {% endblock %}
+
 {% block body %}
 <h1>Top endpoints identified in campaign</h1>
 <p>This report shows the endpoints that triggered analytics during the selected campaign. Only the first 300 endpoints are shown.</p>

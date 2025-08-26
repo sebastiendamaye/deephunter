@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block style %}
-  <link rel="stylesheet" type="text/css" href="/static/css/list_analytics.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/list_analytics.css" />
 {% endblock %}
 
 {% block body %}
@@ -15,14 +15,14 @@
                  |_|                                   
 </pre>
 <table class="mitre">
-  <tr>
-    <th>DeepHunter</th>
-    <td><a href="https://github.com/sebastiendamaye/deephunter/releases/tag/{{ version }}" target="_blank">{{ version }}</a> ({{ version_commit }})</td>
-  </tr>
-  <tr>
-    <th>MITRE</th>
-    <td><a href="https://github.com/mitre-attack/attack-stix-data/releases" target="_blank">{{ version_mitre }}</a></td>
-  </tr>
+    <tr>
+        <th>DeepHunter</th>
+        <td><a href="https://github.com/sebastiendamaye/deephunter/releases/tag/{{ version }}" target="_blank">{{ version }}</a> ({{ version_commit }})</td>
+    </tr>
+    <tr>
+        <th>MITRE</th>
+        <td><a href="https://github.com/mitre-attack/attack-stix-data/releases" target="_blank">{{ version_mitre }}</a></td>
+    </tr>
 </table>
 </div>
 {% endblock %}
