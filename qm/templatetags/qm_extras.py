@@ -284,15 +284,17 @@ def gotodoc(url):
 
     # repos
     elif url == '/repos/listrepos/':
-        return f"{doc}/repos/index.html"
+        return f"{doc}/repos/list_repos.html"
     elif url == '/repos/addrepo/':
-        return f"{doc}/repos/index.html"
+        return f"{doc}/repos/add_repo.html"
     elif re.match(r"^/repos/editrepo/\d+/", url):
-        return f"{doc}/repos/index.html"
-    elif re.match(r"^/repos/syncrepo/\d+/", url):
-        return f"{doc}/repos/index.html"
+        return f"{doc}/repos/edit_repo.html"
+    elif re.match(r"^/repos/syncrepo/\d+/check/", url):
+        return f"{doc}/repos/check_repo.html"
+    elif re.match(r"^/repos/syncrepo/\d+/sync/", url):
+        return f"{doc}/repos/sync_repo.html"
     elif re.match(r"^/repos/syncreposelectanalytics/\d+/", url):
-        return f"{doc}/repos/index.html"
+        return f"{doc}/repos/sync_repo.html"
 
     # saved searches
     elif re.match(r"^/qm/saved_searches/\d+/change/$", url):
