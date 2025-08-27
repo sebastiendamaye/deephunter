@@ -4,7 +4,7 @@ Sync a repository
 Importing analytics
 *******************
 
-The `sync` button from the `list repos <list_repos.html>`_ view allows you to import analytics from the remote repository into DeepHunter. It is highly recommended to first do a `check <repos/check_repo.html>`_.
+The `sync` button from the `list repos <list_repos.html>`_ view allows you to import analytics from the remote repository into DeepHunter. It is highly recommended to first do a `check <check_repo.html>`_.
 
 Notes about the imported analytics:
 
