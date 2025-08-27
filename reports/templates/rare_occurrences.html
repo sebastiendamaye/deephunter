@@ -34,7 +34,7 @@
 		<td>
 			{% if analytic.endpoints %}
 				{% for endpoint in analytic.endpoints %}
-					<a href="/timeline?hostname={{ endpoint }}" target="_blank">{{ endpoint }}</a> |
+					<a href="/qm/timeline?hostname={{ endpoint }}" target="_blank">{{ endpoint }}</a> |
 				{% endfor %}
 			{% endif %}
 		</td>

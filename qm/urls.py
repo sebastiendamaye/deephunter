@@ -18,7 +18,7 @@ urlpatterns = [
     path('saved_searches/<int:search_id>/change/', views.saved_search_form, name='saved_search_form'),
     path('saved_searches/<int:search_id>/delete/', views.delete_saved_search, name='delete_saved_search'),
 
-    path('timeline', views.timeline, name='timeline'),
+    path('timeline/', views.timeline, name='timeline'),
 
     path('tl_timeline/<str:hostname>/', views.tl_timeline, name='tl_timeline'),
     path('tl_host/<str:hostname>/', views.tl_host, name='tl_host'),
@@ -29,9 +29,9 @@ urlpatterns = [
     path('cancelregen/<str:taskid>/', views.cancelregen, name='cancelregen'),
     path('<int:analytic_id>/progress/', views.progress, name='progress'),
     path('<int:analytic_id>/deletestats/', views.deletestats, name='deletestats'),
-    path('netview', views.netview, name='netview'),
-    path('about', views.about, name='about'),
-    path('managecampaigns', views.managecampaigns, name='managecampaigns'),
+    path('netview/', views.netview, name='netview'),
+    path('about/', views.about, name='about'),
+    path('managecampaigns/', views.managecampaigns, name='managecampaigns'),
     path('regencampaign/<str:campaign_name>/', views.regencampaign, name='regencampaign'),
     path('regencampaignstatus/<str:campaign_name>/', views.regencampaignstatus, name='regencampaignstatus'),
 

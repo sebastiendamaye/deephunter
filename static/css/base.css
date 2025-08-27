@@ -251,3 +251,32 @@ div.notification-read-button {
 .pad20 {
 	padding: 20px;
 }
+
+/* Help marker on top menu (navbar) */
+
+.help-marker {
+    position: fixed;      /* Fixed to the viewport */
+    top: 10px;            /* Distance from the top */
+    right: 16px;          /* Distance from the right */
+    z-index: 1000;        /* Ensure it appears above other elements */
+    font-size: 24px;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    font-weight: bold;
+    color: #555;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    text-decoration: none;
+    opacity: 0.4;
+    transition: opacity 0.3s ease;
+    background-color: white; /* Optional: helps it stand out */
+    box-shadow: 0 0 4px rgba(0,0,0,0.1); /* Optional visual enhancement */
+}
+
+.help-marker:hover {
+    opacity: 1;
+    color: #000;
+    border-color: #888;
+}

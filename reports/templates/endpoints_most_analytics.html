@@ -16,7 +16,7 @@
         </tr>
         {% for endpoint in top_endpoints %}
             <tr>
-                <td><a href="/timeline?hostname={{ endpoint.hostname }}">{{ endpoint.hostname }}</a></td>
+                <td><a href="/qm/timeline?hostname={{ endpoint.hostname }}">{{ endpoint.hostname }}</a></td>
                 <td>{{ endpoint.site }}</td>
                 <td>{{ endpoint.analytics_count }}</td>
             </tr>

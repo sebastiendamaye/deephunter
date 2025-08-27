@@ -6,6 +6,7 @@ from qm.models import (Country, TargetOs, ThreatActor, ThreatName, Vulnerability
     MitreTactic, MitreTechnique, Tag, Category, Review, Analytic, Repo)
 from connectors.models import Connector
 from django.conf import settings
+import re
 
 register = template.Library()
 
@@ -220,3 +221,71 @@ def statuscolor(status):
 @register.filter
 def statuslabel(status):
     return dict(Analytic.STATUS_CHOICES).get(status, status)
+
+@register.filter
+def gotodoc(url):
+    doc = 'https://deephunter.readthedocs.io/en/latest'
+    
+    # modules
+    if url == '/':
+        return f"{doc}/modules/dashboards.html"
+    elif url == '/qm/listanalytics/':
+        return f"{doc}/modules/analytics.html"
+    elif url == '/qm/saved_searches/':
+        return f"{doc}/modules/analytics.html#saved-searches"
+    elif url == '/qm/timeline/':
+        return f"{doc}/modules/timeline.html"
+    elif url == '/qm/netview/':
+        return f"{doc}/modules/netview.html"
+    
+    # Reports based on analytics view
+    elif url == '/qm/listanalytics/?statuses=REVIEW':
+        return f"{doc}/reports/analytics_to_review.html"
+    elif url == '/qm/listanalytics/?run_daily=0&maxhosts=1':
+        return f"{doc}/reports/disabled_analytics.html"
+    elif url == '/qm/listanalytics/?alreadyseen=0':
+        return f"{doc}/reports/zero_occurrences.html"
+
+    # reports
+    elif url == '/reports/campaigns_stats/':
+        return f"{doc}/reports/stats.html"
+    elif url == '/reports/analytics_perfs/':
+        return f"{doc}/reports/perfs.html"
+    elif url == '/reports/endpoints/':
+        return f"{doc}/reports/endpoints.html"
+    elif url == '/reports/endpoints_most_analytics/':
+        return f"{doc}/reports/endpoints_most_analytics.html"
+    elif url == '/reports/mitre/':
+        return f"{doc}/reports/mitre_coverage.html"
+    elif url == '/reports/missing_mitre/':
+        return f"{doc}/reports/missing_mitre.html"
+    elif url == '/reports/query_error/':
+        return f"{doc}/reports/query_error.html"
+    elif url == '/reports/rare_occurrences/':
+        return f"{doc}/reports/rare_occurrences.html"
+
+    # tools
+    elif url == '/extensions/vthashchecker/':
+        return f"{doc}/tools/vt_hash_checker.html"
+    elif url == '/extensions/vtipchecker/':
+        return f"{doc}/tools/vt_ip_checker.html"
+    elif url == '/extensions/malwarebazaarhashchecker/':
+        return f"{doc}/tools/mb_hash_checker.html"
+    elif url == '/extensions/loldriverhashchecker/':
+        return f"{doc}/tools/lol_drivers_hash_checker.html"
+    elif url == '/extensions/whois/':
+        return f"{doc}/tools/whois.html"
+
+    # connectors    
+    elif url == '/connectors/connectorconf/':
+        return f"{doc}/plugins/index.html#settings"
+
+    # saved searches
+    elif re.match(r"^/qm/saved_searches/\d+/change/$", url):
+        return f"{doc}/modules/analytics.html#saved-searches"
+    elif re.match(r"^/qm/saved_searches/add/", url):
+        return f"{doc}/modules/analytics.html#saved-searches"
+
+    # else
+    else:
+        return doc

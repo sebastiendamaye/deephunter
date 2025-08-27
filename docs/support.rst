@@ -1,6 +1,17 @@
 Support
 #######
 
+Help Marker
+***********
+
+A help marker appears on the top right corner of the screen. Clicking on it will redirect you to the appropriate section of the documentation.
+
+.. image:: img/help_marker.png
+   :alt: Help Marker
+
+Report an issue
+***************
+
 To report an issue, go to the `DeepHunter GitHub project <https://github.com/sebastiendamaye/deephunter/issues>`_ and click on the "New issue" button.
 
 DeepHunter is developed and maintained by Sébastien Damaye, under the `MIT license <https://github.com/sebastiendamaye/deephunter?tab=MIT-1-ov-file>`_. You are free to download, clone and modify the application.

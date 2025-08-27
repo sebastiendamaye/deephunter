@@ -38,7 +38,7 @@
 			{% if endpoints %}
 				<ul>
 					{% for endpoint in endpoints|slice:":10" %}
-						<li><a href="/timeline?hostname={{ endpoint.hostname }}" target="_blank">{{ endpoint.hostname }}</a></li>
+						<li><a href="/qm/timeline?hostname={{ endpoint.hostname }}" target="_blank">{{ endpoint.hostname }}</a></li>
 					{% endfor %}
 					{% if distinct_endpoints > 10 %}<li>...</li>{% endif %}
 				</ul>

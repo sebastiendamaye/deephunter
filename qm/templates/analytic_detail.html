@@ -28,7 +28,7 @@
 		<div class="ml40">
 			<b>Top 10 endpoints: </b>
 			{% for endpoint in endpoints %}
-				<a href="/timeline?hostname={{ endpoint }}" target="_blank">{{ endpoint }}</a> |
+				<a href="/qm/timeline?hostname={{ endpoint }}" target="_blank">{{ endpoint }}</a> |
 			{% endfor %}
 			<a href="/admin/qm/endpoint/?snapshot__analytic__name={{ analytic.name }}" target="_blank">See all endpoints...</a>
 		</div>
