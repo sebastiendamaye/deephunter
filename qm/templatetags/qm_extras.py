@@ -291,6 +291,8 @@ def gotodoc(url):
         return f"{doc}/repos/index.html"
     elif re.match(r"^/repos/syncrepo/\d+/", url):
         return f"{doc}/repos/index.html"
+    elif re.match(r"^/repos/syncreposelectanalytics/\d+/", url):
+        return f"{doc}/repos/index.html"
 
     # saved searches
     elif re.match(r"^/qm/saved_searches/\d+/change/$", url):
