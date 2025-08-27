@@ -237,6 +237,8 @@ def gotodoc(url):
         return f"{doc}/modules/timeline.html"
     elif url == '/qm/netview/':
         return f"{doc}/modules/netview.html"
+    elif url == '/qm/managecampaigns/':
+        return f"{doc}/modules/manage_campaigns.html"
     
     # Reports based on analytics view
     elif url == '/qm/listanalytics/?statuses=REVIEW':
@@ -279,6 +281,16 @@ def gotodoc(url):
     # connectors    
     elif url == '/connectors/connectorconf/':
         return f"{doc}/plugins/index.html#settings"
+
+    # repos
+    elif url == '/repos/listrepos/':
+        return f"{doc}/repos/index.html"
+    elif url == '/repos/addrepo/':
+        return f"{doc}/repos/index.html"
+    elif re.match(r"^/repos/editrepo/\d+/", url):
+        return f"{doc}/repos/index.html"
+    elif re.match(r"^/repos/syncrepo/\d+/", url):
+        return f"{doc}/repos/index.html"
 
     # saved searches
     elif re.match(r"^/qm/saved_searches/\d+/change/$", url):
