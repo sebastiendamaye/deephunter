@@ -31,14 +31,7 @@ REPO_IMPORT_DEFAULT_RUN_DAILY = settings.REPO_IMPORT_DEFAULT_RUN_DAILY
 
 @login_required
 def list_repos(request):
-    repos = []
-    for repo in Repo.objects.all():
-        repos.append({
-            "id": repo.id,
-            "name": repo.name,
-            "url": repo.url,
-        })
-    context = {"repos": repos}
+    context = {"repos": Repo.objects.all()}
     return render(request, "list_repos.html", context)
 
 def get_repo_import_info(request, repo_id):
@@ -58,9 +51,9 @@ def get_repo_import_info(request, repo_id):
 def import_repo_select_analytics(request, repo_id):
     repo = get_object_or_404(Repo, pk=repo_id)
     if "github.com" in repo.url:
-        contents = all_connectors.get('github').get_github_contents(repo.url)
+        contents = all_connectors.get('github').get_github_contents(repo)
     elif "bitbucket.org" in repo.url:
-        contents = all_connectors.get('bitbucket').get_bitbucket_contents(repo.url)
+        contents = all_connectors.get('bitbucket').get_bitbucket_contents(repo)
     context = {
         "repo": repo,
         "contents": contents,
@@ -113,7 +106,7 @@ def edit_repo(request, repo_id):
         'form': form,
         'repo': repo,
     }
-    return render(request, 'edit_repo.html', context)
+    return render(request, 'add_repo.html', context)
 
 @login_required
 def report(request, repo_id):

@@ -4,17 +4,67 @@
     <link rel="stylesheet" href="/static/css/list_analytics.css" />
     <link rel="stylesheet" href="/static/css/repos.css" />
 {% endblock %}
+{% block js %}
+    <script src="/static/fontawesome/all.min.js"></script>
+{% endblock %}
 
 {% block body %}
 <div class="padaround">
-    <h1><a href="/repos/listrepos/">Repos</a> > Add a new repo</h1>
-    <p>Only github.com and bitbucket.org repos are supported currently.</p>
+    <h1><a href="/repos/listrepos/">Repos</a> > {% if repo %}Edit {{ repo.name }}{% else %}Add a new repo{% endif %}</h1>
+	<div class="alert alert-info d-flex flex-row">
+		<div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+        <div class="notification-message">
+            <li>Only github.com and bitbucket.org repos are supported currently.</li>
+            <li>If the repo is private, a <a href="https://github.com/settings/personal-access-tokens" target="_blank">personal access token</a> is required for GitHub, and an <a href="https://bitbucket.org/account/settings/app-passwords/" target="_blank">Application password</a> is required for BitBucket.</li>
+        </div>
+	</div>
 
-    <form method="post" action="{% url 'add_repo' %}">
+    <form method="post" action="{% if repo %}{% url 'edit_repo' repo.id %}{% else %}{% url 'add_repo' %}{% endif %}">
         {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Add Repo" class="button">
+        <p>
+            {{ form.name.errors }}
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            <span class="helptext">{{ form.name.help_text }}</span>
+        </p>
+        <p>
+            {{ form.url.errors }}
+            {{ form.url.label_tag }}
+            {{ form.url }}
+            <span class="helptext">{{ form.url.help_text }}</span>
+        </p>
+        <p>
+            {{ form.is_private.errors }}
+            {{ form.is_private.label_tag }}
+            {{ form.is_private }}
+            <span class="helptext">{{ form.is_private.help_text }}</span>
+        </p>
+        <div id="token-field" class="{% if not form.is_private.value %}hidden{% endif %}">
+            <p>
+                {{ form.token.errors }}
+                {{ form.token.label_tag }}
+                {{ form.token }}
+                <span class="helptext">{{ form.token.help_text }}</span>
+            </p>
+        </div>
+        <input type="submit" value="{% if repo %}Update Repo{% else %}Add Repo{% endif %}" class="button">
         <a href="{% url 'list_repos' %}" class="button">Cancel</a>
     </form>
 </div>
+
+<script nonce="lk8d3h5bvz">
+document.addEventListener('DOMContentLoaded', function() {
+    var isPrivateCheckbox = document.getElementById("id_is_private");
+    var tokenField = document.getElementById("token-field");
+    if (isPrivateCheckbox && tokenField) {
+        isPrivateCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                tokenField.classList.remove('hidden');
+            } else {
+                tokenField.classList.add('hidden');
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

@@ -42,9 +42,9 @@ def import_repo_task(repo_id, mode, selected_analytics=None):
         add_debug_notification(f'Starting import repo task: {repo.name} (mode: {mode})')
 
     if "github.com" in repo.url:
-        contents = all_connectors.get('github').get_github_contents(repo.url)
+        contents = all_connectors.get('github').get_github_contents(repo)
     elif "bitbucket.org" in repo.url:
-        contents = all_connectors.get('bitbucket').get_bitbucket_contents(repo.url)
+        contents = all_connectors.get('bitbucket').get_bitbucket_contents(repo)
     nb_analytics = 0
 
     # We delete previous ref in RepoAnalytic related to this repo

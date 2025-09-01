@@ -35,10 +35,10 @@
             <div class="repo_details">
                 <h3 class="repo">
                     <a href="{{ repo.url }}" target="_blank" title="{{ repo.url }}">{{ repo.name }}</a>
+                    <span class="repo_visibility">{% if repo.is_private %}private{% else %}public{% endif %}</span>
                 </h3>
                 <div class="repo_import_info" hx-get="/repos/{{ repo.id }}/get-repo-import-info/" hx-trigger="load, every 10s"></div>
                 <div class="actions_buttons">
-                    {% if repo.last_check_date %}<a href="/repos/report/{{ repo.id }}/" class="button">open report</a>{% endif %}
                     <span hx-get="/repos/{{ repo.id }}/progress-import-repo/" hx-trigger="load, every 3s"></span>
                 </div>
             </div>

@@ -35,13 +35,27 @@ def parse_github_url(url):
         path = ''
     return owner, repo, branch, path
 
-def get_github_contents(url):
+def get_github_contents(repo):
+    """
+    Returns a list of JSON files in a GitHub repo
+    :param repo: The repo object
+    :return: A list of JSON files or empty list if error
+    """
     init_globals()
 
-    owner, repo, branch, path = parse_github_url(url)
-    api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    owner, repo_name, branch, path = parse_github_url(repo.url)
+    api_url = f"https://api.github.com/repos/{owner}/{repo_name}/contents/{path}"
     
-    response = requests.get(api_url, proxies=PROXY)
+    if repo.token:
+        headers = {
+            "Authorization": f"token {repo.token}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+    else:
+        headers = {}
+    
+    response = requests.get(api_url, headers=headers, proxies=PROXY)
+    
     if response.status_code == 200:
         data = response.json()
         return [
@@ -54,6 +68,6 @@ def get_github_contents(url):
         ]
 
     # In case of an error
-    add_error_notification(f"GitHub connector: error (status code {response.status_code}) connecting to {url}")
+    add_error_notification(f"GitHub connector: error (status code {response.status_code}) connecting to {repo.url}")
     return []
     

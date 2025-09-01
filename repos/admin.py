@@ -2,8 +2,8 @@ from django.contrib import admin
 from .models import Repo, RepoAnalytic
 
 class RepoAdmin(admin.ModelAdmin):
-    list_display = ('name', 'url', 'get_nb_analytics', 'get_nb_analytics_valid', 'get_nb_analytics_errors', 'last_check_date', 'last_import_date')
-    list_filter = ['last_check_date', 'last_import_date']
+    list_display = ('name', 'url', 'is_private', 'token', 'get_nb_analytics', 'get_nb_analytics_valid', 'get_nb_analytics_errors', 'last_check_date', 'last_import_date')
+    list_filter = ['last_check_date', 'last_import_date', 'is_private']
     search_fields = ['name', 'url']
 
     @admin.display(description='nb_analytics')

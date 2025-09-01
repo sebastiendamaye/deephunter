@@ -4,14 +4,9 @@ from .models import Repo
 class RepoForm(forms.ModelForm):
     class Meta:
         model = Repo
-        fields = ['name', 'url']
+        fields = ['name', 'url', 'is_private', 'token']
         widgets = {
             'name': forms.TextInput(attrs={'size': 50}),
             'url': forms.TextInput(attrs={'size': 100}),
+            'token': forms.TextInput(attrs={'size': 100}),
         }
-
-    def clean(self):
-        cleaned_data = super().clean()
-        name = cleaned_data.get('name')
-        url = cleaned_data.get('url')
-        return cleaned_data
