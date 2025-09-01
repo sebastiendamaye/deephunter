@@ -262,18 +262,18 @@ AUTO_STATS_REGENERATION
 
 	AUTO_STATS_REGENERATION = True
 
-REPO_SYNC_CREATE_FIELD_IF_NOT_EXIST
-***********************************
+REPO_IMPORT_CREATE_FIELD_IF_NOT_EXIST
+*************************************
 
 - **Type**: dictionary of booleans
 - **Possible values**: ``True`` or ``False``
-- **Description**: Defines the behavior for repo synchronization when FK/M2M fields don't exist in your DB. If set to ``True``, the relation will be created automatically. Notice that Target OS and MITRE techniques won't be automatically created (If not in your database, analytics will be created with empty values). For vulnerabilities, the base score will default to 0.
+- **Description**: Defines the behavior for repo import when FK/M2M fields don't exist in your DB. If set to ``True``, the relation will be created automatically. Notice that Target OS and MITRE techniques won't be automatically created (If not in your database, analytics will be created with empty values). For vulnerabilities, the base score will default to 0.
 
 - **Example**:
 
 .. code-block:: python
 	
-	REPO_SYNC_CREATE_FIELD_IF_NOT_EXIST = {
+	REPO_IMPORT_CREATE_FIELD_IF_NOT_EXIST = {
 		"category": "false",
 		"threats": "false",
 		"actors": "false",
@@ -281,8 +281,8 @@ REPO_SYNC_CREATE_FIELD_IF_NOT_EXIST
 	}
 
 
-REPO_SYNC_DEFAULT_STATUS
-************************
+REPO_IMPORT_DEFAULT_STATUS
+**************************
 
 - **Type**: string
 - **Possible values**: ``DRAFT`` or ``PUB``
@@ -291,11 +291,11 @@ REPO_SYNC_DEFAULT_STATUS
 
 .. code-block:: python
 
-	REPO_SYNC_DEFAULT_STATUS = "DRAFT"
+	REPO_IMPORT_DEFAULT_STATUS = "DRAFT"
 
 
-REPO_SYNC_DEFAULT_RUN_DAILY
-***************************
+REPO_IMPORT_DEFAULT_RUN_DAILY
+*****************************
 
 - **Type**: boolean
 - **Possible values**: ``True`` or ``False``
@@ -304,7 +304,7 @@ REPO_SYNC_DEFAULT_RUN_DAILY
 
 .. code-block:: python
 
-	REPO_SYNC_DEFAULT_RUN_DAILY = True
+	REPO_IMPORT_DEFAULT_RUN_DAILY = True
 
 NOTIFICATIONS_RECIPIENTS
 ************************

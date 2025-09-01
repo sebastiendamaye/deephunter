@@ -9,9 +9,9 @@ You can access the `list repos <list_repos.html>`_ view from the menu (**Admin >
 
 Default values can be set in the settings:
 
-- `REPO_SYNC_CREATE_FIELD_IF_NOT_EXIST <../settings.html#repo-sync-create-field-if-not-exist>`_
-- `REPO_SYNC_DEFAULT_STATUS <../settings.html#repo-sync-default-status>`_
-- `REPO_SYNC_DEFAULT_RUN_DAILY <../settings.html#repo-sync-default-run-daily>`_
+- `REPO_IMPORT_CREATE_FIELD_IF_NOT_EXIST <../settings.html#repo-import-create-field-if-not-exist>`_
+- `REPO_IMPORT_DEFAULT_STATUS <../settings.html#repo-import-default-status>`_
+- `REPO_IMPORT_DEFAULT_RUN_DAILY <../settings.html#repo-import-default-run-daily>`_
 
 Expected format for repositories
 ********************************
@@ -85,6 +85,7 @@ Analytics should be JSON files, with the following structure:
 
 Example
 =======
+Below is an example of a valid analytic JSON file:
 
 .. code-block:: json
 
@@ -125,4 +126,5 @@ Contents
    edit_repo
    delete_repo
    check_repo
-   sync_repo
+   import_repo
+   report

@@ -1,0 +1,28 @@
+{% load humanize %}
+
+<span class="icons" title="Number of analytics">
+    <i class="fa-solid fa-bucket"></i>
+    {% if nb_analytics %}{{ nb_analytics }}{% else %}-{% endif %}
+</span>
+<span class="icons" title="Imported analytics">
+    <!--i class="fa-solid fa-rotate"></i-->
+    <i class="fa-solid fa-database"></i>
+    {% if nb_analytics_imported %}{{ nb_analytics_imported }}{% else %}-{% endif %}
+</span>
+<span class="icons" title="Valid analytics">
+    <i class="fa-solid fa-check"></i>
+    {% if nb_analytics_valid %}{{ nb_analytics_valid }}{% else %}-{% endif %}
+</span>
+<span class="icons" title="Analytics with errors">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    {% if nb_analytics_errors %}{{ nb_analytics_errors }}{% else %}-{% endif %}
+</span>
+
+<div>
+    <span class="date"><b>Last checked:</b> {% if last_check_date %}{{ last_check_date|naturaltime }}{% else %}-{% endif %}</span>
+    <span class="date"><b>Last imported:</b> {% if last_import_date %}{{ last_import_date|naturaltime }}{% else %}-{% endif %}</span>
+</div>
+
+{% if last_check_date %}
+    <div class="report_link"><a href="/repos/report/{{ repo_id }}/">open report</a></div>
+{% endif %}

@@ -2,49 +2,52 @@
 
 {% block style %}
     <link rel="stylesheet" href="/static/css/list_analytics.css" />
+    <link rel="stylesheet" href="/static/css/repos.css" />
+{% endblock %}
+
+{% block js %}
+    <script src="/static/fontawesome/all.min.js"></script>
 {% endblock %}
 
 {% block body %}
-<h1>Repos</h1>
+<div class="padaround">
+    <h1>Repos</h1>
 
-<p><a href="/repos/addrepo/" class="button">Add a new repo</a></p>
-<table class="mitre">
-    <tr>
-        <th>Actions</th>
-        <th>Name</th>
-        <th>URL</th>
-        <th>#Analytics</th>
-        <th>#Valid</th>
-        <th>#Errors</th>
-        <th>Last Check</th>
-        <th>Last Sync</th>
-    </tr>
+    <p><a href="/repos/addrepo/" class="button">Add a new repo</a></p>
+
+    <hr />
     {% for repo in repos %}
-        <tr>
-            <td class="aright">
-                {% if "github.com/" in repo.url or "bitbucket.org/" in repo.url %}
-                    <a href="/repos/syncrepo/{{ repo.id }}/check/" class="button">check</a>
-                    <a href="/repos/syncreposelectanalytics/{{ repo.id }}/" class="button">sync</a>
+
+        <div class="repo_container">
+
+            <div class="repo_icon">
+                {% if 'github.com' in repo.url %}
+                    <img class="img-repo-icon" src="/static/images/GitHub.png" alt="github" />
+                {% else %}
+                    <img class="img-repo-icon" src="/static/images/BitBucket.png" alt="bitbucket" />
                 {% endif %}
-                <a href="/repos/editrepo/{{ repo.id }}/" class="button">edit</a>
-                <a href="/repos/deleterepo/{{ repo.id }}/" class="button">delete</a>
-            </td>
-            <td>{{ repo.name }}</td>
-            <td><a href="{{ repo.url }}" target="_blank">{{ repo.url }}</a></td>
-            <td class="aright">{% if repo.nb_analytics %}{{ repo.nb_analytics }}{% else %}-{% endif %}</td>
-            <td class="aright">
-                {% if repo.nb_analytics %}
-                    {% if repo.nb_analytics_valid %}{{ repo.nb_analytics_valid }}{% else %}0{% endif %}
-                {% else %}-{% endif %}
-            </td>
-            <td class="aright">
-                {% if repo.nb_analytics %}
-                    {% if repo.nb_analytics_errors %}{{ repo.nb_analytics_errors }}{% else %}0{% endif %}
-                {% else %}-{% endif %}
-            </td>
-            <td>{% if repo.last_check_date %}{{ repo.last_check_date }}{% else %}-{% endif %}</td>
-            <td>{% if repo.last_sync_date %}{{ repo.last_sync_date }}{% else %}-{% endif %}</td>
-        </tr>
+                <div>
+                    <span class="icon"><a href="/repos/editrepo/{{ repo.id }}/" title="Edit"><i class="fa-solid fa-pen"></i></a></span>
+                    <span class="icon"><a href="/repos/deleterepo/{{ repo.id }}/" title="Delete"><i class="fa-solid fa-trash"></i></a></span>
+                </div>
+            </div>
+            
+            <div class="repo_details">
+                <h3 class="repo">
+                    <a href="{{ repo.url }}" target="_blank" title="{{ repo.url }}">{{ repo.name }}</a>
+                </h3>
+                <div class="repo_import_info" hx-get="/repos/{{ repo.id }}/get-repo-import-info/" hx-trigger="load, every 10s"></div>
+                <div class="actions_buttons">
+                    {% if repo.last_check_date %}<a href="/repos/report/{{ repo.id }}/" class="button">open report</a>{% endif %}
+                    <span hx-get="/repos/{{ repo.id }}/progress-import-repo/" hx-trigger="load, every 3s"></span>
+                </div>
+            </div>
+
+
+        </div>
+
+        <hr />
     {% endfor %}
-</table>
+
+</div>
 {% endblock %}

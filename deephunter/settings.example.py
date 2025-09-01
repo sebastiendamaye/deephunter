@@ -93,18 +93,18 @@ DISABLE_ANALYTIC_ON_REVIEW = False  # Disable analytics with status 'REVIEW'
 # Automatically regenerate stats when analytic query field is changed
 AUTO_STATS_REGENERATION = True
 
-# For repo sync when FK/M2M fields don't exist in your DB, should the missing relation be created
+# For repo import when FK/M2M fields don't exist in your DB, should the missing relation be created
 # target_os and mitre_techniques won't be automatically created. If not in your database, analytic will be created without empty values
 # Vulnerabilities base score will default to 0
-REPO_SYNC_CREATE_FIELD_IF_NOT_EXIST = {
+REPO_IMPORT_CREATE_FIELD_IF_NOT_EXIST = {
     "category": "false",
     "threats": "false",
     "actors": "false",
     "vulnerabilities": "false",
 }
-# Default values when analytics are sync'ed from a repo
-REPO_SYNC_DEFAULT_STATUS = "DRAFT"
-REPO_SYNC_DEFAULT_RUN_DAILY = False
+# Default values when analytics are imported from a repo
+REPO_IMPORT_DEFAULT_STATUS = "DRAFT"
+REPO_IMPORT_DEFAULT_RUN_DAILY = False
 
 # List of users and groups to send notifications to for each notification level
 NOTIFICATIONS_RECIPIENTS = {
@@ -143,6 +143,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'django.contrib.humanize',
     'dbbackup', # django-dbbackup
     'django_markup',
     'simple_history',

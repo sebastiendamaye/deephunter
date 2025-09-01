@@ -75,10 +75,12 @@ table.mitre {
 table.mitre td {
 	border: solid 1px #ccc;
 	padding: 5px;
+	vertical-align: top;
 }
 table.mitre th {
 	background: #eee;
 	padding: 5px;
+	vertical-align: top;
 }
 
 .float-container {
@@ -424,7 +426,8 @@ button.inlineedit {
 
 .flex-container {
 	display: flex;
-	padding: 20px;
+	/*padding-left: 20px;*/
+	/*padding-right: 20px;*/
 	height: 100vh;
 }
 

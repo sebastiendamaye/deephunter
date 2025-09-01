@@ -6,13 +6,15 @@
 {% endblock %}
 
 {% block body %}
-<h1><a href="/repos/listrepos/">Repos</a> > Add a new repo</h1>
-<p>Only github.com and bitbucket.org repos are supported currently.</p>
+<div class="padaround">
+    <h1><a href="/repos/listrepos/">Repos</a> > Add a new repo</h1>
+    <p>Only github.com and bitbucket.org repos are supported currently.</p>
 
-<form method="post" action="{% url 'add_repo' %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Add Repo" class="button">
-    <a href="{% url 'list_repos' %}" class="button">Cancel</a>
-</form>
+    <form method="post" action="{% url 'add_repo' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Add Repo" class="button">
+        <a href="{% url 'list_repos' %}" class="button">Cancel</a>
+    </form>
+</div>
 {% endblock %}

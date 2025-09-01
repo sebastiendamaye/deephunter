@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load repos_extras %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/list_analytics.css" />
+    <link rel="stylesheet" href="/static/jquery-ui/jquery-ui.min.css" />
+    <link rel="stylesheet" href="/static/css/tabs.css" />
+{% endblock %}
+{% block js %}
+    <script src="/static/jquery-ui/jquery-ui.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="padaround">
+
+    <h1><a href="/repos/listrepos/">Repos</a> > Report for repo {{ repo.name }}</h1>
+
+    <p>
+        <table class="mitre">
+            <tr>
+                <th>Name</th>
+                <td>{{ repo.name }}</td>
+            </tr>
+            <tr>
+                <th>URL</th>
+                <td><a href="{{ repo.url }}" target="_blank">{{ repo.url }}</a></td>
+            </tr>
+            <tr>
+                <th>Nb analytics</th>
+                <td>{{ nb_analytics }} analytics ({{ nb_analytics_imported }} imported, {{ nb_analytics_valid }} valid, {{ nb_analytics_errors }} with errors)</td>
+            </tr>
+            <tr>
+                <th>Last check</th>
+                <td>{% if repo.last_check_date %}{{ repo.last_check_date }}{% else %}-{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Last import</th>
+                <td>{% if repo.last_import_date %}{{ repo.last_import_date }}{% else %}-{% endif %}</td>
+            </tr>
+        </table>
+    </p>
+
+    <div id="tabs">
+        <ul>
+            <li><a href="#tab_valid">Valid analytics ({{ nb_analytics_valid }})</a></li>
+            <li><a href="#tab_errors">Analytics with errors ({{ nb_analytics_errors }})</a></li>
+        </ul>
+
+        <div id="tab_valid">
+            {% if nb_analytics_valid > 0 %}
+                <table class="mitre">
+                    <tr>
+                        <th>Name</th>
+                        <th>Imported</th>
+                        <th>Infos</th>
+                    </tr>
+                    {% for analytic in analytics %}
+                        {% if analytic.is_valid %}
+                            <tr>
+                                <td><a href="{{ analytic.url }}" target="_blank">{{ analytic.name }}</a></td>
+                                <td class="acenter">
+                                    {% if analytic.is_imported %}
+                                        <img src="/static/admin/img/icon-yes.svg" alt="is imported" />
+                                    {% else %}
+                                        <img src="/static/admin/img/icon-no.svg" alt="is not imported" />
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for report in analytic.report %}
+                                        {% if report.type == 'info' %}
+                                            <li>{{ report.message }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No valid analytics.</p>
+            {% endif %}
+        </div>
+
+        <div id="tab_errors">
+            {% if nb_analytics_errors > 0 %}
+                <table class="mitre">
+                    <tr>
+                        <th>Name</th>
+                        <th>Imported</th>
+                        <th>Infos</th>
+                        <th>Errors</th>
+                    </tr>
+                    {% for analytic in analytics %}
+                        {% if not analytic.is_valid %}
+                            <tr>
+                                <td><a href="{{ analytic.url }}" target="_blank">{{ analytic.name }}</a></td>
+                                <td class="acenter">
+                                    {% if analytic.is_imported %}
+                                        <img src="/static/admin/img/icon-yes.svg" alt="is imported" />
+                                    {% else %}
+                                        <img src="/static/admin/img/icon-no.svg" alt="is not imported" />
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for report in analytic.report %}
+                                        {% if report.type == 'info' %}
+                                            <li>{{ report.message }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for report in analytic.report %}
+                                        {% if report.type == 'error' %}
+                                            <li>{{ report.message }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>No analytics with errors.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+<script type="text/javascript" nonce="jg6kl5z3v2">
+	$(document).ready(function() {
+		$( "#tabs" ).tabs();
+	});
+</script>
+
+{% endblock %}

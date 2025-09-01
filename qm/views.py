@@ -617,10 +617,10 @@ def progress(request, analytic_id):
         analytic = get_object_or_404(Analytic, pk=analytic_id)
         celery_status = get_object_or_404(TasksStatus, taskname=analytic.name)
         button = f'<span><b>Task progress:</b> {round(celery_status.progress)}%'
-        button += f' | <button hx-get="/cancelregen/{celery_status.taskid}/" class="buttonred">CANCEL</button></span>'
+        button += f' | <button hx-get="/qm/cancelregen/{celery_status.taskid}/" class="buttonred">CANCEL</button></span>'
         return HttpResponse(button)
     except:
-        return HttpResponse('<button hx-get="/{}/regen/" class="buttonred">Regenerate stats</button>'.format(analytic_id))
+        return HttpResponse('<button hx-get="/qm/{}/regen/" class="buttonred">Regenerate stats</button>'.format(analytic_id))
 
 @login_required
 @permission_required("qm.delete_campaign")

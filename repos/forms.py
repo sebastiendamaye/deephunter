@@ -12,6 +12,6 @@ class RepoForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        url = cleaned_data.get('name')
+        name = cleaned_data.get('name')
         url = cleaned_data.get('url')
         return cleaned_data
