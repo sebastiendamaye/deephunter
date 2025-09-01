@@ -38,7 +38,7 @@
 			<b>Created by: </b>{% if analytic.created_by %}{{ analytic.created_by }}{% else %}-{% endif %}
 			&nbsp;|&nbsp;<b>Created on: </b>{{ analytic.pub_date }}
 			&nbsp;|&nbsp;<b>Last modified: </b>{{ analytic.update_date }}
-			&nbsp;|&nbsp;<b>Last time seen: </b>{{ analytic.last_time_seen }}
+			&nbsp;|&nbsp;<b>Last time seen: </b>{% if analytic.last_time_seen %}{{ analytic.last_time_seen }}{% else %}-{% endif %}
 		</div>
 		<div class="ml40">
 			<b>Tags: </b>{% if analytic.tags %}{% for tag in analytic.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
