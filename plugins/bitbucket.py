@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import requests
 from django.conf import settings
 from pathlib import Path
+from notifications.utils import add_error_notification
 
 _globals_initialized = False
 def init_globals():
@@ -39,18 +40,7 @@ def get_bitbucket_contents(url):
         api_url = f"https://api.bitbucket.org/2.0/repositories/{repo_owner}/{repo_slug}/src/{branch}/"
 
     response = requests.get(api_url, proxies=PROXY)
-    data = response.json()
-    for item in data.get('values'):
-        if item['type'] == 'commit_file' and Path(item['path']).suffix == ".json":
-            full.append({
-                "name": item['path'],
-                "download_url": item['links']['self']['href']
-            })
-
-    # Bitbucket is paginating results. The "next" key returns the URL of the next page results
-    while "next" in response.json():
-        api_url = response.json()["next"]
-        response = requests.get(api_url, proxies=PROXY)
+    if response.status_code == 200:
         data = response.json()
         for item in data.get('values'):
             if item['type'] == 'commit_file' and Path(item['path']).suffix == ".json":
@@ -59,4 +49,20 @@ def get_bitbucket_contents(url):
                     "download_url": item['links']['self']['href']
                 })
 
-    return full
+        # Bitbucket is paginating results. The "next" key returns the URL of the next page results
+        while "next" in response.json():
+            api_url = response.json()["next"]
+            response = requests.get(api_url, proxies=PROXY)
+            data = response.json()
+            for item in data.get('values'):
+                if item['type'] == 'commit_file' and Path(item['path']).suffix == ".json":
+                    full.append({
+                        "name": item['path'],
+                        "download_url": item['links']['self']['href']
+                    })
+
+        return full
+
+    # In case of an error
+    add_error_notification(f"Bitbucket connector: error (status code {response.status_code}) connecting to {url}")
+    return []

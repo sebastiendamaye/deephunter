@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import requests
 from django.conf import settings
 from pathlib import Path
+from notifications.utils import add_error_notification
 
 _globals_initialized = False
 def init_globals():
@@ -39,13 +40,20 @@ def get_github_contents(url):
 
     owner, repo, branch, path = parse_github_url(url)
     api_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path}"
+    
     response = requests.get(api_url, proxies=PROXY)
-    data = response.json()
-    return [
-        {
-            "name": item['name'],
-            "download_url": item['download_url']
-        }
-        for item in data
-        if item['type'] == 'file' and Path(item['name']).suffix == ".json"
-    ]
+    if response.status_code == 200:
+        data = response.json()
+        return [
+            {
+                "name": item['name'],
+                "download_url": item['download_url']
+            }
+            for item in data
+            if item['type'] == 'file' and Path(item['name']).suffix == ".json"
+        ]
+
+    # In case of an error
+    add_error_notification(f"GitHub connector: error (status code {response.status_code}) connecting to {url}")
+    return []
+    
