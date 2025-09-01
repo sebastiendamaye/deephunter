@@ -4,6 +4,7 @@ Active Directory connector
 
 from connectors.utils import get_connector_conf
 from ldap3 import Server, Connection, ALL
+from ldap3.core.exceptions import LDAPBindError, LDAPException
 from notifications.utils import add_error_notification
 
 _globals_initialized = False
@@ -36,21 +37,40 @@ def ldap_search(username):
     :return: An LDAP entry if found, otherwise None.
     """
     init_globals()
-    server = Server(LDAP_SERVER, port=LDAP_PORT, use_ssl=LDAP_SSL, get_info=ALL)
-    conn = Connection(server, LDAP_USER, LDAP_PWD, auto_bind=True)
-    conn.search(
-        LDAP_SEARCH_BASE,
-        '(sAMAccountName={})'.format(username),
-        attributes=[
-            LDAP_ATTRIBUTES['USER_NAME'],
-            LDAP_ATTRIBUTES['JOB_TITLE'],
-            LDAP_ATTRIBUTES['BUSINESS_UNIT'],
-            LDAP_ATTRIBUTES['OFFICE'],
-            LDAP_ATTRIBUTES['COUNTRY']
-            ]
-        )
-    if conn.entries:
-        return conn.entries[0]
-    else:
-        add_error_notification(f"Active Directory connector: No LDAP entry found for user {username}")
+    try:
+        server = Server(LDAP_SERVER, port=LDAP_PORT, use_ssl=LDAP_SSL, get_info=ALL)
+        conn = Connection(server, LDAP_USER, LDAP_PWD, auto_bind=True)
+        conn.search(
+            LDAP_SEARCH_BASE,
+            '(sAMAccountName={})'.format(username),
+            attributes=[
+                LDAP_ATTRIBUTES['USER_NAME'],
+                LDAP_ATTRIBUTES['JOB_TITLE'],
+                LDAP_ATTRIBUTES['BUSINESS_UNIT'],
+                LDAP_ATTRIBUTES['OFFICE'],
+                LDAP_ATTRIBUTES['COUNTRY']
+                ]
+            )
+        
+        if conn.entries:
+            results = conn.entries[0]
+        else:
+            add_error_notification(f"Active Directory connector: No LDAP entry found for user {username}")
+            results = None
+        
+        # close connection
+        conn.unbind()
+        
+        return results
+    
+    except LDAPBindError as e:
+        add_error_notification(f"Active Directory connector: Failed to bind to LDAP server: Invalid credentials or DN: {e}")
+        return None
+
+    except LDAPException as e:
+        add_error_notification(f"Active Directory connector: An LDAP error occurred: {e}")
+        return None
+
+    except Exception as e:
+        add_error_notification(f"Active Directory connector: A general error occurred: {e}")
         return None
