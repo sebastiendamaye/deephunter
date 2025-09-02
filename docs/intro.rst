@@ -152,7 +152,7 @@ Because threat hunting analytics may become obsolete with time, or need to be up
 
 .. note::
 
-  Notice that bypassing the workflow logic and forcing statuses can be done via the admin panel, if necessary.
+  Notice that bypassing the workflow logic and forcing statuses can be done via the `admin panel <admin.html#bulk-actions>`_, if necessary.
 
 Statuses
 ========

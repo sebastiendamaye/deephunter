@@ -17,6 +17,7 @@ urlpatterns = [
     path('saved_searches/add/', views.saved_search_form, name='saved_search_form'),
     path('saved_searches/<int:search_id>/change/', views.saved_search_form, name='saved_search_form'),
     path('saved_searches/<int:search_id>/delete/', views.delete_saved_search, name='delete_saved_search'),
+    path('search-in-admin/', views.search_in_admin, name='search_in_admin'),
 
     path('timeline/', views.timeline, name='timeline'),
 

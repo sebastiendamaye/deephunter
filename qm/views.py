@@ -826,6 +826,25 @@ def delete_saved_search(request, search_id):
         return HttpResponseForbidden("You do not have permission to delete this saved search.")
 
 @login_required
+def search_in_admin(request):
+    """
+    Converts the list view search string into a search string compatible
+    with the admin backend (custom filters have been created in the admin)
+    """
+    search = request.GET['search']
+    search = search.replace('search=', 'q=')
+    search = search.replace('connectors=', 'connector=')
+    search = search.replace('repos=', 'repo=')
+    search = search.replace('categories=', 'category=')
+    search = search.replace('source_countries=', 'actors__source_country=')
+    search = search.replace('mitre_tactics=', 'mitre_techniques__mitre_tactic=')
+    search = search.replace('statuses=', 'status=')
+    #already seen
+    search = search.replace('maxhosts=1', 'maxhosts_count=greater_than_zero')
+    search = search.replace('queryerror=', 'query_error=')
+    return HttpResponseRedirect(f'/admin/qm/analytic/?not_status=ARCH&{search}')
+
+@login_required
 def db_totalnumberanalytics(request):
     analytics = Analytic.objects.exclude(status='ARCH')    
     

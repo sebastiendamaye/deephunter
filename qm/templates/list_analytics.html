@@ -32,11 +32,11 @@
 
 	<div>
 		{% if posted_search or posted_filters %}
-			<a href="/qm/listanalytics/" class="button">Reset filters</a>
 			<a href="/qm/saved_searches/add/?search={{ filtered_query_string }}" class="button">Save search</a>
+			<a href="/qm/search-in-admin/?search={{ filtered_query_string }}" class="button" title="Run the search in the admin interface">Search in admin</a>
 		{% endif %}
 	</div>
-	<div><h4>FILTERS</h4></div>
+	<div><h4>FILTERS {% if posted_search or posted_filters %}&nbsp;<a href="/qm/listanalytics/" class="button">Reset filters</a>{% endif %}</h4></div>
 	{% if posted_filters %}
 		<div id="divfilters">
 			{% if posted_filters.connectors %}

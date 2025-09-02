@@ -5,20 +5,112 @@ from connectors.models import Connector
 from django.contrib.admin.models import LogEntry
 from simple_history.admin import SimpleHistoryAdmin
 from django.conf import settings
+from datetime import datetime, timedelta
+from django.contrib import messages
 
 admin.site.site_title = 'DeepHunter_'
 admin.site.site_header = 'DeepHunter_'
 admin.site.index_title = 'DeepHunter_'
 
+class MaxHostsCountFilter(admin.SimpleListFilter):
+    title = 'Max Hosts Count'
+    parameter_name = 'maxhosts_count'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('zero', 'Equal to 0'),
+            ('greater_than_zero', 'Greater than 0'),
+        ]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == 'zero':
+            return queryset.filter(maxhosts_count=0)
+        if value == 'greater_than_zero':
+            return queryset.filter(maxhosts_count__gt=0)
+        return queryset
+
+class HitsLastCampaignFilter(admin.SimpleListFilter):
+    title = 'Hits for last campaign'
+    parameter_name = 'hits'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('1', 'yes'),
+            ('0', 'no'),
+        ]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+
+        # Get yesterday's date
+        yesterday = datetime.now() - timedelta(days=1)
+        yesterday_date = yesterday.date()  # Get the date part
+
+        if value == '1':
+            return queryset.filter(
+                snapshot__hits_count__gt=0,
+                snapshot__date=yesterday_date
+            ).distinct()
+        if value == '0':
+            return queryset.filter(
+                snapshot__hits_count=0,
+                snapshot__date=yesterday_date
+            ).distinct()
+        return queryset
+
+class AlreadySeenFilter(admin.SimpleListFilter):
+    title = 'Already seen'
+    parameter_name = 'alreadyseen'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('1', 'yes'),
+            ('0', 'no'),
+        ]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == '1':
+            return queryset.filter(last_time_seen__isnull=False)
+        if value == '0':
+            return queryset.filter(last_time_seen__isnull=True)
+        return queryset
+
+class NotStatusFilter(admin.SimpleListFilter):
+    title = 'Exclude Status'
+    parameter_name = 'not_status'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('DRAFT', 'Not Draft'),
+            ('PUB', 'Not Published'),
+            ('REVIEW', 'Not to be reviewed'),
+            ('PENDING', 'Not Pending'),
+            ('ARCH', 'Not Archived'),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.exclude(status=self.value())
+        return queryset
+    
 class AnalyticAdmin(SimpleHistoryAdmin):
-    list_display = ('name', 'update_date', 'created_by', 'status', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'query_error_date', 'maxhosts_count', 'connector', 'query', 'last_time_seen', 'repo')
-    list_filter = ['repo', 'status', 'created_by', 'category', 'confidence', 'relevance', 'run_daily', 'run_daily_lock', 'create_rule', 'maxhosts_count', 'dynamic_query', 'query_error', 'query_error_date', 'last_time_seen', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name', 'target_os', 'tags__name', 'connector']
+    list_display = ('name', 'update_date', 'created_by', 'status', 'category', 'confidence', 'relevance', 'run_daily',
+                    'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'query_error_date', 'maxhosts_count',
+                    'connector', 'query', 'last_time_seen', 'repo')
+    list_filter = ['repo', 'status', NotStatusFilter, 'created_by', 'category', 'confidence', 'relevance', 'run_daily',
+                   'run_daily_lock', 'create_rule', MaxHostsCountFilter, 'dynamic_query', 'query_error', 'query_error_date',
+                   'last_time_seen', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name',
+                   'actors__source_country', 'target_os', 'tags__name', 'connector', 'vulnerabilities',
+                   HitsLastCampaignFilter, AlreadySeenFilter]
     search_fields = ['name', 'description', 'notes', 'emulation_validation']
     filter_horizontal = ('mitre_techniques', 'threats', 'actors', 'target_os', 'vulnerabilities', 'tags')
     history_list_display = ['query']
     save_as = True
+    actions = ['update_status_draft', 'update_status_pub', 'update_status_review', 'update_status_arch', 'update_status_pending']
 
-    # Only show connectors that are flagged for TH analytics
+    # When creating or updating analytics, only show connectors that are flagged for TH analytics
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "connector":
             kwargs["queryset"] = Connector.objects.filter(domain="analytics")
@@ -29,6 +121,32 @@ class AnalyticAdmin(SimpleHistoryAdmin):
             # If the object is being created, set the created_by field to the current user
             obj.created_by = request.user
         return super().save_model(request, obj, form, change)
+
+    def update_status_draft(self, request, queryset):
+        updated_count = queryset.update(status='DRAFT')
+        self.message_user(request, f"{updated_count} analytics updated to DRAFT status.", messages.SUCCESS)
+    update_status_draft.short_description = "Mark selected entries as DRAFT."
+
+    def update_status_pub(self, request, queryset):
+        updated_count = queryset.update(status='PUB')
+        self.message_user(request, f"{updated_count} analytics updated to PUB status.", messages.SUCCESS)
+    update_status_pub.short_description = "Mark selected entries as PUB."
+
+    def update_status_review(self, request, queryset):
+        updated_count = queryset.update(status='REVIEW')
+        self.message_user(request, f"{updated_count} analytics updated to REVIEW status.", messages.SUCCESS)
+    update_status_review.short_description = "Mark selected entries as REVIEW."
+
+    def update_status_arch(self, request, queryset):
+        updated_count = queryset.update(status='ARCH')
+        self.message_user(request, f"{updated_count} analytics updated to ARCH status.", messages.SUCCESS)
+    update_status_arch.short_description = "Mark selected entries as ARCH."
+
+    def update_status_pending(self, request, queryset):
+        updated_count = queryset.update(status='PENDING')
+        self.message_user(request, f"{updated_count} analytics updated to PENDING status.", messages.SUCCESS)
+    update_status_pending.short_description = "Mark selected entries as PENDING."
+
 
 class SnapshotAdmin(admin.ModelAdmin):
     list_display = ('get_campaign', 'analytic__name', 'analytic__connector__name', 'date', 'runtime', 'hits_count', 'hits_endpoints','zscore_count', 'zscore_endpoints', 'anomaly_alert_count', 'anomaly_alert_endpoints',)

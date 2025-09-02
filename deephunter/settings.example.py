@@ -142,11 +142,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # Django plugins
     'django_extensions',
     'django.contrib.humanize',
-    'dbbackup', # django-dbbackup
+    'dbbackup',
     'django_markup',
     'simple_history',
+    
+    # DeepHunter apps
     'qm',
     'extensions',
     'reports',

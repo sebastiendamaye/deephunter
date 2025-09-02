@@ -60,3 +60,42 @@ Fields should be quite explicit, and it shouldn't be too complicated for you to 
 - You can create threat actors, threat names or vulnerabilities directly from a threat hunting analytic, by using the ``+`` icon on the right side of these fields.
 
 To clone an analytic, just edit the analytic you wish to clone, change its name, and click the "Save as new" button.
+
+Bulk actions
+************
+
+Native actions (UI)
+-------------------
+It is possible to perform bulk actions on multiple threat hunting analytics at once. To do this, select the desired analytics from the list view and choose an action from the **Actions** dropdown menu. The available actions include:
+
+- Delete analytics
+- Mark as Draft
+- Mark as Published
+- Mark as Under Review
+- Mark as Archived
+- Mark as Pending
+
+After selecting an action, click the **Go** button to apply the action to all selected analytics.
+
+.. image:: img/admin_bulk_actions.png
+  :alt: admin bulk actions
+
+Advanced actions (Django shell)
+-------------------------------
+For other actions, you may need to edit each analytic individually, or use the native Django shell, as depicted in the example below.
+
+First open the shell:
+
+.. code-block:: bash
+
+    $ source /data/venv/bin/activate
+    $ cd /data/deephunter
+    $ ./manage shell
+
+Once in the shell, you can run commands to interact with the database and perform actions on the threat hunting analytics. The example below shows how to disable the `run_daily` flag for analytics imported via the `deephunter_analytics` repository.
+
+.. code-block:: python
+
+    >>> repo = Repo.objects.get(name='deephunter_analytics')
+    >>> analytics = Analytic.objects.filter(repo=repo)
+    >>> analytics.update(run_daily=False)
