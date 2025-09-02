@@ -99,3 +99,11 @@ The checkbox acts as a toggle to switch between all saved searches or only saved
 
 .. image:: ../img/saved_searches.png
   :alt: saved searches
+
+Bulk actions
+************
+It is possible to perform bulk actions on multiple threat hunting analytics at once. To do this, do a search and click the **Search in admin** button. It will send the search to the admin panel where you will be able to do `bulk actions <../admin.html#bulk-actions>`_, including deleting analytics, and updating the status.
+
+.. image:: ../img/analytics_search_in_admin.png
+  :alt: analytics search in admin
+
