@@ -13,6 +13,7 @@ urlpatterns = [
     path('db_highestweightedscoretoday/', views.db_highestweightedscoretoday, name='db_highestweightedscoretoday'),
     path('db_analyticswitherrors/', views.db_analyticswitherrors, name='db_analyticswitherrors'),
     path('db_topendpointdistinctanalytics/', views.db_top_endpoint_distinct_analytics, name='db_top_endpoint_distinct_analytics'),
+    path('db_auto-disabled-analytics/', views.db_auto_disabled_analytics, name='db_auto_disabled_analytics'),
     path('db_analyticsbystatus/', views.db_analyticsbystatus, name='db_analyticsbystatus'),
     path('db_analyticsbyconnector/', views.db_analyticsbyconnector, name='db_analyticsbyconnector'),
     path('db_analyticsbyuser/', views.db_analyticsbyuser, name='db_analyticsbyuser'),

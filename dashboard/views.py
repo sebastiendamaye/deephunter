@@ -140,6 +140,15 @@ def db_top_endpoint_distinct_analytics(request):
     return HttpResponse(code)
 
 @login_required
+def db_auto_disabled_analytics(request):
+    analytics = Analytic.objects.filter(run_daily=0, maxhosts_count__gt=1).exclude(status='ARCH')
+    
+    code = f"""<h3>Auto-disabled analytics</h3>
+        <p class="num"><a href="/qm/listanalytics/?run_daily=0&maxhosts=1">{analytics.count()}</p>
+        """
+    return HttpResponse(code)
+
+@login_required
 def db_analyticsbystatus(request):
     status_breakdown = Analytic.objects.values('status').exclude(status='ARCH').annotate(count=Count('id'))
     context = { 'status_breakdown': status_breakdown, }
