@@ -403,3 +403,16 @@ def endpoints_most_analytics(request):
         'top_endpoints': page_obj,
     }
     return render(request, 'endpoints_most_analytics.html', context)
+
+@login_required
+def upcoming_analytic_reviews(request):
+    analytics = (
+        Analytic.objects
+        .filter(next_review_date__isnull=False)
+        .exclude(status='ARCH')
+        .values('next_review_date')
+        .annotate(count=Count('id'))
+        .order_by('next_review_date')
+    )
+    context = {'analytics': analytics}
+    return render(request, 'upcoming_analytic_reviews.html', context)

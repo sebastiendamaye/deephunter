@@ -11,4 +11,5 @@ urlpatterns = [
     path('query_error_table/', views.query_error_table, name='query_error_table'),
     path('rare_occurrences/', views.rare_occurrences, name='rare_occurrences'),
     path('endpoints_most_analytics/', views.endpoints_most_analytics, name='endpoints_most_analytics'),
+    path('upcoming-analytic-reviews/', views.upcoming_analytic_reviews, name='upcoming_analytic_reviews'),
 ]

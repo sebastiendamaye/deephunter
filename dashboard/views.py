@@ -156,3 +156,16 @@ def db_analyticsbyuser(request):
     analytics_breakdown = Analytic.objects.values('created_by__id', 'created_by__username').exclude(status='ARCH').annotate(count=Count('id'))
     context = { 'analytics_breakdown': analytics_breakdown, }
     return render(request, 'db_analyticsbyuser.html', context)        
+
+@login_required
+def db_analytics_reviews_workload(request):
+    analytics = (
+        Analytic.objects
+        .filter(next_review_date__isnull=False, next_review_date__lt=datetime.now()+timedelta(weeks=2))
+        .exclude(status='ARCH')
+        .values('next_review_date')
+        .annotate(count=Count('id'))
+        .order_by('next_review_date')
+    )
+    context = {'analytics': analytics}
+    return render(request, 'db_analytics_reviews_workload.html', context)

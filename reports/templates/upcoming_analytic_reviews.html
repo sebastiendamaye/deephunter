@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block style %}
+	<link rel="stylesheet" href="/static/css/list_analytics.css" />
+	<link rel="stylesheet" href="/static/css/stats.css" />
+{% endblock %}
+{% block js %}
+	<script src="/static/canvasjs/jquery.canvasjs.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="padaround">
+	<h1>Upcoming Analytics to review</h1>
+	<div id="analyticsReviewsWorkload_chartContainer" class="chartContainer"></div>
+</div>
+
+<script nonce="jK4hG2t713">
+
+$(document).ready(function() {
+
+	var options = {
+		animationEnabled: false,
+		axisX:{
+			valueFormatString: "DD MMM"
+		},
+		axisY:{
+			minimum: 0
+		},
+		toolTip:{
+			shared:true
+		},
+		data: [
+		{
+			type: "column",
+			showInLegend: true,
+			name: "",
+			markerType: "square",
+			xValueFormatString: "DD MMM, YYYY",
+			color: "#2596be",
+			yValueFormatString: "#,##0",
+			dataPoints: [
+				{% for analytic in analytics %}
+					{ x: new Date("{{ analytic.next_review_date|date:"Y-m-d" }}"), y: {{ analytic.count }} },
+				{% endfor %}
+			]
+		}
+		]
+	};
+
+	$("#analyticsReviewsWorkload_chartContainer").CanvasJSChart(options);
+
+});
+
+</script>
+
+
+{% endblock %}
