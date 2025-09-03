@@ -150,14 +150,14 @@
 			return false;
 		} else if (properties['group'] >= '1000') {
 			// Threats details
-			window.open('/threats/'+connectors[properties['item']]+'/{{ hostname }}/'+formatDate(properties['time'])+'/', '_blank');
+			window.open('/qm/threats/'+connectors[properties['item']]+'/{{ hostname }}/'+formatDate(properties['time'])+'/', '_blank');
 		} else {
 
 			var nodeID = properties['item'];
-			$('#link_events').attr('href', '/events/'+mygroups[properties['group']]+'/'+formatDate(properties['time'])+'/{{hostname}}/');
+			$('#link_events').attr('href', '/qm/events/'+mygroups[properties['group']]+'/'+formatDate(properties['time'])+'/{{hostname}}/');
 			
 			if (storylineid[nodeID] != '') {
-				$('#link_storylineid').attr('href', '/storyline/'+storylineid[nodeID]+'/'+formatDate(properties['time'])+'/');
+				$('#link_storylineid').attr('href', '/qm/storyline/'+storylineid[nodeID]+'/'+formatDate(properties['time'])+'/');
 				$('#link_storylineid').removeClass('disabled');
 			} else {
 				$('#link_storylineid').attr('href', '#');
@@ -165,7 +165,7 @@
 			}
 			
 			$('#link_admin').attr('href', '/admin/qm/analytic/'+mygroups[properties['group']]+'/change/');
-			$('#link_trend').attr('href', '/'+mygroups[properties['group']]+'/trend/');
+			$('#link_trend').attr('href', '/qm/'+mygroups[properties['group']]+'/trend/');
 
 			var x = properties.pageX+10;
 			var y = properties.pageY-150;

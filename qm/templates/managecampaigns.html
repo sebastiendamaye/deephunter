@@ -28,7 +28,7 @@
             <tbody>
                 {% for campaign in campaigns %}
                     <tr>
-                        <td><div hx-get="/regencampaignstatus/{{ campaign.name }}/" hx-trigger="load, every 2s"></div></td>
+                        <td><div hx-get="/qm/regencampaignstatus/{{ campaign.name }}/" hx-trigger="load, every 2s"></div></td>
                         <td>{{ campaign.name }}</td>
                         <td>{{ campaign.date_start }}</td>
                         <td>{{ campaign.date_end }}</td>

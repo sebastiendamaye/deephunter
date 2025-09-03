@@ -12,11 +12,12 @@ urlpatterns = [
     path('sso/', views.sso, name='sso'),
     path('authorize/', views.authorize, name='authorize'),
     re_path(r'^favicon\.ico$', favicon_view),
-    path('', include('qm.urls')),
+    path('', include('dashboard.urls')),
     path('qm/', include('qm.urls')),
     path('extensions/', include('extensions.urls')),
     path('reports/', include('reports.urls')),
     path('connectors/', include('connectors.urls')),
     path('repos/', include('repos.urls')),
     path('notifications/', include('notifications.urls')),
+    path('dashboard/', include('dashboard.urls')),
 ]

@@ -20,7 +20,7 @@ $(".toggle-row").click(function() {
 });
 
 $('.btn').click(function(){
-	$("#d_"+this.id.split('_')[1]).load("/"+this.id.split('_')[1]+"/detail/");
+	$("#d_"+this.id.split('_')[1]).load("/qm/"+this.id.split('_')[1]+"/detail/");
 });
 
 /* remove filter button */

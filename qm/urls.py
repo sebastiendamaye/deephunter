@@ -2,7 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.dashboards, name='dashboards'),
     path('listanalytics/', views.list_analytics, name='list_analytics'),
     path('<int:analytic_id>/trend/', views.trend, name='trend'),
     path('<int:analytic_id>/trend/<int:tab>/', views.trend, name='trend'),
@@ -35,20 +34,6 @@ urlpatterns = [
     path('managecampaigns/', views.managecampaigns, name='managecampaigns'),
     path('regencampaign/<str:campaign_name>/', views.regencampaign, name='regencampaign'),
     path('regencampaignstatus/<str:campaign_name>/', views.regencampaignstatus, name='regencampaignstatus'),
-
-    path('db_totalnumberanalytics/', views.db_totalnumberanalytics, name='db_totalnumberanalytics'),
-    path('db_analyticsrunintodaycampaign/', views.db_analyticsrunintodaycampaign, name='db_analyticsrunintodaycampaign'),
-    path('db_analyticsmatchingintodaycampaign/', views.db_analyticsmatchingintodaycampaign, name='db_analyticsmatchingintodaycampaign'),
-    path('db_analyticstoreview/', views.db_analyticstoreview, name='db_analyticstoreview'),
-    path('db_analyticspending/', views.db_analyticspending, name='db_analyticspending'),
-    path('db_archivedanalytics/', views.db_archivedanalytics, name='db_archivedanalytics'),
-    path('db_analyticsbystatus/', views.db_analyticsbystatus, name='db_analyticsbystatus'),
-    path('db_analyticsbyconnector/', views.db_analyticsbyconnector, name='db_analyticsbyconnector'),
-    path('db_analyticsbyuser/', views.db_analyticsbyuser, name='db_analyticsbyuser'),
-    path('db_runningtasks/', views.db_runningtasks, name='db_runningtasks'),
-    path('db_highestweightedscoretoday/', views.db_highestweightedscoretoday, name='db_highestweightedscoretoday'),
-    path('db_analyticswitherrors/', views.db_analyticswitherrors, name='db_analyticswitherrors'),
-    path('db_topendpointdistinctanalytics/', views.db_top_endpoint_distinct_analytics, name='db_top_endpoint_distinct_analytics'),
 
     path('edit_description_initial/<int:analytic_id>/', views.edit_description_initial, name='edit_description_initial'),
     path('edit_description_form/<int:analytic_id>/', views.edit_description_form, name='edit_description_form'),

@@ -157,6 +157,7 @@ INSTALLED_APPS = [
     'connectors',
     'repos',
     'notifications',
+    'dashboard',
 ]
 
 MIDDLEWARE = [
