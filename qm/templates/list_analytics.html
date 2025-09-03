@@ -466,12 +466,17 @@
 
 		<tr><td><div class="filter">Created by</div></td></tr>
 		<tr><td>
-			{% for user in created_by %}
 			<div class="form-check">
-				<input class="form-check-input" type="checkbox" id="checkcreatedby{{ user.id }}" name="created_by" value="{{ user.id }}"
-					{% if user.id|slugify in posted_filters.created_by %} checked{% endif %}>
-				<label class="form-check-label" for="checkcreatedby{{ user.id }}">{{ user.username }}</label>
+				<input class="form-check-input" type="checkbox" id="checkcreatedby0" name="created_by" value="0"
+					{% if 0|slugify in posted_filters.created_by %} checked{% endif %}>
+				<label class="form-check-label" for="checkcreatedby0">(empty)</label>
 			</div>
+			{% for user in created_by %}
+				<div class="form-check">
+					<input class="form-check-input" type="checkbox" id="checkcreatedby{{ user.id }}" name="created_by" value="{{ user.id }}"
+						{% if user.id|slugify in posted_filters.created_by %} checked{% endif %}>
+					<label class="form-check-label" for="checkcreatedby{{ user.id }}">{{ user.username }}</label>
+				</div>
 			{% endfor %}
 		</td></tr>		
 

@@ -114,6 +114,8 @@ def techniqueidtotitle(id):
 
 @register.filter
 def useridtoname(id):
+    if id == '0':
+        return '(empty)'
     v = get_object_or_404(User, pk=id)
     return v.username
 

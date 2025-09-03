@@ -22,7 +22,7 @@ from celery import current_app
 from qm.utils import get_campaign_date, get_available_statuses
 from urllib.parse import urlencode, quote
 from .forms import ReviewForm, EditAnalyticDescriptionForm, EditAnalyticNotesForm, EditAnalyticQueryForm, SavedSearchForm
-from notifications.utils import add_error_notification
+from notifications.utils import add_error_notification, add_debug_notification
 
 # Dynamically import all connectors
 import importlib
@@ -203,7 +203,22 @@ def list_analytics(request):
                 posted_filters['queryerror'] = 0
 
         if 'created_by' in request.GET:
-            analytics = analytics.filter(created_by__pk__in=request.GET.getlist('created_by'))
+            if '0' in request.GET.getlist('created_by'):
+                if len(request.GET.getlist('created_by')) > 1:
+                    # the empty user is selected in addition to other users
+                    listusers = request.GET.getlist('created_by')
+                    listusers.remove('0')
+                    analytics = analytics.filter(
+                        Q(created_by__pk__in=listusers)
+                        | Q(created_by__isnull=True)
+                        )
+                else:
+                    # only the empty user is selected
+                    analytics = analytics.filter(created_by__isnull=True)
+            else:
+                # only existing users are selected
+                analytics = analytics.filter(created_by__pk__in=request.GET.getlist('created_by'))
+            
             posted_filters['created_by'] = request.GET.getlist('created_by')
 
     # Exclude analytics that are archived
@@ -839,9 +854,9 @@ def search_in_admin(request):
     search = search.replace('source_countries=', 'actors__source_country=')
     search = search.replace('mitre_tactics=', 'mitre_techniques__mitre_tactic=')
     search = search.replace('statuses=', 'status=')
-    #already seen
     search = search.replace('maxhosts=1', 'maxhosts_count=greater_than_zero')
     search = search.replace('queryerror=', 'query_error=')
+    search = search.replace('created_by=0', 'created_by=null')
     return HttpResponseRedirect(f'/admin/qm/analytic/?not_status=ARCH&{search}')
 
 @login_required

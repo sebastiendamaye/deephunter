@@ -28,9 +28,9 @@
                 dataPoints: [
                     {% for analytic in analytics_breakdown %}
                         { y: {{ analytic.count }},
-                        name: "{{ analytic.created_by__username }}",
-                        id: "{{ analytic.created_by__id }}",
-                        click: function(e) { window.location='/qm/listanalytics/?created_by={{ analytic.created_by__id }}'; } },
+                        name: "{% if analytic.created_by__id == None %}(empty){% else %}{{ analytic.created_by__username }}{% endif %}",
+                        id: "{% if analytic.created_by__id == None %}0{% else %}{{ analytic.created_by__id }}{% endif %}",
+                        click: function(e) { window.location='/qm/listanalytics/?created_by={% if analytic.created_by__id == None %}0{% else %}{{ analytic.created_by__id }}{% endif %}'; } },
                     {% endfor %}
                 ]
             }],

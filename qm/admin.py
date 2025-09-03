@@ -7,6 +7,8 @@ from simple_history.admin import SimpleHistoryAdmin
 from django.conf import settings
 from datetime import datetime, timedelta
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.db import models
 
 admin.site.site_title = 'DeepHunter_'
 admin.site.site_header = 'DeepHunter_'
@@ -95,11 +97,33 @@ class NotStatusFilter(admin.SimpleListFilter):
             return queryset.exclude(status=self.value())
         return queryset
     
+class CreatedByFilter(admin.SimpleListFilter):
+    title = 'Created By'
+    parameter_name = 'created_by'
+
+    def lookups(self, request, model_admin):
+        users = get_user_model().objects.all()
+        lookups = [(str(user.pk), user.get_username()) for user in users]
+        lookups.append(('null', 'Is Null'))
+        return lookups
+
+    def queryset(self, request, queryset):
+        values = request.GET.getlist(self.parameter_name)
+        if not values:
+            return queryset
+        q = models.Q()
+        for v in values:
+            if v == 'null':
+                q |= models.Q(created_by__isnull=True)
+            else:
+                q |= models.Q(created_by__pk=v)
+        return queryset.filter(q)
+    
 class AnalyticAdmin(SimpleHistoryAdmin):
     list_display = ('name', 'update_date', 'created_by', 'status', 'category', 'confidence', 'relevance', 'run_daily',
                     'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'query_error_date', 'maxhosts_count',
                     'connector', 'query', 'last_time_seen', 'repo')
-    list_filter = ['repo', 'status', NotStatusFilter, 'created_by', 'category', 'confidence', 'relevance', 'run_daily',
+    list_filter = ['repo', 'status', NotStatusFilter, CreatedByFilter, 'category', 'confidence', 'relevance', 'run_daily',
                    'run_daily_lock', 'create_rule', MaxHostsCountFilter, 'dynamic_query', 'query_error', 'query_error_date',
                    'last_time_seen', 'mitre_techniques', 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name',
                    'actors__source_country', 'target_os', 'tags__name', 'connector', 'vulnerabilities',
@@ -125,27 +149,27 @@ class AnalyticAdmin(SimpleHistoryAdmin):
     def update_status_draft(self, request, queryset):
         updated_count = queryset.update(status='DRAFT')
         self.message_user(request, f"{updated_count} analytics updated to DRAFT status.", messages.SUCCESS)
-    update_status_draft.short_description = "Mark selected entries as DRAFT."
+    update_status_draft.short_description = "Mark selected entries as DRAFT"
 
     def update_status_pub(self, request, queryset):
         updated_count = queryset.update(status='PUB')
         self.message_user(request, f"{updated_count} analytics updated to PUB status.", messages.SUCCESS)
-    update_status_pub.short_description = "Mark selected entries as PUB."
+    update_status_pub.short_description = "Mark selected entries as PUB"
 
     def update_status_review(self, request, queryset):
         updated_count = queryset.update(status='REVIEW')
         self.message_user(request, f"{updated_count} analytics updated to REVIEW status.", messages.SUCCESS)
-    update_status_review.short_description = "Mark selected entries as REVIEW."
+    update_status_review.short_description = "Mark selected entries as REVIEW"
 
     def update_status_arch(self, request, queryset):
         updated_count = queryset.update(status='ARCH')
         self.message_user(request, f"{updated_count} analytics updated to ARCH status.", messages.SUCCESS)
-    update_status_arch.short_description = "Mark selected entries as ARCH."
+    update_status_arch.short_description = "Mark selected entries as ARCH"
 
     def update_status_pending(self, request, queryset):
         updated_count = queryset.update(status='PENDING')
         self.message_user(request, f"{updated_count} analytics updated to PENDING status.", messages.SUCCESS)
-    update_status_pending.short_description = "Mark selected entries as PENDING."
+    update_status_pending.short_description = "Mark selected entries as PENDING"
 
 
 class SnapshotAdmin(admin.ModelAdmin):
