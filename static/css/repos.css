@@ -1,4 +1,5 @@
-label {
+form.form label {
+    /* only apply to label inside forms with the class "form" */
     font-size: 14px;
     width: 80px;
     display: inline-block;

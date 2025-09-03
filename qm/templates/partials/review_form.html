@@ -1,7 +1,7 @@
 <div id="form-container_{{ analytic.id }}">
     {% if analytic.status == 'REVIEW' %}
         <p>This analytic has been running for {{ days_before_review }} days with the 'published' status and is pending for review.</p>
-        <form method="POST" 
+        <form class="form" method="POST" 
                 hx-post="{% url 'submit_review' analytic.id %}" 
                 hx-target="#form-container_{{ analytic.id }}" 
                 hx-swap="outerHTML">
