@@ -131,7 +131,7 @@ class Analytic(models.Model):
     ]
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True, help_text="Description, Markdown syntax")
-    repo = models.ForeignKey(Repo, on_delete=models.SET_NULL, null=True, blank=True, help_text="Repo this analytic has been created from")
+    repo = models.ForeignKey(Repo, on_delete=models.SET_NULL, null=True, blank=True, editable=False, help_text="Repo this analytic has been created from")
     notes = models.TextField(blank=True, help_text="Threat hunting notes, Markdown syntax")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     pub_date = models.DateTimeField(auto_now_add=True)
