@@ -104,11 +104,15 @@ def tacticidtotitle(id):
 
 @register.filter
 def techniqueidtoname(id):
+    if id == '0':
+        return '(empty)'
     v = get_object_or_404(MitreTechnique, pk=id)
     return v.mitre_id
 
 @register.filter
 def techniqueidtotitle(id):
+    if id == '0':
+        return '(empty)'
     v = get_object_or_404(MitreTechnique, pk=id)
     return v.name
 

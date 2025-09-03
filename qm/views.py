@@ -108,12 +108,27 @@ def list_analytics(request):
             posted_filters['threats'] = request.GET.getlist('threats')
         
         if 'mitre_techniques' in request.GET:
-            analytics = analytics.filter(
-                Q(mitre_techniques__pk__in=request.GET.getlist('mitre_techniques'))
-                | Q(mitre_techniques__mitre_technique__pk__in=request.GET.getlist('mitre_techniques'))
-            )
+            if '0' in request.GET.getlist('mitre_techniques'):
+                if len(request.GET.getlist('mitre_techniques')) > 1:
+                    # the empty MITRE technique is selected in addition to other techniques
+                    listtechniques = request.GET.getlist('mitre_techniques')
+                    listtechniques.remove('0')
+                    analytics = analytics.filter(
+                        Q(mitre_techniques__pk__in=request.GET.getlist('mitre_techniques'))
+                        | Q(mitre_techniques__mitre_technique__pk__in=request.GET.getlist('mitre_techniques'))
+                        | Q(mitre_techniques__isnull=True)
+                    )
+                else:
+                    # only the empty MITRE technique is selected
+                    analytics = analytics.filter(mitre_techniques__isnull=True)
+            else:
+                # only existing MITRE techniques are selected
+                analytics = analytics.filter(
+                    Q(mitre_techniques__pk__in=request.GET.getlist('mitre_techniques'))
+                    | Q(mitre_techniques__mitre_technique__pk__in=request.GET.getlist('mitre_techniques'))
+                )
             posted_filters['mitre_techniques'] = request.GET.getlist('mitre_techniques')
-        
+
         if 'mitre_tactics' in request.GET:
             analytics = analytics.filter(mitre_techniques__mitre_tactic__pk__in=request.GET.getlist('mitre_tactics'))
             posted_filters['mitre_tactics'] = request.GET.getlist('mitre_tactics')
@@ -849,6 +864,7 @@ def search_in_admin(request):
     search = search.replace('categories=', 'category=')
     search = search.replace('source_countries=', 'actors__source_country=')
     search = search.replace('mitre_tactics=', 'mitre_techniques__mitre_tactic=')
+    search = search.replace('mitre_techniques=0', 'mitre_techniques=null')
     search = search.replace('statuses=', 'status=')
     search = search.replace('maxhosts=1', 'maxhosts_count=greater_than_zero')
     search = search.replace('queryerror=', 'query_error=')

@@ -261,24 +261,6 @@ def endpoints(request):
     
     return render(request, 'endpoints.html', context)
 
-
-@login_required
-def missing_mitre(request):
-    # Number of analytics with unmapped MITRE techniques
-    q_unmapped = Analytic.objects.filter(mitre_techniques=None)
-    q_unmapped_count = q_unmapped.count()
-
-    # Number of analytics with MITRE techniques mapped
-    q_mapped_count = Analytic.objects.filter(~Q(mitre_techniques=None)).count()
-
-    context = {
-        'q_unmapped': q_unmapped,
-        'q_unmapped_count': q_unmapped_count,
-        'q_mapped_count': q_mapped_count
-        }
-    
-    return render(request, 'missing_mitre.html', context)
-
 @login_required
 def analytics_perfs(request):
     yesterday = datetime.now() - timedelta(days=1)

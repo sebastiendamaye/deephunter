@@ -301,12 +301,17 @@
 
 			<br />
 			<h5>Techniques</h5>
-			{% for technique in mitre_techniques %}
 			<div class="form-check">
-				<input class="form-check-input" type="checkbox" id="checktechnique{{ technique.id }}" name="mitre_techniques" value="{{ technique.id }}"
-					{% if technique.id|slugify in posted_filters.mitre_techniques %} checked{% endif %}>
-				<label class="form-check-label" for="checktechnique{{ technique.id }}" title="{{ technique.description }}">{{ technique }}</label>
+				<input class="form-check-input" type="checkbox" id="checktechnique0" name="mitre_techniques" value="0"
+					{% if 0|slugify in posted_filters.mitre_techniques %} checked{% endif %}>
+				<label class="form-check-label" for="checktechnique0">(empty)</label>
 			</div>
+			{% for technique in mitre_techniques %}
+				<div class="form-check">
+					<input class="form-check-input" type="checkbox" id="checktechnique{{ technique.id }}" name="mitre_techniques" value="{{ technique.id }}"
+						{% if technique.id|slugify in posted_filters.mitre_techniques %} checked{% endif %}>
+					<label class="form-check-label" for="checktechnique{{ technique.id }}" title="{{ technique.description }}">{{ technique }}</label>
+				</div>
 			{% endfor %}
 		</td></tr>
 
