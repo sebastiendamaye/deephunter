@@ -72,10 +72,33 @@ def db_highestweightedscoretoday(request):
     # Get the highest score
     highestweightedscore = qs.first()
     
-    code = f"""<h3>Highest weighted score today</h3>
-        <p class="num"><a href="/reports/endpoints">{highestweightedscore['total_weighted_score']}</p>
+    code = f"""<h3>Endpoint with highest weighted relevance today</h3>
+        <p class="num"><a href="/reports/endpoints/">{highestweightedscore['total_weighted_score']}</p>
         """
     return HttpResponse(code)
+
+@login_required
+def db_highest_weighted_score_all_campaigns(request):
+
+    highest_score = 0
+    campaigns = Campaign.objects.filter(name__startswith='daily_cron_')
+    for campaign in campaigns:
+        qs = Endpoint.objects.filter(
+            snapshot__campaign=campaign
+        ).values('hostname').annotate(
+            total_weighted_score=Sum(F('snapshot__analytic__weighted_relevance'))
+        ).order_by('-total_weighted_score')
+        highestweightedscore = qs.first()
+        if highestweightedscore:
+            highest_weighted_relevance = highestweightedscore['total_weighted_score']
+            if highest_weighted_relevance > highest_score:
+                highest_score = highest_weighted_relevance
+
+    code = f"""<h3>Enpoint with highest weighted relevance (all campaigns)</h3>
+        <p class="num"><a href="/reports/endpoints/">{highest_score}</p>
+        """
+    return HttpResponse(code)
+
 
 @login_required
 def db_analyticstoreview(request):
