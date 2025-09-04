@@ -221,12 +221,17 @@
 
 		<tr><td><div class="filter">Categories</div></td></tr>
 		<tr><td>
-			{% for category in categories %}
 			<div class="form-check">
-				<input class="form-check-input" type="checkbox" id="checkcategory{{ category.id }}" name="categories" value="{{ category.id }}"
-					{% if category.id|slugify in posted_filters.categories %} checked{% endif %}>
-				<label class="form-check-label" for="checkcategory{{ category.id }}" title="{{ category.description }}"">{{ category.name }}</label>
+				<input class="form-check-input" type="checkbox" id="checkcategory0" name="categories" value="0"
+					{% if 0|slugify in posted_filters.categories %} checked{% endif %}>
+				<label class="form-check-label" for="checkcategory0" title="No Category">(empty)</label>
 			</div>
+			{% for category in categories %}
+				<div class="form-check">
+					<input class="form-check-input" type="checkbox" id="checkcategory{{ category.id }}" name="categories" value="{{ category.id }}"
+						{% if category.id|slugify in posted_filters.categories %} checked{% endif %}>
+					<label class="form-check-label" for="checkcategory{{ category.id }}" title="{{ category.description }}"">{{ category.name }}</label>
+				</div>
 			{% endfor %}
 		</td></tr>
 

@@ -74,7 +74,21 @@ def list_analytics(request):
             posted_filters['repos'] = request.GET.getlist('repos')
 
         if 'categories' in request.GET:
-            analytics = analytics.filter(category__pk__in=request.GET.getlist('categories'))
+            if '0' in request.GET.getlist('categories'):
+                if len(request.GET.getlist('categories')) > 1:
+                    # the empty category is selected in addition to other categories
+                    listcategories = request.GET.getlist('categories')
+                    listcategories.remove('0')
+                    analytics = analytics.filter(
+                        Q(category__pk__in=listcategories)
+                        | Q(category__isnull=True)
+                    )
+                else:
+                    # only the empty category is selected
+                    analytics = analytics.filter(category__isnull=True)
+            else:
+                # only existing categories are selected
+                analytics = analytics.filter(category__pk__in=request.GET.getlist('categories'))
             posted_filters['categories'] = request.GET.getlist('categories')
 
         if 'target_os' in request.GET:
@@ -869,6 +883,7 @@ def search_in_admin(request):
     search = search.replace('search=', 'q=')
     search = search.replace('connectors=', 'connector=')
     search = search.replace('repos=', 'repo=')
+    search = search.replace('categories=0', 'category=null')
     search = search.replace('categories=', 'category=')
     search = search.replace('source_countries=', 'actors__source_country=')
     search = search.replace('mitre_tactics=', 'mitre_techniques__mitre_tactic=')

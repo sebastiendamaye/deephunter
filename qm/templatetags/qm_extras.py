@@ -49,6 +49,8 @@ def connectoridtoname(id):
 
 @register.filter
 def categoryidtoname(id):
+    if id == '0':
+        return '(empty)'
     v = get_object_or_404(Category, pk=id)
     return v.name
 

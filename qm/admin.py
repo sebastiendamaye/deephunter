@@ -141,12 +141,34 @@ class MitreTechniquesFilter(admin.SimpleListFilter):
                 q |= models.Q(mitre_techniques__pk=v)
         return queryset.filter(q)
 
+class CategoryFilter(admin.SimpleListFilter):
+    title = 'Category'
+    parameter_name = 'category'
+
+    def lookups(self, request, model_admin):
+        categories = Category.objects.all()
+        lookups = [(str(category.pk), category.name) for category in categories]
+        lookups.append(('null', 'Is Null'))
+        return lookups
+
+    def queryset(self, request, queryset):
+        values = request.GET.getlist(self.parameter_name)
+        if not values:
+            return queryset
+        q = models.Q()
+        for v in values:
+            if v == 'null':
+                q |= models.Q(category__isnull=True)
+            else:
+                q |= models.Q(category__pk=v)
+        return queryset.filter(q)
+
 
 class AnalyticAdmin(SimpleHistoryAdmin):
     list_display = ('name', 'update_date', 'created_by', 'status', 'category', 'confidence', 'relevance', 'run_daily',
                     'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'query_error_date', 'maxhosts_count',
                     'connector', 'query', 'last_time_seen', 'repo')
-    list_filter = ['repo', 'status', NotStatusFilter, CreatedByFilter, 'category', 'confidence', 'relevance', 'run_daily',
+    list_filter = ['repo', 'status', NotStatusFilter, CreatedByFilter, CategoryFilter, 'confidence', 'relevance', 'run_daily',
                    'run_daily_lock', 'create_rule', MaxHostsCountFilter, 'dynamic_query', 'query_error', 'query_error_date',
                    'last_time_seen', MitreTechniquesFilter, 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name',
                    'actors__source_country', 'target_os', 'tags__name', 'connector', 'vulnerabilities',
