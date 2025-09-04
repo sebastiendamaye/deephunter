@@ -152,7 +152,15 @@ def list_analytics(request):
             else:
                 analytics = analytics.filter(run_daily=False)
                 posted_filters['run_daily'] = 0
-            
+
+        if 'run_daily_lock' in request.GET:
+            if request.GET['run_daily_lock'] == '1':
+                analytics = analytics.filter(run_daily_lock=True)
+                posted_filters['run_daily_lock'] = 1
+            else:
+                analytics = analytics.filter(run_daily_lock=False)
+                posted_filters['run_daily_lock'] = 0
+
         if 'create_rule' in request.GET:
             if request.GET['create_rule'] == '1':
                 analytics = analytics.filter(create_rule=True)

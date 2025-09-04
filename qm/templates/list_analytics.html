@@ -130,7 +130,15 @@
 					<button class="button_filter" id="button_checkrundaily_0">RUN_DAILY:no&nbsp;&nbsp;<b>x</b></button>
 				{% endif %}
 			{% endif %}
-			
+
+			{% if posted_filters.run_daily_lock == 0 or posted_filters.run_daily_lock == 1 %}
+				{% if posted_filters.run_daily_lock|slugify == '1' %}
+					<button class="button_filter" id="button_checkrundaily_lock_1">RUN_DAILY_LOCK:yes&nbsp;&nbsp;<b>x</b></button>
+				{% else %}
+					<button class="button_filter" id="button_checkrundaily_lock_0">RUN_DAILY_LOCK:no&nbsp;&nbsp;<b>x</b></button>
+				{% endif %}
+			{% endif %}
+
 			{% if posted_filters.create_rule == 0 or posted_filters.create_rule == 1 %}
 				{% if posted_filters.create_rule|slugify == '1' %}
 					<button class="button_filter" id="button_checkcreaterule_1">CREATE_RULE:yes&nbsp;&nbsp;<b>x</b></button>
@@ -387,6 +395,19 @@
 				<input class="form-check-input" type="radio" id="checkrundaily0" name="run_daily" value="0"
 					{% if posted_filters.run_daily|slugify == '0' %} checked{% endif %} />
 				<label class="form-check-label" for="checkrundaily0">no</label>
+			</div>
+
+			<br />
+			<h5>Run daily lock</h5>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" id="checkrundailylock1" name="run_daily_lock" value="1"
+					{% if posted_filters.run_daily_lock|slugify == '1' %} checked{% endif %} />
+				<label class="form-check-label" for="checkrundailylock1">yes</label>
+			</div>
+			<div class="form-check">
+				<input class="form-check-input" type="radio" id="checkrundailylock0" name="run_daily_lock" value="0"
+					{% if posted_filters.run_daily_lock|slugify == '0' %} checked{% endif %} />
+				<label class="form-check-label" for="checkrundailylock0">no</label>
 			</div>
 
 			<br />
