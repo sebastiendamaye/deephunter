@@ -11,4 +11,5 @@ urlpatterns = [
     path('rare_occurrences/', views.rare_occurrences, name='rare_occurrences'),
     path('endpoints_most_analytics/', views.endpoints_most_analytics, name='endpoints_most_analytics'),
     path('upcoming-analytic-reviews/', views.upcoming_analytic_reviews, name='upcoming_analytic_reviews'),
+    path('highest_weighted_score/', views.highest_weighted_score, name='highest_weighted_score'),
 ]

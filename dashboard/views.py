@@ -95,7 +95,7 @@ def db_highest_weighted_score_all_campaigns(request):
                 highest_score = highest_weighted_relevance
 
     code = f"""<h3>Enpoint with highest weighted relevance (all campaigns)</h3>
-        <p class="num"><a href="/reports/endpoints/">{highest_score}</p>
+        <p class="num"><a href="/reports/highest_weighted_score/">{highest_score}</p>
         """
     return HttpResponse(code)
 

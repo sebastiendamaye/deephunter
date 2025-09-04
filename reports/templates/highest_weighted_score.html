@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block style %}
+	<link rel="stylesheet" href="/static/css/list_analytics.css" />
+	<link rel="stylesheet" href="/static/css/stats.css" />
+{% endblock %}
+{% block js %}
+	<script src="/static/canvasjs/jquery.canvasjs.min.js"></script>
+    <script src="/static/fontawesome/all.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="padaround">
+	<h1>Endpoints Highest Weighted Relevance over time</h1>
+	<div class="alert alert-info d-flex flex-row">
+		<div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+        <div class="notification-message">
+            <li>This graph shows the highest weighted relevance scores for endpoints over the daily campaigns.</li>
+			<li>The highest weighted relevance over all campaigns is shown in red.</li>
+			<li>Clicking on a bar will open the timeline view for the endpoint that has the highest weighted relevance score for the campaign.</li>
+        </div>
+	</div>
+	<div id="chart-container" class="chartContainer"></div>
+</div>
+
+<script nonce="jK4hG2t713">
+
+$(document).ready(function() {
+
+	var options = {
+		animationEnabled: false,
+		axisX:{
+			valueFormatString: "DD MMM"
+		},
+		axisY:{
+			minimum: 0
+		},
+		toolTip:{
+			shared:true
+		},
+		data: [
+		{
+			type: "column",
+			showInLegend: true,
+			name: "",
+			markerType: "square",
+			xValueFormatString: "DD MMM, YYYY",
+			color: "#2596be",
+			yValueFormatString: "#,##0.0",
+			dataPoints: [
+				{% for result in results %}
+					{
+						x: new Date("{{ result.date|date:"Y-m-d" }}"),
+						y: {{ result.highest_weighted_relevance }},
+						color: "{{ result.color }}",
+						hostname: "{{ result.hostname }}"
+					},
+				{% endfor %}
+			]
+		}
+		]
+	};
+
+	$("#chart-container").CanvasJSChart(options);
+	var chart = $("#chart-container").CanvasJSChart();
+	chart.options.data[0].click = function(e) {
+		if (e.dataPoint.hostname) {
+			var searchUrl = "/qm/timeline/?hostname=" + e.dataPoint.hostname;
+			window.open(searchUrl, "_blank");
+		}
+	};
+	chart.render();
+});
+
+</script>
+
+
+{% endblock %}

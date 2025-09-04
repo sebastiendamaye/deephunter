@@ -3,7 +3,7 @@ import json
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required, permission_required
 from django.utils import timezone
-from django.db.models import Q, Sum, Count
+from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta
 from qm.models import Analytic, Snapshot, Campaign, MitreTactic, MitreTechnique, Endpoint, Connector
@@ -398,3 +398,39 @@ def upcoming_analytic_reviews(request):
     )
     context = {'analytics': analytics}
     return render(request, 'upcoming_analytic_reviews.html', context)
+
+@login_required
+def highest_weighted_score(request):
+    results = []
+    highest_score = 0
+    campaigns = Campaign.objects.filter(name__startswith='daily_cron_').order_by('date_start')
+    for campaign in campaigns:
+        qs = Endpoint.objects.filter(
+            snapshot__campaign=campaign
+        ).values('hostname').annotate(
+            total_weighted_score=Sum(F('snapshot__analytic__weighted_relevance'))
+        ).order_by('-total_weighted_score')
+        highestweightedscore = qs.first()
+        if highestweightedscore:
+            highest_weighted_relevance = highestweightedscore['total_weighted_score']
+            hostname = highestweightedscore['hostname']
+        else:
+            highest_weighted_relevance = 0
+            hostname = ''
+        results.append({
+            "date": campaign.date_start,
+            "hostname": hostname,
+            "highest_weighted_relevance": highest_weighted_relevance,
+            "color": "#4661EE"  # Default color (light blue)
+            })
+
+    # Find the item with the highest score and give them the red color
+    max_score = max(int(item["highest_weighted_relevance"]) for item in results)
+    for item in results:
+        if int(item["highest_weighted_relevance"]) == max_score:
+            item["color"] = "#FF6961"  # Red color for the highest score
+
+    context = {
+        'results': results,
+    }
+    return render(request, 'highest_weighted_score.html', context)
