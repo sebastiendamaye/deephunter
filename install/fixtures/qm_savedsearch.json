@@ -1,1 +1,58 @@
-[{"model": "qm.savedsearch", "pk": 1, "fields": {"name": "Analytics to review", "description": "", "search": "statuses=REVIEW", "is_public": true, "is_locked": true, "created_by": null, "pub_date": "2025-08-04T15:11:11.381Z", "update_date": "2025-08-04T15:11:11.381Z"}}, {"model": "qm.savedsearch", "pk": 2, "fields": {"name": "Auto-disabled analytics", "description": "", "search": "run_daily=0&maxhosts=1", "is_public": true, "is_locked": true, "created_by": null, "pub_date": "2025-08-04T15:11:52.902Z", "update_date": "2025-08-04T15:11:52.903Z"}}, {"model": "qm.savedsearch", "pk": 3, "fields": {"name": "Zero occurrences", "description": "", "search": "alreadyseen=0", "is_public": true, "is_locked": true, "created_by": null, "pub_date": "2025-08-04T15:12:29.942Z", "update_date": "2025-08-04T17:47:43.421Z"}}]
+[
+    {
+        "model": "qm.savedsearch",
+        "pk": 1,
+        "fields": {
+            "name": "Analytics to review",
+            "description": "Analytics pending for review, either because they have not been reviewed yet, or because their last review is expired.",
+            "search": "statuses=REVIEW",
+            "is_public": true,
+            "is_locked": true,
+            "created_by": null,
+            "pub_date": "2025-08-04T15:11:11.381Z",
+            "update_date": "2025-08-04T18:06:50.741Z"
+        }
+    },
+    {
+        "model": "qm.savedsearch",
+        "pk": 2,
+        "fields": {
+            "name": "Auto-disabled analytics",
+            "description": "Analytics that have been automatically removed from future campaigns because they triggered errors, or generated too many results.",
+            "search": "run_daily=0&maxhosts=1",
+            "is_public": true,
+            "is_locked": true,
+            "created_by": null,
+            "pub_date": "2025-08-04T15:11:52.902Z",
+            "update_date": "2025-08-04T18:08:22.408Z"
+        }
+    },
+    {
+        "model": "qm.savedsearch",
+        "pk": 3,
+        "fields": {
+            "name": "Zero occurrences",
+            "description": "Analytics that have never been seen. This goes beyond the data retention.",
+            "search": "alreadyseen=0",
+            "is_public": true,
+            "is_locked": true,
+            "created_by": null,
+            "pub_date": "2025-08-04T15:12:29.942Z",
+            "update_date": "2025-08-04T18:07:36.305Z"
+        }
+    },
+    {
+        "model": "qm.savedsearch",
+        "pk": 4,
+        "fields": {
+            "name": "Missing MITRE mapping",
+            "description": "Analytics with missing MITRE information.",
+            "search": "mitre_techniques=0",
+            "is_public": true,
+            "is_locked": true,
+            "created_by": null,
+            "pub_date": "2025-08-04T15:12:29.942Z",
+            "update_date": "2025-08-04T18:07:36.305Z"
+        }
+    }
+]
