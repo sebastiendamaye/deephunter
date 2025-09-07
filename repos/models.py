@@ -21,6 +21,11 @@ class Repo(models.Model):
         if self.is_private and not self.token:
             raise ValidationError({'token': 'Token is mandatory for private repos.'})
 
+    class Meta:
+        permissions = [
+            ("check", "Can check a repo"),
+            ("import", "Can import analytics from a repo"),
+        ]
 
 class RepoAnalytic(models.Model):
     repo = models.ForeignKey(Repo, on_delete=models.CASCADE)

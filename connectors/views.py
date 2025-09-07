@@ -1,38 +1,32 @@
-from django.shortcuts import render, HttpResponse
-from .forms import ConnectorSelectForm, ConnectorConfFormSet
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect
+from .forms import ConnectorConfFormSet
 from connectors.models import Connector, ConnectorConf
+from django.contrib.auth.decorators import login_required, permission_required
 
+@login_required
+@permission_required('user.is_superuser', raise_exception=True)
 def connector_conf(request):
-    formset = None
-    connector = None
+    context = { 'connectors': Connector.objects.all() }
+    return render(request, "connector_conf.html", context)
+
+
+@login_required
+@permission_required('user.is_superuser', raise_exception=True)
+def selected_connector_settings(request, connector_id):
+    connector = get_object_or_404(Connector, pk=connector_id)
+    qs = ConnectorConf.objects.filter(connector=connector)
 
     if request.method == "POST":
-        # Try to get connector from POST (hidden field in formset form)
-        connector_id = request.POST.get('connector')
-        connector = None
-        if connector_id:
-            connector = Connector.objects.get(pk=connector_id)
-        form = ConnectorSelectForm(request.POST)
-        if connector:
-            qs = ConnectorConf.objects.filter(connector=connector)
-            if 'save_changes' in request.POST:
-                formset = ConnectorConfFormSet(request.POST, queryset=qs)
-                if formset.is_valid():
-                    formset.save()
-            else:
-                formset = ConnectorConfFormSet(queryset=qs)
-        else:
-            formset = None
+        formset = ConnectorConfFormSet(request.POST, queryset=qs)
+        if formset.is_valid():
+            formset.save()
+        return HttpResponseRedirect('/config/deephunter-settings/')
     
     else:
-        form = ConnectorSelectForm()
-        if 'connector' in request.GET:
-            connector = request.GET.get('connector')
-            qs = ConnectorConf.objects.filter(connector=connector)
-            formset = ConnectorConfFormSet(queryset=qs)
+        formset = ConnectorConfFormSet(queryset=qs)
 
-    return render(request, "connector_conf.html", {
-        "form": form,
+    return render(request, "selected_connector_settings.html", {
         "formset": formset,
         "connector": connector,
     })

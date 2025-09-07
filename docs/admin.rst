@@ -10,7 +10,7 @@ The database model
 
 * **Authentication and Authorization**
 
-  * **Groups**: List of groups (``manager`` and ``viewer``)
+  * **Groups**: List of local groups
   * **Users**: List of users (even if you are relying on PingID, a local copy of the user is kept in the database, in order to track user actions).
 
 * **Qm**

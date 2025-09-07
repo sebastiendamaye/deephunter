@@ -7,7 +7,7 @@
     </head>
     <body>
 
-        {% include "partials/review_form.html" %}
+        {% if perms.qm.add_review %}{% include "partials/review_form.html" %}{% endif %}
 
         <div id="table-container_{{ analytic.id }}"
             hx-get="{% url 'reviews_table' analytic.id %}"

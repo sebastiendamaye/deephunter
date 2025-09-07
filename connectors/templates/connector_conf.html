@@ -1,38 +1,23 @@
-{% extends "base.html" %}
-{% block style %}
-    <link rel="stylesheet" href="/static/css/connectors_conf.css" />
-{% endblock %}
+<div id="tabs_connectors">
+    <ul>
+        {% for connector in connectors %}
+            <li><a href="#connector_{{ connector.id }}"
+                hx-get="/connectors/selected-connector-settings/{{ connector.id }}/"
+                hx-target="#connector_{{ connector.id }}"
+                {% if forloop.first %}hx-trigger="load"{% endif %}>
+                <span>{{ connector.name }}</span></a></li>
+        {% endfor %}
+    </ul>
 
-{% block body %}
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Select Connector</button>
-</form>
+    {% for connector in connectors %}
+        <div id="connector_{{ connector.id }}"></div>
+    {% endfor %}
 
-{% if formset %}
-    <p>{{ connector.description }}</p>
-    <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="connector" value="{{ connector.pk }}">
-        {{ formset.management_form }}
-        <table>
-            <tr>
-                <th>Key</th>
-                <th>Value</th>
-            </tr>
-            {% for conf_form in formset %}
-                <tr>
-                {{ conf_form.id }}
-                {% for field in conf_form.visible_fields %}
-                    <td>
-                    {{ field }}
-                    </td>
-                {% endfor %}
-                </tr>
-            {% endfor %}
-        </table>
-        <button type="submit" name="save_changes" value="1">Save Changes</button>
-    </form>
-{% endif %}
-{% endblock %}
+</div>
+
+<script type="text/javascript" nonce="jg6kl5z3v2">
+	$(document).ready(function() {
+        $( "#tabs_connectors" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
+        $( "#tabs_connectors li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
+	});
+</script>

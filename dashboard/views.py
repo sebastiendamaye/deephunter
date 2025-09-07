@@ -6,19 +6,6 @@ from datetime import datetime, timedelta, timezone
 from qm.models import Analytic, Campaign, Endpoint, TasksStatus
 from django.http import HttpResponse
 
-"""
-PROXY = settings.PROXY
-STATIC_PATH = settings.STATIC_ROOT
-BASE_DIR = settings.BASE_DIR
-UPDATE_ON = settings.UPDATE_ON
-DB_DATA_RETENTION = settings.DB_DATA_RETENTION
-GITHUB_LATEST_RELEASE_URL = settings.GITHUB_LATEST_RELEASE_URL
-GITHUB_COMMIT_URL = settings.GITHUB_COMMIT_URL
-CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
-ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
-ANALYTICS_PER_PAGE = settings.ANALYTICS_PER_PAGE
-DAYS_BEFORE_REVIEW = settings.DAYS_BEFORE_REVIEW
-"""
 
 @login_required
 def dashboards(request):
@@ -26,6 +13,7 @@ def dashboards(request):
     return render(request, 'dashboards.html', context)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_totalnumberanalytics(request):
     analytics = Analytic.objects.exclude(status='ARCH')    
     
@@ -35,6 +23,7 @@ def db_totalnumberanalytics(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_analyticsrunintodaycampaign(request):
     campaign = get_object_or_404(Campaign, name='daily_cron_{}'.format(datetime.today().strftime('%Y-%m-%d')))
     
@@ -44,6 +33,7 @@ def db_analyticsrunintodaycampaign(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_analyticsmatchingintodaycampaign(request):
     yesterday = datetime.now() - timedelta(days=1)
     yesterday_date = yesterday.date()  # Get the date part
@@ -59,6 +49,7 @@ def db_analyticsmatchingintodaycampaign(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_endpoint', raise_exception=True)
 def db_highestweightedscoretoday(request):
 
     campaign = get_object_or_404(Campaign, name='daily_cron_{}'.format(datetime.today().strftime('%Y-%m-%d')))
@@ -78,6 +69,7 @@ def db_highestweightedscoretoday(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_endpoint', raise_exception=True)
 def db_highest_weighted_score_all_campaigns(request):
 
     highest_score = 0
@@ -101,6 +93,7 @@ def db_highest_weighted_score_all_campaigns(request):
 
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_analyticstoreview(request):
     analytics = Analytic.objects.filter(status='REVIEW')
     
@@ -110,6 +103,7 @@ def db_analyticstoreview(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_analyticspending(request):
     analytics = Analytic.objects.filter(status='PENDING')
     
@@ -119,6 +113,7 @@ def db_analyticspending(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_analyticswitherrors(request):
     analytics = Analytic.objects.filter(query_error=True).exclude(
         query_error_message__contains='"status":"FINISHED"').exclude(
@@ -131,6 +126,7 @@ def db_analyticswitherrors(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_archivedanalytics(request):
     analytics = Analytic.objects.filter(status='ARCH')
     
@@ -140,6 +136,7 @@ def db_archivedanalytics(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_tasksstatus', raise_exception=True)
 def db_runningtasks(request):
     tasks = TasksStatus.objects.all()
     
@@ -149,6 +146,7 @@ def db_runningtasks(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_endpoint', raise_exception=True)
 def db_top_endpoint_distinct_analytics(request):
     top_endpoints = (
         Endpoint.objects
@@ -163,6 +161,7 @@ def db_top_endpoint_distinct_analytics(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_auto_disabled_analytics(request):
     analytics = Analytic.objects.filter(run_daily=0, maxhosts_count__gt=1).exclude(status='ARCH')
     
@@ -172,24 +171,28 @@ def db_auto_disabled_analytics(request):
     return HttpResponse(code)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_analyticsbystatus(request):
     status_breakdown = Analytic.objects.values('status').exclude(status='ARCH').annotate(count=Count('id'))
     context = { 'status_breakdown': status_breakdown, }
     return render(request, 'db_analyticsbystatus.html', context)        
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_analyticsbyconnector(request):
     connector_breakdown = Analytic.objects.values('connector__id', 'connector__name').exclude(status='ARCH').annotate(count=Count('id'))
     context = { 'connector_breakdown': connector_breakdown, }
     return render(request, 'db_analyticsbyconnector.html', context)        
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def db_analyticsbyuser(request):
     analytics_breakdown = Analytic.objects.values('created_by__id', 'created_by__username').exclude(status='ARCH').annotate(count=Count('id'))
     context = { 'analytics_breakdown': analytics_breakdown, }
     return render(request, 'db_analyticsbyuser.html', context)        
 
 @login_required
+@permission_required('qm.view_review', raise_exception=True)
 def db_analytics_reviews_workload(request):
     analytics = (
         Analytic.objects

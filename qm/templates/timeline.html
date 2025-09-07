@@ -18,7 +18,7 @@
 	{% csrf_token %}
 	<div>
 		<input name="hostname" type="text" placeholder="Endpoint name" value="{{ hostname }}">
-		{% if hostname %}[<a href="/qm/netview?hostname={{ hostname }}" target="_blank">Send to Netview</a>]{% endif %}
+		{% if hostname and perms.qm.view_netview %}[<a href="/qm/netview?hostname={{ hostname }}" target="_blank">Send to Netview</a>]{% endif %}
 	</div>
 </form>
 

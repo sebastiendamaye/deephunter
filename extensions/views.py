@@ -16,6 +16,7 @@ for loader, module_name, is_pkg in pkgutil.iter_modules(plugins.__path__):
 PROXY = settings.PROXY
 
 @login_required
+@permission_required('extensions.view_extensions', raise_exception=True)
 def loldriverhashchecker(request):
 
     hashes = ''
@@ -42,6 +43,7 @@ def loldriverhashchecker(request):
     return render(request, 'loldriverhashchecker.html', context)
 
 @login_required
+@permission_required('extensions.view_extensions', raise_exception=True)
 def whois(request):
 
     ip = ''
@@ -60,6 +62,7 @@ def whois(request):
     return render(request, 'whois.html', context)
 
 @login_required
+@permission_required('extensions.view_extensions', raise_exception=True)
 def malwarebazaarhashchecker(request):
 
     hashes = ''
@@ -92,6 +95,7 @@ def malwarebazaarhashchecker(request):
     return render(request, 'malwarebazaarhashchecker.html', context)
 
 @login_required
+@permission_required('extensions.view_extensions', raise_exception=True)
 def vthashchecker(request):
 
     hashes = ''
@@ -126,6 +130,7 @@ def vthashchecker(request):
     return render(request, 'vthashchecker.html', context)
 
 @login_required
+@permission_required('extensions.view_extensions', raise_exception=True)
 def vtipchecker(request):
 
     ips = []

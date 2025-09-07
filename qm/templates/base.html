@@ -19,17 +19,17 @@
 </head>
 <body>
 
-    <!-- Notifications container -->
-    <div id="notifications" 
-         hx-get="{% url 'get_notifications' %}" 
-         hx-trigger="load, every 10s" 
-         hx-target="#notifications" 
-         hx-swap="none">
-        <!-- Notifications will be dynamically injected here -->
-    </div>
+<!-- Notifications container -->
+<div id="notifications" 
+		hx-get="/notifications/get_notifications/" 
+		hx-trigger="load, every 10s" 
+		hx-target="#notifications" 
+		hx-swap="none">
+	<!-- Notifications will be dynamically injected here -->
+</div>
 
-	<!-- contextual help marker-->
-	<a href="{{ request.get_full_path|gotodoc }}" class="help-marker" target="_blank" title="View help documentation">?</a>
+<!-- contextual help marker-->
+<a href="{{ request.get_full_path|gotodoc }}" class="help-marker" target="_blank" title="View help documentation">?</a>
 
 <section>
     <div class="rt-container">
@@ -44,49 +44,51 @@
 
 							<li><a href="#">Analytics</a>
 							<ul>
-								<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/" }}" href="/qm/listanalytics/">List analytics</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin/qm/analytic/add/">Create analytic</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/qm/saved_searches/" }}" href="/qm/saved_searches/">Saved searches</a></li>
+								{% if perms.qm.view_analytic %}<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/" }}" href="/qm/listanalytics/">List analytics</a></li>{% endif %}
+								{% if perms.qm.add_analytic %}<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin/qm/analytic/add/">Create analytic</a></li>{% endif %}
+								{% if perms.qm.view_savedsearch %}<li><a class="{{ request.path|isactiveurl:"/qm/saved_searches/" }}" href="/qm/saved_searches/">Saved searches</a></li>{% endif %}
 							</ul>        
 							</li>
 
-							<li><a class="{{ request.path|isactiveurl:"/qm/timeline/" }}" href="/qm/timeline/">Timeline</a></li>
-							<li><a class="{{ request.path|isactiveurl:"/qm/netview/" }}" href="/qm/netview/">Netview</a></li>
+							{% if perms.qm.view_timeline %}<li><a class="{{ request.path|isactiveurl:"/qm/timeline/" }}" href="/qm/timeline/">Timeline</a></li>{% endif %}
+							{% if perms.qm.view_netview %}<li><a class="{{ request.path|isactiveurl:"/qm/netview/" }}" href="/qm/netview/">Netview</a></li>{% endif %}
 
-							<li><a href="#">Reports</a>
-							<ul>
-								<li><a class="{{ request.path|isactiveurl:"/reports/campaigns_stats/" }}" href="/reports/campaigns_stats/">Campaigns stats</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/reports/analytics_perfs" }}" href="/reports/analytics_perfs/">Analytics perfs</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/reports/endpoints" }}" href="/reports/endpoints/">Endpoints in campaigns</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/reports/highest_weighted_score" }}" href="/reports/highest_weighted_score/">Highest weighted score</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/reports/endpoints_most_analytics" }}" href="/reports/endpoints_most_analytics/">Endpoints w/ most analytics</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/reports/mitre/" }}" href="/reports/mitre/">Current MITRE coverage</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/reports/query_error/" }}" href="/reports/query_error/">Analytics with errors</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/reports/rare_occurrences/" }}" href="/reports/rare_occurrences/">Rare occurrences</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/reports/archived_analytics/" }}" href="/admin/qm/analytic/?status__exact=ARCH">Archived analytics</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/reports/upcoming-analytic-reviews/" }}" href="/reports/upcoming-analytic-reviews/">Upcoming Analytic Reviews</a></li>
-							</ul>
-							</li>
+							{% if perms.qm.view_reports %}
+								<li><a href="#">Reports</a>
+								<ul>
+									{% if perms.qm.view_campaign %}<li><a class="{{ request.path|isactiveurl:"/reports/campaigns_stats/" }}" href="/reports/campaigns_stats/">Campaigns stats</a></li>{% endif %}
+									{% if perms.qm.view_campaign %}<li><a class="{{ request.path|isactiveurl:"/reports/analytics_perfs" }}" href="/reports/analytics_perfs/">Analytics perfs</a></li>{% endif %}
+									{% if perms.qm.view_endpoint %}<li><a class="{{ request.path|isactiveurl:"/reports/endpoints" }}" href="/reports/endpoints/">Endpoints in campaigns</a></li>{% endif %}
+									{% if perms.qm.view_campaign %}<li><a class="{{ request.path|isactiveurl:"/reports/highest_weighted_score" }}" href="/reports/highest_weighted_score/">Highest weighted score</a></li>{% endif %}
+									{% if perms.qm.view_endpoint %}<li><a class="{{ request.path|isactiveurl:"/reports/endpoints_most_analytics" }}" href="/reports/endpoints_most_analytics/">Endpoints w/ most analytics</a></li>{% endif %}
+									{% if perms.qm.view_analytic %}<li><a class="{{ request.path|isactiveurl:"/reports/mitre/" }}" href="/reports/mitre/">Current MITRE coverage</a></li>{% endif %}
+									{% if perms.qm.view_analytic %}<li><a class="{{ request.path|isactiveurl:"/reports/query_error/" }}" href="/reports/query_error/">Analytics with errors</a></li>{% endif %}
+									{% if perms.qm.view_analytic %}<li><a class="{{ request.path|isactiveurl:"/reports/rare_occurrences/" }}" href="/reports/rare_occurrences/">Rare occurrences</a></li>{% endif %}
+									<li><a class="{{ request.path|isactiveurl:"/reports/archived_analytics/" }}" href="/admin/qm/analytic/?status__exact=ARCH">Archived analytics</a></li>
+									{% if perms.qm.view_review %}<li><a class="{{ request.path|isactiveurl:"/reports/upcoming-analytic-reviews/" }}" href="/reports/upcoming-analytic-reviews/">Upcoming Analytic Reviews</a></li>{% endif %}
+								</ul>
+								</li>
+							{% endif %}
 
-							<li><a href="#">Tools</a>
-							<ul>
-								<li><a class="{{ request.path|isactiveurl:"/extensions/vthashchecker/" }}" href="/extensions/vthashchecker/">VirusTotal Hash Checker</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/extensions/vtipchecker/" }}" href="/extensions/vtipchecker/">VirusTotal IP Checker</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/extensions/malwarebazaarhashchecker/" }}" href="/extensions/malwarebazaarhashchecker/">MalwareBazaar Hash Check</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/extensions/loldriverhashchecker/" }}" href="/extensions/loldriverhashchecker/">LOL Driver Hash Checker</a></li>
-								<li><a class="{{ request.path|isactiveurl:"/extensions/whois/" }}" href="/extensions/whois/">Whois</a></li>
-							</ul>        
-							</li>
+							{% if perms.extensions.view_extensions %}
+								<li><a href="#">Tools</a>
+								<ul>
+									<li><a class="{{ request.path|isactiveurl:"/extensions/vthashchecker/" }}" href="/extensions/vthashchecker/">VirusTotal Hash Checker</a></li>
+									<li><a class="{{ request.path|isactiveurl:"/extensions/vtipchecker/" }}" href="/extensions/vtipchecker/">VirusTotal IP Checker</a></li>
+									<li><a class="{{ request.path|isactiveurl:"/extensions/malwarebazaarhashchecker/" }}" href="/extensions/malwarebazaarhashchecker/">MalwareBazaar Hash Check</a></li>
+									<li><a class="{{ request.path|isactiveurl:"/extensions/loldriverhashchecker/" }}" href="/extensions/loldriverhashchecker/">LOL Driver Hash Checker</a></li>
+									<li><a class="{{ request.path|isactiveurl:"/extensions/whois/" }}" href="/extensions/whois/">Whois</a></li>
+								</ul>        
+								</li>
+							{% endif %}
 
 							<li><a href="#">Admin</a>
 							<ul>
 								<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin">Admin interface</a></li>
-								{% if request.user.is_superuser %}
-									<li><a class="{{ request.path|isactiveurl:"/connectors/connectorconf/" }}" href="/connectors/connectorconf">Connectors</a></li>
-									<li><a class="{{ request.path|isactiveurl:"/qm/managecampaigns" }}" href="/qm/managecampaigns">Manage campaigns</a></li>
-									<li><a class="{{ request.path|isactiveurl:"/repos/listrepos/" }}" href="/repos/listrepos/">Manage repos</a></li>
-									<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin/qm/tasksstatus/">Running tasks</a></li>
-								{% endif %}
+								{% if perms.qm.view_campaign %}<li><a class="{{ request.path|isactiveurl:"/qm/managecampaigns" }}" href="/qm/managecampaigns">Manage campaigns</a></li>{% endif %}
+								{% if perms.repos.view_repo %}<li><a class="{{ request.path|isactiveurl:"/repos/listrepos/" }}" href="/repos/listrepos/">Manage repos</a></li>{% endif %}
+								{% if perms.qm.view_tasksstatus %}<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin/qm/tasksstatus/">Running tasks</a></li>{% endif %}
+								{% if request.user.is_superuser %}<li><a class="{{ request.path|isactiveurl:"/config/deephunter-settings/" }}" href="/config/deephunter-settings/">Settings</a></li>{% endif %}
 							</ul> 
 							</li>
 
@@ -115,50 +117,48 @@
 </section>
 
 
-
 {% block body %}{% endblock %}
 
 
-	<script nonce="k0bc3z4fg1">
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Toastr with default options (optional)
-            toastr.options = {
-                "closeButton": true,
-                "debug": false,
-                "newestOnTop": true,
-                "progressBar": true,
-                "positionClass": "toast-top-right", // Top right corner
-                "preventDuplicates": true,
-                "showDuration": "300", // Duration for showing the toast
-                "hideDuration": "1000", // Duration for hiding the toast
-                "timeOut": "5000", // Time before the toast disappears (5 seconds)
-                "extendedTimeOut": "1000"
-            };
-        });
+<script nonce="k0bc3z4fg1">
+	document.addEventListener('DOMContentLoaded', function() {
+		// Initialize Toastr with default options (optional)
+		toastr.options = {
+			"closeButton": true,
+			"debug": false,
+			"newestOnTop": true,
+			"progressBar": true,
+			"positionClass": "toast-top-right", // Top right corner
+			"preventDuplicates": true,
+			"showDuration": "300", // Duration for showing the toast
+			"hideDuration": "1000", // Duration for hiding the toast
+			"timeOut": "5000", // Time before the toast disappears (5 seconds)
+			"extendedTimeOut": "1000"
+		};
+	});
 
-let shownNotifications = new Set();
+	let shownNotifications = new Set();
 
-document.body.addEventListener('htmx:afterRequest', function(evt) {
-    if (evt.detail.target.id === "notifications") {
-        try {
-            let data = JSON.parse(evt.detail.xhr.responseText);
-            if (data.notifications) {
-                data.notifications.forEach(function(n) {
-                    if (!shownNotifications.has(n.id)) {
-                        toastr[n.level](n.message);
-                        shownNotifications.add(n.id);
-                    }
-                });
-            }
-        } catch (e) {
-			// Not JSON, ignore
-            //console.log(e);
-        }
-    }
-});
-    </script>
+	document.body.addEventListener('htmx:afterRequest', function(evt) {
+		if (evt.detail.target.id === "notifications") {
+			try {
+				let data = JSON.parse(evt.detail.xhr.responseText);
+				if (data.notifications) {
+					data.notifications.forEach(function(n) {
+						if (!shownNotifications.has(n.id)) {
+							toastr[n.level](n.message);
+							shownNotifications.add(n.id);
+						}
+					});
+				}
+			} catch (e) {
+				// Not JSON, ignore
+				//console.log(e);
+			}
+		}
+	});
 
-
+</script>
 
 </body>
 </html>

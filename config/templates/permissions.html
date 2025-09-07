@@ -1,0 +1,43 @@
+<div class="alert alert-info d-flex flex-row">
+    <div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+    <div class="notification-message">
+        Permission modifications are saved in real time (there is no submit button).
+    </div>
+</div>
+
+<div id="accordion">
+    {% for module in modules %}
+        <h3>{{ module.module }}</h3>
+        <div>
+            <table class="mitre">
+                <tr>
+                    <th>Action</th>
+                    {% for group in groups %}
+                        <th>{{ group }}</th>
+                    {% endfor %}
+                </tr>
+                {% for permission in module.permissions %}
+                    <tr>
+                        <td title="{{ permission.description }}">{{ permission.action }}</td>
+                        {% for group in permission.groups %}
+                            <td class="acenter"><input class="perm_checkbox"
+                                type="checkbox" {% if group.has_perm %}checked{% endif %}
+                                value="yes"
+                                hx-get="/config/update-permission/{{ group.group_id }}/{{ permission.permission_id }}/"
+                                hx-trigger="change" /></td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endfor %}
+</div>
+
+<script type="text/javascript" nonce="jg6kl5z3v2">
+    $( function() {
+        $( "#accordion" ).accordion({
+            collapsible: true,
+            heightStyle: "content"
+        });
+    } );
+</script>

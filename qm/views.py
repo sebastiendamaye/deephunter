@@ -48,6 +48,7 @@ DAYS_BEFORE_REVIEW = settings.DAYS_BEFORE_REVIEW
 
 
 @login_required
+@permission_required("qm.view_analytic", raise_exception=True)
 def list_analytics(request):
 
     analytics = Analytic.objects.all().order_by('id')
@@ -322,6 +323,7 @@ def list_analytics(request):
     return render(request, 'list_analytics.html', context)
     
 @login_required
+@permission_required("qm.view_snapshot", raise_exception=True)
 def trend(request, analytic_id, tab=0):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     # show graph for last 90 days only
@@ -361,6 +363,7 @@ def trend(request, analytic_id, tab=0):
     return render(request, 'trend.html', context)
 
 @login_required
+@permission_required("qm.view_analytic", raise_exception=True)
 def analyticdetail(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)    
     
@@ -391,6 +394,7 @@ def analyticdetail(request, analytic_id):
     return render(request, 'analytic_detail.html', context)
 
 @login_required
+@permission_required("qm.view_timeline", raise_exception=True)
 def timeline(request):
 
     hostname = ''
@@ -404,6 +408,7 @@ def timeline(request):
     return render(request, 'timeline.html', context)
 
 @login_required
+@permission_required("qm.view_timeline", raise_exception=True)
 def tl_timeline(request, hostname):
 
     groups = []
@@ -535,10 +540,11 @@ def tl_timeline(request, hostname):
         'storylineid_json': storylineid_json,
         'connectors_json': connectors_json,
         }
-    return render(request, 'tl_timeline.html', context)
+    return render(request, 'partials/tl_timeline.html', context)
 
 
 @login_required
+@permission_required("qm.view_timeline", raise_exception=True)
 def tl_host(request, hostname):
 
     machinedetails = {}
@@ -571,10 +577,11 @@ def tl_host(request, hostname):
         'business_unit': business_unit,
         'location': location,
         }
-    return render(request, 'tl_host.html', context)
+    return render(request, 'partials/tl_host.html', context)
 
 
 @login_required
+@permission_required("qm.view_timeline", raise_exception=True)
 def tl_ad(request, hostname):
 
     machinedetails = {}
@@ -586,9 +593,10 @@ def tl_ad(request, hostname):
     context = {
         'machinedetails': machinedetails,
         }
-    return render(request, 'tl_ad.html', context)
+    return render(request, 'partials/tl_ad.html', context)
 
 @login_required
+@permission_required("qm.view_timeline", raise_exception=True)
 def tl_apps(request, hostname):
 
     if is_connector_enabled('sentinelone'):
@@ -602,9 +610,10 @@ def tl_apps(request, hostname):
     context = {
         'apps': apps,
         }
-    return render(request, 'tl_apps.html', context)
+    return render(request, 'partials/tl_apps.html', context)
 
 @login_required
+@permission_required("qm.run_query", raise_exception=True)
 def events(request, analytic_id, eventdate=None, endpointname=None):
     """
     Redirect to the analytic link in the connector's data lake.
@@ -620,6 +629,7 @@ def threats(request, connector, endpointname, date):
     return HttpResponseRedirect(all_connectors.get(connector).get_redirect_threats_link(endpointname, date))
 
 @login_required
+@permission_required("qm.run_query", raise_exception=True)
 def storyline(request, storylineids, eventdate):
     """
     Redirect to Singularity DataLake in S1 with results related to the queried storyline ID(s).
@@ -628,7 +638,7 @@ def storyline(request, storylineids, eventdate):
     return HttpResponseRedirect(all_connectors.get('sentinelone').get_redirect_storyline_link(storylineids, eventdate))
 
 @login_required
-@permission_required("qm.delete_campaign")
+@permission_required("qm.change_snapshot", raise_exception=True)
 def regen(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
         
@@ -645,7 +655,7 @@ def regen(request, analytic_id):
     return HttpResponse('running...')
 
 @login_required
-@permission_required("qm.delete_campaign")
+@permission_required("qm.change_snapshot", raise_exception=True)
 def cancelregen(request, taskid):
     try:
         # without signal='SIGKILL', the task is not cancelled immediately
@@ -659,7 +669,6 @@ def cancelregen(request, taskid):
         return HttpResponse(f'Error terminating Celery Task: {e}')
 
 @login_required
-@permission_required("qm.delete_campaign")
 def progress(request, analytic_id):
     try:
         analytic = get_object_or_404(Analytic, pk=analytic_id)
@@ -671,13 +680,14 @@ def progress(request, analytic_id):
         return HttpResponse(f'<button hx-get="/qm/{analytic_id}/regen/" class="buttonred">Regenerate stats</button>')
 
 @login_required
-@permission_required("qm.delete_campaign")
+@permission_required("qm.delete_snapshot", raise_exception=True)
 def deletestats(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     Snapshot.objects.filter(analytic=analytic).delete()
     return HttpResponse('Stats deleted')
 
 @login_required
+@permission_required("qm.view_netview", raise_exception=True)
 def netview(request):
     debug = ''    
     ips = []
@@ -770,13 +780,14 @@ def about(request):
     return render(request, 'about.html', context)
 
 @login_required
+@permission_required("qm.view_campaign", raise_exception=True)
 def managecampaigns(request):
     campaigns = Campaign.objects.filter(name__startswith='daily_cron_').order_by('-name')
     context = {'campaigns': campaigns}
     return render(request, 'managecampaigns.html', context)
 
 @login_required
-@permission_required("qm.delete_campaign")
+@permission_required("qm.change_campaign", raise_exception=True)
 def regencampaign(request, campaign_name):
     campaign = get_object_or_404(Campaign, name=campaign_name)
     campaign_name = campaign.name
@@ -810,6 +821,7 @@ def regencampaignstatus(request, campaign_name):
         return HttpResponse(f'<button hx-get="/qm/regencampaign/{campaign_name}/" class="buttonred">Regenerate</button>')
 
 @login_required
+@permission_required("qm.view_savedsearch", raise_exception=True)
 def saved_searches(request):
     """
     Loads the saved searches page.
@@ -818,6 +830,7 @@ def saved_searches(request):
     return render(request, 'saved_searches.html', context)
 
 @login_required
+@permission_required("qm.view_savedsearch", raise_exception=True)
 def saved_searches_table(request):
     """
     Display saved searches for the current user.
@@ -831,6 +844,7 @@ def saved_searches_table(request):
     return render(request, 'partials/saved_searches_table.html', context)
 
 @login_required
+@permission_required("qm.add_savedsearch", raise_exception=True)
 def saved_search_form(request, search_id=None):
     if search_id:
         saved_search = get_object_or_404(SavedSearch, pk=search_id)
@@ -864,6 +878,7 @@ def saved_search_form(request, search_id=None):
     return render(request, "saved_search_form.html", context)
 
 @login_required
+@permission_required("qm.delete_savedsearch", raise_exception=True)
 def delete_saved_search(request, search_id):
     saved_search = get_object_or_404(SavedSearch, pk=search_id)
     # Only allow delete if owned by the user or (public and unlocked)
@@ -874,6 +889,7 @@ def delete_saved_search(request, search_id):
         return HttpResponseForbidden("You do not have permission to delete this saved search.")
 
 @login_required
+@permission_required("qm.bulk_update_analytics", raise_exception=True)
 def search_in_admin(request):
     """
     Converts the list view search string into a search string compatible
@@ -895,24 +911,27 @@ def search_in_admin(request):
     return HttpResponseRedirect(f'/admin/qm/analytic/?not_status=ARCH&{search}')
 
 @login_required
+@permission_required("qm.change_analytic", raise_exception=True)
 def edit_description_initial(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     context = {
         "analytic_description": analytic.description,
         "analytic_id": analytic.id
     }
-    return render(request, 'edit_description_initial.html', context)
+    return render(request, 'partials/edit_description_initial.html', context)
 
 @login_required
+@permission_required("qm.change_analytic", raise_exception=True)
 def edit_description_form(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     context = {
         "form": EditAnalyticDescriptionForm(initial={'description': analytic.description}),
         "analytic_id": analytic.id,
     }
-    return render(request, 'edit_description_form.html', context)
+    return render(request, 'partials/edit_description_form.html', context)
 
 @login_required
+@permission_required("qm.change_analytic", raise_exception=True)
 def edit_description_submit(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     if request.method == "POST":
@@ -920,28 +939,31 @@ def edit_description_submit(request, analytic_id):
         if form.is_valid():
             form.save()
         else:
-            return render(request, 'edit_description_form.html', {'analytic_id': analytic.id})
+            return render(request, 'partials/edit_description_form.html', {'analytic_id': analytic.id})
     return HttpResponseRedirect(f"/qm/edit_description_initial/{analytic.id}")
 
 @login_required
+@permission_required("qm.change_analytic", raise_exception=True)
 def edit_notes_initial(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     context = {
         "analytic_notes": analytic.notes,
         "analytic_id": analytic.id
     }
-    return render(request, 'edit_notes_initial.html', context)
+    return render(request, 'partials/edit_notes_initial.html', context)
 
 @login_required
+@permission_required("qm.change_analytic", raise_exception=True)
 def edit_notes_form(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     context = {
         "form": EditAnalyticNotesForm(initial={'notes': analytic.notes}),
         "analytic_id": analytic.id,
     }
-    return render(request, 'edit_notes_form.html', context)
+    return render(request, 'partials/edit_notes_form.html', context)
 
 @login_required
+@permission_required("qm.change_analytic", raise_exception=True)
 def edit_notes_submit(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     if request.method == "POST":
@@ -949,10 +971,11 @@ def edit_notes_submit(request, analytic_id):
         if form.is_valid():
             form.save()
         else:
-            return render(request, 'edit_notes_form.html', {'analytic_id': analytic.id})
+            return render(request, 'partials/edit_notes_form.html', {'analytic_id': analytic.id})
     return HttpResponseRedirect(f"/qm/edit_notes_initial/{analytic.id}")
 
 @login_required
+@permission_required("qm.change_analytic", raise_exception=True)
 def edit_query_initial(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     context = {
@@ -960,9 +983,10 @@ def edit_query_initial(request, analytic_id):
         "analytic_columns": analytic.columns,
         "analytic_id": analytic.id
     }
-    return render(request, 'edit_query_initial.html', context)
+    return render(request, 'partials/edit_query_initial.html', context)
 
 @login_required
+@permission_required("qm.change_analytic", raise_exception=True)
 def edit_query_form(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     context = {
@@ -974,9 +998,10 @@ def edit_query_form(request, analytic_id):
         ),
         "analytic_id": analytic.id,
     }
-    return render(request, 'edit_query_form.html', context)
+    return render(request, 'partials/edit_query_form.html', context)
 
 @login_required
+@permission_required("qm.change_analytic", raise_exception=True)
 def edit_query_submit(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     if request.method == "POST":
@@ -984,7 +1009,7 @@ def edit_query_submit(request, analytic_id):
         if form.is_valid():
             form.save()
         else:
-            return render(request, 'edit_query_form.html', {'analytic_id': analytic.id})
+            return render(request, 'partials/edit_query_form.html', {'analytic_id': analytic.id})
     return HttpResponseRedirect(f"/qm/edit_query_initial/{analytic.id}")
 
 @login_required
@@ -998,9 +1023,10 @@ def status_button(request, analytic_id):
         "analytic": analytic,
         "statuses": statuses,
     }
-    return render(request, 'status_button.html', context)
+    return render(request, 'partials/status_button.html', context)
 
 @login_required
+@permission_required("qm.change_analytic_status", raise_exception=True)
 def change_status(request, analytic_id, updated_status):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     
@@ -1021,15 +1047,17 @@ def change_status(request, analytic_id, updated_status):
     context = {
         "analytic": analytic,
     }
-    return render(request, 'status_button.html', context)
+    return render(request, 'partials/status_button.html', context)
 
 @login_required
+@permission_required("qm.delete_analytic", raise_exception=True)
 def delete_analytic(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     analytic.delete()
     return HttpResponseRedirect(reverse('list_analytics'))
 
 @login_required
+@permission_required("qm.view_analytic", raise_exception=True)
 def rundailycheckbox(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     if analytic.run_daily:
@@ -1040,7 +1068,8 @@ def rundailycheckbox(request, analytic_id):
     else:
         return HttpResponse('<img src="/static/admin/img/icon-no.svg" />')
 
-
+@login_required
+@permission_required("qm.view_review", raise_exception=True)
 def review_page(request, analytic_id):
     form = ReviewForm()
     analytic = get_object_or_404(Analytic, pk=analytic_id)
@@ -1054,6 +1083,7 @@ def review_page(request, analytic_id):
 
 
 @login_required
+@permission_required("qm.add_review", raise_exception=True)
 def submit_review(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     form = ReviewForm(request.POST)
@@ -1104,6 +1134,7 @@ def submit_review(request, analytic_id):
         })
             
 @login_required
+@permission_required("qm.view_review", raise_exception=True)
 def reviews_table(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     reviews = Review.objects.filter(analytic=analytic).order_by('-date')
@@ -1111,23 +1142,3 @@ def reviews_table(request, analytic_id):
         'analytic': analytic,
         'reviews': reviews,
     })
-
-
-@login_required
-def get_notifications(request):
-    # Since notifications are polled every 10s, we only want to show notifications
-    # that are younger than 10 seconds ago
-    usernotifications = UserNotification.objects.filter(
-        user=request.user,
-        is_read=False,
-        notification__created_at__gte=datetime.now() - timedelta(seconds=10)
-    ).order_by('-notification__created_at')
-    notifications_list = [
-        {
-            "id": n.id,
-            "message": n.notification.message,
-            "level": n.notification.level,
-        }
-        for n in usernotifications
-    ]
-    return JsonResponse({"notifications": notifications_list})

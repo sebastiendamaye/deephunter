@@ -31,6 +31,7 @@ RARE_OCCURRENCES_THRESHOLD = settings.RARE_OCCURRENCES_THRESHOLD
 ANALYTICS_PER_PAGE = settings.ANALYTICS_PER_PAGE
 
 @login_required
+@permission_required('qm.view_campaign', raise_exception=True)
 def campaigns_stats(request):
     stats = []
     seconds_in_day = 24 * 60 * 60
@@ -86,6 +87,7 @@ def campaigns_stats(request):
     return render(request, 'stats.html', context)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def mitre(request):
     max_score = 0
     json = """
@@ -198,6 +200,7 @@ def mitre(request):
     return render(request, 'mitre.html', context)
 
 @login_required
+@permission_required('qm.view_endpoint', raise_exception=True)
 def endpoints(request):
 
     # list of campaigns
@@ -262,6 +265,7 @@ def endpoints(request):
     return render(request, 'endpoints.html', context)
 
 @login_required
+@permission_required('qm.view_campaign', raise_exception=True)
 def analytics_perfs(request):
     yesterday = datetime.now() - timedelta(days=1)
     snapshots = Snapshot.objects.filter(date=yesterday).order_by('-runtime')
@@ -289,11 +293,13 @@ def analytics_perfs(request):
     return render(request, 'perfs.html', context)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def query_error(request):
     context = {}
     return render(request, 'query_error.html', context)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def query_error_table(request):
     analytics_with_errors = Analytic.objects.filter(query_error = True).exclude(status='ARCH').order_by('-query_error_date')
     include_info = request.GET.get('include_info', 'off') == 'on'  # Get checkbox value
@@ -329,6 +335,7 @@ def query_error_table(request):
 
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
 def rare_occurrences(request):
     analytics = (
         Endpoint.objects
@@ -368,6 +375,7 @@ def rare_occurrences(request):
 
 
 @login_required
+@permission_required('qm.view_endpoint', raise_exception=True)
 def endpoints_most_analytics(request):
     # Limited to first 300 endpoints with the most analytics
     top_endpoints = (
@@ -387,6 +395,7 @@ def endpoints_most_analytics(request):
     return render(request, 'endpoints_most_analytics.html', context)
 
 @login_required
+@permission_required('qm.view_review', raise_exception=True)
 def upcoming_analytic_reviews(request):
     analytics = (
         Analytic.objects
@@ -400,6 +409,7 @@ def upcoming_analytic_reviews(request):
     return render(request, 'upcoming_analytic_reviews.html', context)
 
 @login_required
+@permission_required('qm.view_campaign', raise_exception=True)
 def highest_weighted_score(request):
     results = []
     highest_score = 0

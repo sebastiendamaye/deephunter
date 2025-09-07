@@ -2,9 +2,6 @@ from django import forms
 from django.forms import modelformset_factory
 from .models import Connector, ConnectorConf
 
-class ConnectorSelectForm(forms.Form):
-    connector = forms.ModelChoiceField(queryset=Connector.objects.all(), label="Select Connector")
-
 class ConnectorConfForm(forms.ModelForm):
     class Meta:
         model = ConnectorConf

@@ -17,7 +17,7 @@
         <div class="notification-message">
             <li>This graph shows the highest weighted relevance scores for endpoints over the daily campaigns.</li>
 			<li>The highest weighted relevance over all campaigns is shown in red.</li>
-			<li>Clicking on a bar will open the timeline view for the endpoint that has the highest weighted relevance score for the campaign.</li>
+			{% if perms.qm.view_timeline %}<li>Clicking on a bar will open the timeline view for the endpoint that has the highest weighted relevance score for the campaign.</li>{% endif %}
         </div>
 	</div>
 	<div id="chart-container" class="chartContainer"></div>
@@ -62,6 +62,7 @@ $(document).ready(function() {
 	};
 
 	$("#chart-container").CanvasJSChart(options);
+	{% if perms.qm.view_timeline %}
 	var chart = $("#chart-container").CanvasJSChart();
 	chart.options.data[0].click = function(e) {
 		if (e.dataPoint.hostname) {
@@ -70,6 +71,7 @@ $(document).ready(function() {
 		}
 	};
 	chart.render();
+	{% endif %}
 });
 
 </script>

@@ -51,11 +51,12 @@ AUTH_TOKEN_MAPPING = {
     'groups': 'roles'
 }
 
-# To be granted access, users must be in one of these groups (viewer or manager)
-# Mapping between DeepHunter groups (viewer, manager) and your AD groups, or Entra ID roles
+# Mapping between DeepHunter groups (viewer, manager, threathunter, etc.) and your AD groups, or Entra ID roles (deephunterdev_usr, deephunterdev_pr, etc.)
+# To be granted access, users must be in one of these groups (you will need to manually create these groups in DeepHunter)
 USER_GROUPS_MEMBERSHIP = {
     'viewer': 'deephunterdev_usr',
-    'manager': 'deephunterdev_pr'
+    'manager': 'deephunterdev_pr',
+    'threathunter': 'deephunterdev_th',
 }
 
 # USER and GROUP. Used by deployment script to apply correct permissions
@@ -158,6 +159,7 @@ INSTALLED_APPS = [
     'repos',
     'notifications',
     'dashboard',
+    'config',
 ]
 
 MIDDLEWARE = [

@@ -204,6 +204,16 @@ class Analytic(models.Model):
         if self.has_changed():
             super().save(*args, **kwargs)
 
+    class Meta:
+        permissions = [
+            ("bulk_update_analytics", "Bulk actions on analytics"),
+            ("change_analytic_status", "Can change the status of analytics"),
+            ("run_query", "Can run queries"),
+            ("view_timeline", "Can view timeline"),
+            ("view_netview", "Can view netview"),
+            ("view_reports", "Can view reports"),
+        ]
+
 class Campaign(models.Model):
     name = models.CharField(max_length=250, unique=True)
     description = models.TextField(blank=True)

@@ -54,13 +54,34 @@ To use Entra ID:
 
 Groups and Privileges
 *********************
-Use the `authgroup fixture <install.html#install-initial-data>`_ to create necessary groups in the local database.
 
-Users are intended to be assigned to one of these local groups:
+Local and AD Groups
+===================
 
-- **viewer**: read-only user (all of the ``can_view`` permissions of the ``qm`` model). You can change default permissions if needed.
-- **manager**: write-access user (all permissions of the ``qm`` model).
+If you are relying on local authentication, you can create groups and assign privileges using the backend of DeepHunter.
 
-Note that administrators have the ``manager`` profile, with the ``Superuser status`` option enabled (automatically assigned during first login, based on the AD group the user belongs to, if you are relying in PingID).
+If you are relying on PingID or Entra ID, you need to create groups in the local database that will be mapped to the AD groups or Entra ID roles. Use the ``USER_GROUPS_MEMBERSHIP`` variable in the settings to do this mapping.
 
-In the settings, do the correct mapping for the ``USER_GROUPS_MEMBERSHIP`` variable.
+In the example below, the AD groups or Entra ID roles ``deephunterdev_usr``, ``deephunterdev_pr`` and ``deephunterdev_th`` are mapped to the local groups ``viewer``, ``manager`` and ``threathunter`` respectively.
+
+.. code-block:: python
+
+    USER_GROUPS_MEMBERSHIP = {
+        'viewer': 'deephunterdev_usr',
+        'manager': 'deephunterdev_pr',
+        'threathunter': 'deephunterdev_th',
+    }
+
+Privileges
+==========
+
+Privileges are assigned to groups. Use the User Interface to assign privileges to groups.
+
+.. image:: img/groups_permissions.png
+  :width: 800
+  :alt: DeepHunter groups and privileges
+
+settings
+========
+
+To access the settings, you'll need the superuser privileges. Either grant a user the ``superuser`` status, or use the ``admin`` account.

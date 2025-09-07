@@ -1,9 +1,14 @@
-input {
+#connector-form input {
     width: 350px;
     border: none;
+    font-size: 10pt;
 }
 
-textarea {
-    width: 1300px;
+#connector-form textarea {
+    width: 1200px;
     height: 30px;
+}
+
+#connector-conf-submit {
+    margin-top: 10px;
 }

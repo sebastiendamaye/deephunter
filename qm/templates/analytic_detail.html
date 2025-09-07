@@ -12,16 +12,16 @@
 <div id="tabs_{{ analytic.id }}">
 	<ul>
 		<li><a href="#details_{{ analytic.id }}"><span>Details</span></a></li>
-		<li><a href="#trend_{{ analytic.id }}" hx-get="/qm/{{ analytic.id }}/trend/1/" hx-target="#trend_{{ analytic.id }}"><span>Trend</span></a></li>
-		<li><a href="#review_{{ analytic.id }}" hx-get="/qm/review_page/{{ analytic.id }}/" hx-target="#review_{{ analytic.id }}"><span>Review</span></a></li>
+		{% if perms.qm.view_snapshot %}<li><a href="#trend_{{ analytic.id }}" hx-get="/qm/{{ analytic.id }}/trend/1/" hx-target="#trend_{{ analytic.id }}"><span>Trend</span></a></li>{% endif %}
+		{% if perms.qm.view_review %}<li><a href="#review_{{ analytic.id }}" hx-get="/qm/review_page/{{ analytic.id }}/" hx-target="#review_{{ analytic.id }}"><span>Review</span></a></li>{% endif %}
 	</ul>
 	<div id="details_{{ analytic.id }}">
 
 		<div class="m10">
-			<a href="/qm/events/{{ analytic.id }}/" target="_blank" class="button">Run query</a>
-			<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank" class="button">Edit in admin</a>
-			<a href="/admin/qm/analytic/{{ analytic.id }}/history/" target="_blank" class="button">History</a>
-			<span class="pad20"><a href="/qm/deleteanalytic/{{ analytic.id }}/" class="buttonred">Delete</a></span>
+			{% if perms.qm.run_query %}<a href="/qm/events/{{ analytic.id }}/" target="_blank" class="button">Run query</a>{% endif %}
+			{% if perms.qm.change_analytic %}<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank" class="button">Edit in admin</a>{% endif %}
+			{% if perms.qm.view_historicalanalytic %}<a href="/admin/qm/analytic/{{ analytic.id }}/history/" target="_blank" class="button">History</a>{% endif %}
+			{% if perms.qm.delete_analytic %}<span class="pad20"><a href="/qm/deleteanalytic/{{ analytic.id }}/" class="buttonred">Delete</a></span>{% endif %}
 		</div>
 
 		{% if endpoints %}
@@ -124,14 +124,11 @@
 
 	</div>
 
-	<div id="trend_{{ analytic.id }}">
-	</div>
-	
-	<div id="review_{{ analytic.id }}">
-	</div>
+	{% if perms.qm.view_snapshot %}<div id="trend_{{ analytic.id }}"></div>{% endif %}
+
+	{% if perms.qm.view_review %}<div id="review_{{ analytic.id }}"></div>{% endif %}
 
 </div>
-
 
 <script type="text/javascript" nonce="jg6kl5z3v2">
 	$(document).ready(function() {

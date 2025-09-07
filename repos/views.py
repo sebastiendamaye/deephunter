@@ -30,6 +30,7 @@ REPO_IMPORT_DEFAULT_STATUS = settings.REPO_IMPORT_DEFAULT_STATUS
 REPO_IMPORT_DEFAULT_RUN_DAILY = settings.REPO_IMPORT_DEFAULT_RUN_DAILY
 
 @login_required
+@permission_required("repos.view_repo", raise_exception=True)
 def list_repos(request):
     context = {"repos": Repo.objects.all()}
     return render(request, "list_repos.html", context)
@@ -48,6 +49,7 @@ def get_repo_import_info(request, repo_id):
     return render(request, "partials/repo_import_info.html", context)
 
 @login_required
+@permission_required("repos.import", raise_exception=True)
 def import_repo_select_analytics(request, repo_id):
     repo = get_object_or_404(Repo, pk=repo_id)
     if "github.com" in repo.url:
@@ -61,6 +63,7 @@ def import_repo_select_analytics(request, repo_id):
     return render(request, 'import_repo_select_analytics.html', context)
 
 @login_required
+@permission_required("repos.view_repo", raise_exception=True)
 def preview(request, url):
     # Add back padding if necessary
     padding = '=' * (-len(url) % 4)
@@ -72,12 +75,14 @@ def preview(request, url):
     return HttpResponse(results.json() if results.headers.get('Content-Type') == 'application/json' else results.text)
 
 @login_required
+@permission_required("repos.delete_repo", raise_exception=True)
 def delete_repo(request, repo_id):
     repo = get_object_or_404(Repo, pk=repo_id)
     repo.delete()
     return HttpResponseRedirect(reverse('list_repos'))
 
 @login_required
+@permission_required("repos.add_repo", raise_exception=True)
 def add_repo(request):
     if request.method == "POST":
         form = RepoForm(request.POST)
@@ -89,6 +94,7 @@ def add_repo(request):
     return render(request, 'add_repo.html', {'form': form})
 
 @login_required
+@permission_required("repos.change_repo", raise_exception=True)
 def edit_repo(request, repo_id):
     repo = get_object_or_404(Repo, pk=repo_id)
     form = RepoForm(instance=repo)
@@ -109,6 +115,7 @@ def edit_repo(request, repo_id):
     return render(request, 'add_repo.html', context)
 
 @login_required
+@permission_required("repos.view_repo", raise_exception=True)
 def report(request, repo_id):
     repo = get_object_or_404(Repo, pk=repo_id)
     
@@ -159,20 +166,24 @@ def import_repo(request, repo_id, mode):
         return HttpResponseRedirect(reverse('list_repos'))
 
 @login_required
-@permission_required("repo.change_repo")
 def progress_import_repo(request, repo_id):
     try:
         repo = get_object_or_404(Repo, pk=repo_id)
         celery_status = get_object_or_404(TasksStatus, taskname=f"import_repo_{repo.id}")
         button = f'<span><b>Task progress:</b> {round(celery_status.progress)}%'
-        button += f' | <button hx-get="/repos/cancel-import-repo/{celery_status.taskid}/" class="buttonred">CANCEL</button></span>'
+        if request.user.has_perm('repos.check') or request.user.has_perm('repos.import'):
+            button += f' | <button hx-get="/repos/cancel-import-repo/{celery_status.taskid}/" class="buttonred">CANCEL</button>'
+        button += '</span>'
         return HttpResponse(button)
     except:
-        return HttpResponse(f'<button hx-get="/repos/importrepo/{repo_id}/check/" class="button">check</button>'
-            + f'&nbsp;<a href="/repos/importreposelectanalytics/{repo_id}/" class="button">Import</a>')
+        buttons = ''
+        if request.user.has_perm('repos.check'):
+            buttons += f'<button hx-get="/repos/importrepo/{repo_id}/check/" class="button">check</button>&nbsp;'
+        if request.user.has_perm('repos.import'):
+            buttons += f'<a href="/repos/importreposelectanalytics/{repo_id}/" class="button">Import</a>'
+        return HttpResponse(buttons)
 
 @login_required
-@permission_required("repo.change_repo")
 def cancel_import_repo(request, taskid):
     try:
         # without signal='SIGKILL', the task is not cancelled immediately

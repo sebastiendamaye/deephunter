@@ -114,7 +114,7 @@ AUTH_TOKEN_MAPPING
 USER_GROUPS_MEMBERSHIP
 **********************
 - **Type**: Dictionary
-- **Description**: If you are relying on an external authentication provider (i.e., PingID or Entra ID), you'll need to assign your users to AD groups or Entra ID roles. This variable is used to map DeepHunter's permissions (viewer and manager keys on the left side, respectively for read-only and write accesses) with your groups/roles (values on the right side). Only change the values (on the right side), not the keys (on the left side).
+- **Description**: If you are relying on an external authentication provider (i.e., PingID or Entra ID), you'll need to assign your users to AD groups or Entra ID roles. This variable is used to map local groups with AD groups or Entra ID roles.
 
 - **Example**: 
 

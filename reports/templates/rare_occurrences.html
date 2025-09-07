@@ -27,14 +27,18 @@
         <td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
         <td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>
 		<td class="acenter">
-			[<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank">admin</a>]
-			[<a href="/qm/{{ analytic.id }}/trend/" target="_blank">stats</a>]
+			{% if perms.qm.change_analytic %}<a class="button" href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank">admin</a>{% endif %}
+			{% if perms.qm.view_snapshot %}<a class="button" href="/qm/{{ analytic.id }}/trend/" target="_blank">stats</a>{% endif %}
 		</td>
 		<td class="acenter">{{ analytic.distinct_hostnames }}</td>
 		<td>
 			{% if analytic.endpoints %}
 				{% for endpoint in analytic.endpoints %}
-					<a href="/qm/timeline?hostname={{ endpoint }}" target="_blank">{{ endpoint }}</a> |
+					{% if perms.qm.view_timeline %}
+						<a href="/qm/timeline?hostname={{ endpoint }}" target="_blank">{{ endpoint }}</a> |
+					{% else %}
+						{{ endpoint }} |
+					{% endif %}
 				{% endfor %}
 			{% endif %}
 		</td>

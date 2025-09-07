@@ -56,6 +56,4 @@ urlpatterns = [
     path('submit_review/<int:analytic_id>/', views.submit_review, name='submit_review'),
     path('reviews_table/<int:analytic_id>/', views.reviews_table, name='reviews_table'),
 
-    path('get_notifications/', views.get_notifications, name='get_notifications'),
-
 ]

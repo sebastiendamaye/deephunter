@@ -2,7 +2,6 @@ from authlib.integrations.django_client import OAuth
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
-import requests
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User, Group
@@ -74,11 +73,12 @@ def authorize(request):
             usergroups = token['userinfo'][AUTH_TOKEN_MAPPING['groups']]
     
     if usergroups:
-        refgroup_viewer = USER_GROUPS_MEMBERSHIP['viewer']
-        refgroup_manager = USER_GROUPS_MEMBERSHIP['manager']
+
+        # Search for matching groups
+        matching_groups = {k: v for k, v in USER_GROUPS_MEMBERSHIP.items() if v in usergroups}
 
         # if user is member of 1 of the reference groups, access granted
-        if refgroup_viewer in usergroups or refgroup_manager in usergroups:
+        if matching_groups:
             # we search if the user is already in the local DB
             user = User.objects.filter(username=token['userinfo'][AUTH_TOKEN_MAPPING['username']])
 
@@ -124,12 +124,8 @@ def authorize(request):
                 user.save()
                         
             # Add user to relevant group (viewer and/or manager)
-            if refgroup_manager in usergroups:
-                group = get_object_or_404(Group, name='manager')
-                group.user_set.add(user)
-
-            if refgroup_viewer in usergroups:
-                group = get_object_or_404(Group, name='viewer')
+            for matching_group in matching_groups:
+                group = get_object_or_404(Group, name=matching_group)
                 group.user_set.add(user)
             
             # login user

@@ -39,8 +39,8 @@
 		</tr>
 		<tr>
 			<td colspan="4">
-				[<a href="/qm/timeline?hostname={{ endpoint.hostname }}" target="_blank">Send to Timeline</a>]
-				[<a href="/qm/netview?hostname={{ endpoint.hostname }}" target="_blank">Send to Netview</a>]
+				{% if perms.qm.view_timeline %}<a class="button" href="/qm/timeline?hostname={{ endpoint.hostname }}" target="_blank">Send to Timeline</a>{% endif %}
+				{% if perms.qm.view_netview %}<a class="button" href="/qm/netview?hostname={{ endpoint.hostname }}" target="_blank">Send to Netview</a>{% endif %}
 				<table>
 					<tr>
 						<th class="w200">Connector</th>
@@ -58,9 +58,9 @@
 						<td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
 						<td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>
 						<td class="acenter">
-							[<a href="{{ analytic.xdrlink }}" target="_blank">events</a>]
-							[<a href="/qm/{{ analytic.analyticid }}/trend/" target="_blank">trend</a>]
-							[<a href="/admin/qm/analytic/{{ analytic.analyticid }}/change/" target="_blank">admin</a>]
+							{% if perms.qm.run_query %}<a class="button" href="{{ analytic.xdrlink }}" target="_blank">events</a>{% endif %}
+							{% if perms.qm.view_snapshot %}<a class="button" href="/qm/{{ analytic.analyticid }}/trend/" target="_blank">trend</a>{% endif %}
+							{% if perms.qm.change_analytic %}<a class="button" href="/admin/qm/analytic/{{ analytic.analyticid }}/change/" target="_blank">admin</a>{% endif %}
 							</td>
 					</tr>
 					{% endfor %}

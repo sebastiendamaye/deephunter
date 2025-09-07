@@ -23,7 +23,7 @@ To enable or disable plugins, go to the admin panel (``/admin/connectors/connect
 
 Settings
 ********
-You can configure each connector from the ``Admin > Connectors`` menu in DeepHunter.
+You can configure each connector from the ``Admin > Settings > Connectors`` menu in DeepHunter.
 
 .. image:: ../img/connector_settings.png
   :width: 800

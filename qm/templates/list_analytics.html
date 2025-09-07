@@ -32,8 +32,8 @@
 
 	<div>
 		{% if posted_search or posted_filters %}
-			<a href="/qm/saved_searches/add/?search={{ filtered_query_string }}" class="button">Save search</a>
-			<a href="/qm/search-in-admin/?search={{ filtered_query_string }}" class="button" title="Run the search in the admin interface">Search in admin</a>
+			{% if perms.qm.add_savedsearch %}<a href="/qm/saved_searches/add/?search={{ filtered_query_string }}" class="button">Save search</a>{% endif %}
+			{% if perms.qm.bulk_update_analytics %}<a href="/qm/search-in-admin/?search={{ filtered_query_string }}" class="button" title="Run the search in the admin interface">Search in admin</a>{% endif %}
 		{% endif %}
 	</div>
 	<div><h4>FILTERS {% if posted_search or posted_filters %}&nbsp;<a href="/qm/listanalytics/" class="button">Reset filters</a>{% endif %}</h4></div>
@@ -544,7 +544,9 @@
         <td><button id="b_{{ analytic.id }}" class="btn btn-default toggle-row"><i class="fa fa-chevron-right"></i></button></td>
         <td>{{ analytic.name }}</td>
 		<td>{{ analytic.connector.name }}</td>
-        <td class="acenter"><div id="analytic_status_{{ analytic.id }}" class="dropdown" hx-get="/qm/statusbutton/{{ analytic.id }}/" hx-trigger="load, every 10s"></div></td>
+        <td class="acenter">
+			<div id="analytic_status_{{ analytic.id }}" class="dropdown" hx-get="/qm/statusbutton/{{ analytic.id }}/" hx-trigger="load, every 10s"></div>
+		</td>
         <td class="acenter">{{ analytic.category.short_name }}</td>
         <td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
         <td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>

@@ -25,10 +25,8 @@
 				[<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank">edit in admin</a>]
 				[<a href="/admin/qm/endpoint/?snapshot__analytic__name={{ analytic.name }}" target="_blank">see endpoints</a>]
 			{% endif %}
-			{% if perms.qm.delete_campaign %}
-				<div class="progress"><a hx-get="/qm/{{ analytic.id }}/progress/" hx-trigger="load, every 3s"></a></div>&nbsp;
-				<div class="progress"><button hx-get="/qm/{{ analytic.id }}/deletestats/" class="buttonred">Delete stats</button></div>
-			{% endif %}
+			{% if perms.qm.change_snapshot %}<div class="progress"><a hx-get="/qm/{{ analytic.id }}/progress/" hx-trigger="load, every 3s"></a></div>&nbsp;{% endif %}
+			{% if perms.qm.delete_snapshot %}<div class="progress"><button hx-get="/qm/{{ analytic.id }}/deletestats/" class="buttonred">Delete stats</button></div>{% endif %}
 
 		</div>
 		<div class="paragraph"><b>#hits z-score threshold:</b> {{ analytic.anomaly_threshold_count }}</div>
@@ -61,7 +59,6 @@
 
 </div>
 
-{% if perms.qm.delete_campaign %}
 <script type="text/javascript" nonce="jg6kl5z3v2">
 $(document).ready(function() {
 
@@ -190,7 +187,6 @@ $(document).ready(function() {
 
 });
 </script>
-{% endif %}
 
 </body>
 </html>

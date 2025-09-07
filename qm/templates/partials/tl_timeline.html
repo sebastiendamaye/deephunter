@@ -33,10 +33,12 @@
 
 
 	<div id="contextMenu">
-		<a id="link_events" href="" target="_blank">Open events</a>
-		<a id="link_storylineid" href="" target="_blank">Open Storyline ID</a>
-		<a id="link_trend" href="" target="_blank">See trend</a>
-		<a id="link_admin" href="" target="_blank">Edit in admin</a>
+		{% if perms.qm.run_query %}
+			<a id="link_events" href="" target="_blank">Open events</a>
+			<a id="link_storylineid" href="" target="_blank">Open Storyline ID</a>
+		{% endif %}
+		{% if perms.qm.view_snapshot %}<a id="link_trend" href="" target="_blank">See trend</a>{% endif %}
+		{% if perms.qm.change_analytic %}<a id="link_admin" href="" target="_blank">Edit in admin</a>{% endif %}
 	</div>
 
 	<script type="text/javascript" nonce="jc3vgs67dm">

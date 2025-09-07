@@ -20,4 +20,5 @@ urlpatterns = [
     path('repos/', include('repos.urls')),
     path('notifications/', include('notifications.urls')),
     path('dashboard/', include('dashboard.urls')),
+    path('config/', include('config.urls')),
 ]
