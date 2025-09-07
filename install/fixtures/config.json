@@ -1,0 +1,406 @@
+[
+    {
+        "model": "config.module",
+        "pk": 1,
+        "fields": {
+            "name": "Dashboard"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 2,
+        "fields": {
+            "name": "Analytic"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 3,
+        "fields": {
+            "name": "Saved searches"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 4,
+        "fields": {
+            "name": "Analytics Review"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 5,
+        "fields": {
+            "name": "Campaigns"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 6,
+        "fields": {
+            "name": "Endpoints"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 7,
+        "fields": {
+            "name": "Timeline"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 8,
+        "fields": {
+            "name": "Netview"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 9,
+        "fields": {
+            "name": "Reports"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 10,
+        "fields": {
+            "name": "Tools"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 12,
+        "fields": {
+            "name": "Running tasks"
+        }
+    },
+    {
+        "model": "config.module",
+        "pk": 13,
+        "fields": {
+            "name": "Repos"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 1,
+        "fields": {
+            "module": 1,
+            "action": "View",
+            "description": "Access the dashboard screen (welcome screen)",
+            "permission": "dashboard.view_dashboard"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 2,
+        "fields": {
+            "module": 2,
+            "action": "View",
+            "description": "View the details of a threat hunting analytic",
+            "permission": "qm.view_analytic"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 3,
+        "fields": {
+            "module": 2,
+            "action": "Add",
+            "description": "Add new Threat Hunting analytics",
+            "permission": "qm.add_analytic"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 4,
+        "fields": {
+            "module": 2,
+            "action": "Delete",
+            "description": "Delete Threat Hunting analytics",
+            "permission": "qm.delete_analytic"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 5,
+        "fields": {
+            "module": 2,
+            "action": "Update",
+            "description": "Update a threat hunting analytic",
+            "permission": "qm.change_analytic"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 6,
+        "fields": {
+            "module": 2,
+            "action": "Bulk update",
+            "description": "Update the status of several Threat Hunting analytics",
+            "permission": "qm.bulk_update_analytics"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 7,
+        "fields": {
+            "module": 2,
+            "action": "Update status",
+            "description": "Update the status of a threat hunting analytic",
+            "permission": "qm.change_analytic_status"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 8,
+        "fields": {
+            "module": 2,
+            "action": "View trend/stats",
+            "description": "Access the statistics (trend) of a threat hunting analytic",
+            "permission": "qm.view_snapshot"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 9,
+        "fields": {
+            "module": 2,
+            "action": "Regenerate trend/stats",
+            "description": "Regenerate the statistics of a Threat Hunting analytic",
+            "permission": "qm.change_snapshot"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 10,
+        "fields": {
+            "module": 2,
+            "action": "Delete trend/stats",
+            "description": "Delete statistics on analytics",
+            "permission": "qm.delete_snapshot"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 11,
+        "fields": {
+            "module": 2,
+            "action": "Run query",
+            "description": "Ability to run the query of a threat hunting analytic",
+            "permission": "qm.run_query"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 12,
+        "fields": {
+            "module": 2,
+            "action": "View history",
+            "description": "View the history of a threat hunting analytic",
+            "permission": "qm.view_historicalanalytic"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 13,
+        "fields": {
+            "module": 3,
+            "action": "View",
+            "description": "Access saved searches",
+            "permission": "qm.view_savedsearch"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 14,
+        "fields": {
+            "module": 3,
+            "action": "Add",
+            "description": "Add a new saved search",
+            "permission": "qm.add_savedsearch"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 15,
+        "fields": {
+            "module": 3,
+            "action": "Change",
+            "description": "Change a saved search (if public or owner of a saved search)",
+            "permission": "qm.change_savedsearch"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 16,
+        "fields": {
+            "module": 3,
+            "action": "Delete",
+            "description": "Delete a saved search (if public or owner of a saved search)",
+            "permission": "qm.delete_savedsearch"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 17,
+        "fields": {
+            "module": 4,
+            "action": "View",
+            "description": "View the reviews of a threat hunting analytic",
+            "permission": "qm.view_review"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 18,
+        "fields": {
+            "module": 4,
+            "action": "Post review",
+            "description": "Post a review when a threat hunting is in PENDING status",
+            "permission": "qm.add_review"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 19,
+        "fields": {
+            "module": 5,
+            "action": "View",
+            "description": "View campaisgns",
+            "permission": "qm.view_campaign"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 20,
+        "fields": {
+            "module": 5,
+            "action": "Regenerate campaigns",
+            "description": "Regenerate a campaign (e.g. in case the cron job failed)",
+            "permission": "qm.change_campaign"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 21,
+        "fields": {
+            "module": 6,
+            "action": "View",
+            "description": "View endpoints (Endpoint report)",
+            "permission": "qm.view_endpoint"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 22,
+        "fields": {
+            "module": 7,
+            "action": "View",
+            "description": "Access the timeline module",
+            "permission": "qm.view_timeline"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 23,
+        "fields": {
+            "module": 8,
+            "action": "View",
+            "description": "Access the netview module",
+            "permission": "qm.view_netview"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 24,
+        "fields": {
+            "module": 9,
+            "action": "View",
+            "description": "View the reports menu",
+            "permission": "qm.view_reports"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 25,
+        "fields": {
+            "module": 10,
+            "action": "Access tools",
+            "description": "Access the tools menu",
+            "permission": "extensions.view_extensions"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 27,
+        "fields": {
+            "module": 12,
+            "action": "See running tasks",
+            "description": "Access the running tasks (% completion, status)",
+            "permission": "qm.view_tasksstatus"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 28,
+        "fields": {
+            "module": 13,
+            "action": "View",
+            "description": "View a repository",
+            "permission": "repos.view_repo"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 29,
+        "fields": {
+            "module": 13,
+            "action": "Add",
+            "description": "Add a repository",
+            "permission": "repos.add_repo"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 30,
+        "fields": {
+            "module": 13,
+            "action": "Update",
+            "description": "Update the details of a repository (e.g. URL)",
+            "permission": "repos.change_repo"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 31,
+        "fields": {
+            "module": 13,
+            "action": "Check",
+            "description": "Can check a repository",
+            "permission": "repos.check"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 32,
+        "fields": {
+            "module": 13,
+            "action": "Import",
+            "description": "Can import threat hunting analytics from a repository",
+            "permission": "repos.import"
+        }
+    },
+    {
+        "model": "config.modulepermission",
+        "pk": 33,
+        "fields": {
+            "module": 13,
+            "action": "Delete",
+            "description": "Delete a repository",
+            "permission": "repos.delete_repo"
+        }
+    }
+]
