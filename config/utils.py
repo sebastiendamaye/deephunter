@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Group, Permission
+import os
+import time
 
 def check_group_permission(group_name, permission):
     """
@@ -14,3 +16,9 @@ def check_group_permission(group_name, permission):
     if permission in group.permissions.all():
         return True
     return False
+
+def touch(filepath):
+    # If file exists, update its modification time
+    # If it doesn't exist, create it
+    with open(filepath, 'a'):
+        os.utime(filepath, None)
