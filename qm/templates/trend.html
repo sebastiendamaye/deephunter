@@ -31,7 +31,9 @@
 		</div>
 		<div class="paragraph"><b>#hits z-score threshold:</b> {{ analytic.anomaly_threshold_count }}</div>
 		<div><b>#endpoints z-score threshold:</b> {{ analytic.anomaly_threshold_endpoints }}</div>
-		<div class="paragraph"><b>Distinct endpoints: </b>{{ distinct_endpoints }}
+		<div class="paragraph">
+			<b>Last time seen: </b>{% if analytic.last_time_seen %}{{ analytic.last_time_seen }}{% else %}-{% endif %}
+			<br /><b>Distinct endpoints: </b>{{ distinct_endpoints }}
 			<br /><b>Top 10 endpoints</b>:
 			{% if endpoints %}
 				<ul>
