@@ -1,7 +1,12 @@
 {% load qm_extras %}
 
 {% if reviews %}
-    <table class="review">
+    <table class="mitre">
+        <tr>
+            <th>Date</th>
+            <th>Reviewer</th>
+            <th>Decision</th>
+            <th>Comments</th>
         {% for review in reviews %}
             <tr>
                 <td>{{ review.date|date:"M. j, Y" }}</td>
