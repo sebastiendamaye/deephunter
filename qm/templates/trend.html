@@ -177,7 +177,7 @@ $(document).ready(function() {
 			yValueFormatString: "#,##0",
 			dataPoints: [
 				{% for s in stats %}
-					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_endpoints }}, click: function(e) { open('/events/{{ analytic.id }}/{{ s.date|date:"Y-m-d" }}/', '_blank'); } },
+					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_endpoints }}, click: function(e) { open('/qm/events/{{ analytic.id }}/{{ s.date|date:"Y-m-d" }}/', '_blank'); } },
 				{% endfor %}
 			]
 		}]
