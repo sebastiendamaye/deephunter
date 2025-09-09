@@ -1,3 +1,4 @@
+<h3>Analytics by status</h3>
 {% load dashboard_extras %}
 <div id="analyticsByStatus_chartContainer" class="chartContainer"></div>
 <script nonce="klf4do97jh">
@@ -8,15 +9,6 @@
     $(document).ready(function() {
 
         var chart = new CanvasJS.Chart("analyticsByStatus_chartContainer", {
-            backgroundColor: "#f9f9f9",
-            title:{
-                text: "Analytics by status",
-                fontSize: 17,
-                fontColor: "#858383",
-                fontWeight: "normal",
-                fontFamily: "Arial",
-                horizontalAlign: "center"
-            },
             data: [{
                 type: "doughnut",
                 startAngle: 270,

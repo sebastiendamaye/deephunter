@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'Roboto';
+  src: url('../webfonts/roboto-v49-latin-regular.woff2') format('woff2');
+  font-style: normal;
+}
+
 .container_widgets {
   display: flex;
   width: 100%;
@@ -13,7 +19,7 @@ div.widget_number {
     padding: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    background-color: #f9f9f9;
+    background-color: #fff;
 }
 
 div.widget_number img {
@@ -22,22 +28,52 @@ div.widget_number img {
 }
 
 div.widget_number h3 {
-    font-size: 1em; /*0.7em*/
+    font-size: 0.9em; /*0.7em*/
     margin-bottom: 10px;
     text-align: center;
-    color: #858383;
+    color: #a1a1a1;
+    font-family: "Roboto", sans-serif;
+    font-weight: 700;
+}
+div.widget_chart h3{
+    padding-top: 10px;
+    font-size: 0.9em; /*0.7em*/
+    margin-bottom: 10px;
+    text-align: center;
+    color: #a1a1a1;
+    font-family: "Roboto", sans-serif;
+    font-weight: 700;
 }
 
 p.num {
+
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 900;
     font-size: 2.5em;
     text-align: center;
-    font-weight: bold;
+    color: #303030;
 }
 
 p.num a {
     text-decoration: none;
-    color: #333;
+    color: #303030;
 }
+
+p.compare_plus {
+    font-size: 0.9em;
+    color: rgba(10, 156, 10, 0.801);
+    text-align: center;
+    font-weight: bold;
+}
+
+p.compare_minus {
+    font-size: 0.9em;
+    color: rgba(209, 49, 0, 0.801);
+    text-align: center;
+    font-weight: bold;
+}
+
 
 div.widget_chart {
     display: grid;
@@ -51,11 +87,11 @@ div.widget_chart {
     padding: 0px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    background-color: #f9f9f9;
+    background-color: #fff;
 }
 
 div.chartContainer {
-    width: 450px; /* div.widget_chart - 10 */
-    height: 290px; /* div.widget_chart - 10 */
+    width: 432px; /* div.widget_chart - 40 */
+    height: 260px; /* div.widget_chart - 40 */
     padding: 0px;
 }

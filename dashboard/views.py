@@ -17,19 +17,23 @@ def dashboards(request):
 def db_totalnumberanalytics(request):
     analytics = Analytic.objects.exclude(status='ARCH')    
     
-    code = f"""<h3>Total number of analytics</h3>
-        <p class="num"><a href="/qm/listanalytics/">{analytics.count()}</a></p>
-        """
+    code = "<h3>Total number of analytics</h3>"
+    code += f'<p class="num"><a href="/qm/listanalytics/">{analytics.count()}</a></p>'
     return HttpResponse(code)
 
 @login_required
 @permission_required('qm.view_analytic', raise_exception=True)
 def db_analyticsrunintodaycampaign(request):
-    campaign = get_object_or_404(Campaign, name='daily_cron_{}'.format(datetime.today().strftime('%Y-%m-%d')))
+    campaign_today = get_object_or_404(Campaign, name='daily_cron_{}'.format(datetime.today().strftime('%Y-%m-%d')))
+    campaign_yesterday = get_object_or_404(Campaign, name='daily_cron_{}'.format((datetime.today()-timedelta(days=1)).strftime('%Y-%m-%d')))
     
-    code = f"""<h3>Analytics run in today's campaign</h3>
-        <p class="num"><a href="/qm/listanalytics/?run_daily=1">{campaign.nb_queries}</p>
-        """
+    code = "<h3>Analytics run in today's campaign</h3>"
+    code += f'<p class="num"><a href="/qm/listanalytics/?run_daily=1">{campaign_today.nb_queries}</a></p>'
+    delta = campaign_today.nb_queries - campaign_yesterday.nb_queries
+    if delta < 0:
+        code += f'<p class="compare_minus"><i class="fa-solid fa-arrow-down"></i> -{delta} (yesterday)</p>'
+    else:
+        code += f'<p class="compare_plus"><i class="fa-solid fa-arrow-up"></i> +{delta} (yesterday)</p>'
     return HttpResponse(code)
 
 @login_required
@@ -37,15 +41,25 @@ def db_analyticsrunintodaycampaign(request):
 def db_analyticsmatchingintodaycampaign(request):
     yesterday = datetime.now() - timedelta(days=1)
     yesterday_date = yesterday.date()  # Get the date part
-
-    analytics = Analytic.objects.filter(
+    analytics_yesterday = Analytic.objects.filter(
         snapshot__hits_count__gt=0,
         snapshot__date=yesterday_date
     ).distinct()
-    
-    code = f"""<h3>Analytics triggered in last campaign</h3>
-        <p class="num"><a href="/qm/listanalytics/?hits=1">{analytics.count()}</p>
-        """
+
+    before_yesterday = datetime.now() - timedelta(days=2)
+    before_yesterday_date = before_yesterday.date()  # Get the date part
+    analytics_before_yesterday = Analytic.objects.filter(
+        snapshot__hits_count__gt=0,
+        snapshot__date=before_yesterday_date
+    ).distinct()
+
+    code = "<h3>Analytics triggered in last campaign</h3>"
+    code += f'<p class="num"><a href="/qm/listanalytics/?hits=1">{analytics_yesterday.count()}</a></p>'
+    delta = analytics_yesterday.count() - analytics_before_yesterday.count()
+    if delta < 0:
+        code += f'<p class="compare_minus"><i class="fa-solid fa-arrow-down"></i> -{delta} (yesterday)</p>'
+    else:
+        code += f'<p class="compare_plus"><i class="fa-solid fa-arrow-up"></i> +{delta} (yesterday)</p>'
     return HttpResponse(code)
 
 @login_required
@@ -64,7 +78,7 @@ def db_highestweightedscoretoday(request):
     highestweightedscore = qs.first()
     
     code = f"""<h3>Endpoint with highest weighted relevance today</h3>
-        <p class="num"><a href="/reports/endpoints/">{highestweightedscore['total_weighted_score']}</p>
+        <p class="num"><a href="/reports/endpoints/">{highestweightedscore['total_weighted_score']}</a></p>
         """
     return HttpResponse(code)
 
@@ -87,7 +101,7 @@ def db_highest_weighted_score_all_campaigns(request):
                 highest_score = highest_weighted_relevance
 
     code = f"""<h3>Enpoint with highest weighted relevance (all campaigns)</h3>
-        <p class="num"><a href="/reports/highest_weighted_score/">{highest_score}</p>
+        <p class="num"><a href="/reports/highest_weighted_score/">{highest_score}</a></p>
         """
     return HttpResponse(code)
 
@@ -98,7 +112,7 @@ def db_analyticstoreview(request):
     analytics = Analytic.objects.filter(status='REVIEW')
     
     code = f"""<h3>Analytics to review</h3>
-        <p class="num"><a href="/qm/listanalytics/?statuses=REVIEW">{analytics.count()}</p>
+        <p class="num"><a href="/qm/listanalytics/?statuses=REVIEW">{analytics.count()}</a></p>
         """
     return HttpResponse(code)
 
@@ -108,7 +122,7 @@ def db_analyticspending(request):
     analytics = Analytic.objects.filter(status='PENDING')
     
     code = f"""<h3>Analytics pending</h3>
-        <p class="num"><a href="/qm/listanalytics/?statuses=PENDING">{analytics.count()}</p>
+        <p class="num"><a href="/qm/listanalytics/?statuses=PENDING">{analytics.count()}</a></p>
         """
     return HttpResponse(code)
 
@@ -121,7 +135,7 @@ def db_analyticswitherrors(request):
         ).exclude(status='ARCH')
     
     code = f"""<h3>Analytics with errors</h3>
-        <p class="num"><a href="/reports/query_error">{analytics.count()}</p>
+        <p class="num"><a href="/reports/query_error">{analytics.count()}</a></p>
         """
     return HttpResponse(code)
 
@@ -131,7 +145,7 @@ def db_archivedanalytics(request):
     analytics = Analytic.objects.filter(status='ARCH')
     
     code = f"""<h3>Archived analytics</h3>
-        <p class="num"><a href="/admin/qm/analytic/?status__exact=ARCH">{analytics.count()}</p>
+        <p class="num"><a href="/admin/qm/analytic/?status__exact=ARCH">{analytics.count()}</a></p>
         """
     return HttpResponse(code)
 
@@ -141,7 +155,7 @@ def db_runningtasks(request):
     tasks = TasksStatus.objects.all()
     
     code = f"""<h3>Running tasks</h3>
-        <p class="num"><a href="/admin/qm/tasksstatus/">{tasks.count()}</p>
+        <p class="num"><a href="/admin/qm/tasksstatus/">{tasks.count()}</a></p>
         """
     return HttpResponse(code)
 
@@ -156,7 +170,7 @@ def db_top_endpoint_distinct_analytics(request):
     )
     
     code = f"""<h3>Most distinct analytics on single endpoint</h3>
-        <p class="num"><a href="/reports/endpoints_most_analytics">{top_endpoints.first()['analytics_count']}</p>
+        <p class="num"><a href="/reports/endpoints_most_analytics">{top_endpoints.first()['analytics_count']}</a></p>
         """
     return HttpResponse(code)
 
@@ -166,7 +180,7 @@ def db_auto_disabled_analytics(request):
     analytics = Analytic.objects.filter(run_daily=0, maxhosts_count__gt=1).exclude(status='ARCH')
     
     code = f"""<h3>Auto-disabled analytics</h3>
-        <p class="num"><a href="/qm/listanalytics/?run_daily=0&maxhosts=1">{analytics.count()}</p>
+        <p class="num"><a href="/qm/listanalytics/?run_daily=0&maxhosts=1">{analytics.count()}</a></p>
         """
     return HttpResponse(code)
 

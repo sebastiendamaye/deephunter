@@ -198,7 +198,7 @@
 	<tbody>
 	
 		<tr><td><div class="filter">Connectors</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			{% for connector in connectors %}
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkconnector{{ connector.id }}" name="connectors" value="{{ connector.id }}"
@@ -209,7 +209,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">Repos</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			{% for repo in repos %}
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkrepo{{ repo.id }}" name="repos" value="{{ repo.id }}"
@@ -220,7 +220,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">Categories</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkcategory0" name="categories" value="0"
 					{% if 0|slugify in posted_filters.categories %} checked{% endif %}>
@@ -236,7 +236,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">Target OS</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			{% for os in target_os %}
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkos{{ os.id }}" name="target_os" value="{{ os.id }}"
@@ -247,7 +247,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">Associated Threat Actors</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			{% for actor in threat_actors %}
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkactor{{ actor.id }}" name="actors" value="{{ actor.id }}" 
@@ -258,7 +258,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">Source Countries</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			{% for country in source_countries %}
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checksourcecountry{{ country.id }}" name="source_countries" value="{{ country.id }}" 
@@ -269,7 +269,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">Associated Threats</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			{% for threat in threat_names %}
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkthreat{{ threat.id }}" name="threats" value="{{ threat.id }}"
@@ -280,7 +280,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">Vulnerabilities</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			{% for vulnerability in vulnerabilities %}
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkvuln{{ vulnerability.id }}" name="vulnerabilities" value="{{ vulnerability.id }}"
@@ -291,7 +291,7 @@
 		</td></tr>
 		
 		<tr><td><div class="filter">Tags</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			{% for tag in tags %}
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checktag{{ tag.id }}" name="tags" value="{{ tag.id }}" 
@@ -302,7 +302,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">MITRE</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			<h5>Tactics</h5>
 			{% for tactic in mitre_tactics %}
 			<div class="form-check">
@@ -329,7 +329,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">Confidence</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkconfidence1" name="confidence" value="1"
 					{% if '1'|slugify in posted_filters.confidence %} checked{% endif %}>
@@ -353,7 +353,7 @@
 		</td></tr>
 		
 		<tr><td><div class="filter">Relevance</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkrelevance1" name="relevance" value="1"
 					{% if '1'|slugify in posted_filters.relevance %} checked{% endif %}>
@@ -378,7 +378,7 @@
 
 
 		<tr><td><div class="filter">Status</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			{% for status in statuses %}
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkstatus{{ status.name }}" name="statuses" value="{{ status.name }}"
@@ -389,7 +389,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">Flags</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			<h5>Run daily</h5>
 			<div class="form-check">
 				<input class="form-check-input" type="radio" id="checkrundaily1" name="run_daily" value="1"
@@ -496,7 +496,7 @@
 		</td></tr>
 
 		<tr><td><div class="filter">Created by</div></td></tr>
-		<tr><td>
+		<tr><td colspan="2">
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkcreatedby0" name="created_by" value="0"
 					{% if 0|slugify in posted_filters.created_by %} checked{% endif %}>

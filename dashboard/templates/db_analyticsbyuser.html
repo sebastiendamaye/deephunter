@@ -1,3 +1,4 @@
+<h3>Analytics by user</h3>
 <div id="analyticsByUser_chartContainer" class="chartContainer"></div>
 <script nonce="klf4do97jh">
     $(document).ready(function() {
@@ -6,15 +7,6 @@
     }
 
         var chart = new CanvasJS.Chart("analyticsByUser_chartContainer", {
-            backgroundColor: "#f9f9f9",
-            title:{
-                text: "Analytics by user",
-                fontSize: 17,
-                fontColor: "#858383",
-                fontWeight: "normal",
-                fontFamily: "Arial",
-                horizontalAlign: "center"
-            },
             data: [{
                 type: "doughnut",
                 startAngle: 270,

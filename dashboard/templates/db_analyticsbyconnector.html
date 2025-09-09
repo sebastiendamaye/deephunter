@@ -1,3 +1,4 @@
+<h3>Analytics by connector</h3>
 <div id="analyticsByConnector_chartContainer" class="chartContainer"></div>
 <script nonce="tB2h37v4d6">
     function clicklegenditem_analyticbyconnector(e) {
@@ -7,15 +8,6 @@
     $(document).ready(function() {
 
         var chart = new CanvasJS.Chart("analyticsByConnector_chartContainer", {
-            backgroundColor: "#f9f9f9",
-            title:{
-                text: "Analytics by connector",
-                fontSize: 17,
-                fontColor: "#858383",
-                fontWeight: "normal",
-                fontFamily: "Arial",
-                horizontalAlign: "center"
-            },
             data: [{
                 type: "doughnut",
                 startAngle: 270,
