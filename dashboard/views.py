@@ -32,6 +32,8 @@ def db_analyticsrunintodaycampaign(request):
     delta = campaign_today.nb_queries - campaign_yesterday.nb_queries
     if delta < 0:
         code += f'<p class="compare_minus"><i class="fa-solid fa-arrow-down"></i> -{delta} (yesterday)</p>'
+    elif delta == 0:
+        code += f'<p class="compare_plus"><i class="fa-solid fa-arrow-right"></i> +0 (yesterday)</p>'
     else:
         code += f'<p class="compare_plus"><i class="fa-solid fa-arrow-up"></i> +{delta} (yesterday)</p>'
     return HttpResponse(code)
@@ -58,6 +60,8 @@ def db_analyticsmatchingintodaycampaign(request):
     delta = analytics_yesterday.count() - analytics_before_yesterday.count()
     if delta < 0:
         code += f'<p class="compare_minus"><i class="fa-solid fa-arrow-down"></i> -{delta} (yesterday)</p>'
+    elif delta == 0:
+        code += f'<p class="compare_plus"><i class="fa-solid fa-arrow-right"></i> +0 (yesterday)</p>'
     else:
         code += f'<p class="compare_plus"><i class="fa-solid fa-arrow-up"></i> +{delta} (yesterday)</p>'
     return HttpResponse(code)
