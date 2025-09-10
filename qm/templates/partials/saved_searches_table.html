@@ -24,7 +24,7 @@
             <td>{{ search.search }}</td>
             <td class="acenter">{% if search.is_public %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
             <td class="acenter">{% if search.is_locked %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
-            <td class="acenter">{% if search.created_by %}{{ search.created_by }}{% else %}-{% endif %}</td>
+            <td class="acenter">{% if search.created_by %}<span title="{{ search.created_by.first_name }} {{ search.created_by.last_name }}">{{ search.created_by }}</span>{% else %}-{% endif %}</td>
             <td>{{ search.pub_date }}</td>
             <td>{{ search.update_date }}</td>
         </tr>

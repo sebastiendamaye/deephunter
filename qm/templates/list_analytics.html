@@ -189,7 +189,7 @@
 			
 			{% if posted_filters.created_by %}
 				{% for v in posted_filters.created_by %}
-					<button class="button_filter" id="button_checkcreatedby_{{ v }}">AUTHOR:{{ v|useridtoname }}&nbsp;&nbsp;<b>x</b></button>
+					<button class="button_filter" id="button_checkcreatedby_{{ v }}" title="{{ v|useridtofirstnamelastname }}">AUTHOR:{{ v|useridtousername }}&nbsp;&nbsp;<b>x</b></button>
 				{% endfor %}
 			{% endif %}
 		</div>
@@ -506,7 +506,7 @@
 				<div class="form-check">
 					<input class="form-check-input" type="checkbox" id="checkcreatedby{{ user.id }}" name="created_by" value="{{ user.id }}"
 						{% if user.id|slugify in posted_filters.created_by %} checked{% endif %}>
-					<label class="form-check-label" for="checkcreatedby{{ user.id }}">{{ user.username }}</label>
+					<label class="form-check-label" for="checkcreatedby{{ user.id }}" title="{{ user.first_name }} {{ user.last_name }}">{{ user.username }}</label>
 				</div>
 			{% endfor %}
 		</td></tr>		

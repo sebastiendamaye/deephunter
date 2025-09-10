@@ -26,7 +26,7 @@
 
 		{% if endpoints %}
 		<div class="ml40">
-			<b>Top 10 endpoints: </b>
+			<b>Top 10 endpoints (last campaign): </b>
 			{% for endpoint in endpoints %}
 				<a href="/qm/timeline?hostname={{ endpoint }}" target="_blank">{{ endpoint }}</a> |
 			{% endfor %}
@@ -35,7 +35,7 @@
 		{% endif %}
 
 		<div class="ml40">
-			<b>Created by: </b>{% if analytic.created_by %}{{ analytic.created_by }}{% else %}-{% endif %}
+			<b>Created by: </b>{% if analytic.created_by %}<span title="{{ analytic.created_by.first_name }} {{ analytic.created_by.last_name }}">{{ analytic.created_by }}</span>{% else %}-{% endif %}
 			&nbsp;|&nbsp;<b>Created on: </b>{{ analytic.pub_date }}
 			&nbsp;|&nbsp;<b>Last modified: </b>{{ analytic.update_date }}
 			&nbsp;|&nbsp;<b>Last time seen: </b>{% if analytic.last_time_seen %}{{ analytic.last_time_seen }}{% else %}-{% endif %}

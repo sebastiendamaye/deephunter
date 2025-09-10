@@ -119,11 +119,18 @@ def techniqueidtotitle(id):
     return v.name
 
 @register.filter
-def useridtoname(id):
+def useridtousername(id):
     if id == '0':
         return '(empty)'
     v = get_object_or_404(User, pk=id)
     return v.username
+
+@register.filter
+def useridtofirstnamelastname(id):
+    if id == '0':
+        return '(empty)'
+    v = get_object_or_404(User, pk=id)
+    return f"{v.first_name} {v.last_name}"
 
 @register.filter
 def confidencecolor(confidence):

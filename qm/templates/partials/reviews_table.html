@@ -10,7 +10,7 @@
         {% for review in reviews %}
             <tr>
                 <td>{{ review.date|date:"M. j, Y" }}</td>
-                <td>{{ review.reviewer }}</td>
+                <td title="{{ review.reviewer.first_name }} {{ review.reviewer.last_name }}">{{ review.reviewer }}</td>
                 <td><b>{{ review.decision|get_review_label }}</b></td>
                 <td>{{ review.comments }}</td>
             </tr>
