@@ -31,7 +31,7 @@ def db_analyticsrunintodaycampaign(request):
     code += f'<p class="num"><a href="/qm/listanalytics/?run_daily=1">{campaign_today.nb_queries}</a></p>'
     delta = campaign_today.nb_queries - campaign_yesterday.nb_queries
     if delta < 0:
-        code += f'<p class="compare_minus"><i class="fa-solid fa-arrow-down"></i> -{delta} (yesterday)</p>'
+        code += f'<p class="compare_minus"><i class="fa-solid fa-arrow-down"></i> {delta} (yesterday)</p>'
     elif delta == 0:
         code += f'<p class="compare_plus"><i class="fa-solid fa-arrow-right"></i> +0 (yesterday)</p>'
     else:
@@ -59,7 +59,7 @@ def db_analyticsmatchingintodaycampaign(request):
     code += f'<p class="num"><a href="/qm/listanalytics/?hits=1">{analytics_yesterday.count()}</a></p>'
     delta = analytics_yesterday.count() - analytics_before_yesterday.count()
     if delta < 0:
-        code += f'<p class="compare_minus"><i class="fa-solid fa-arrow-down"></i> -{delta} (yesterday)</p>'
+        code += f'<p class="compare_minus"><i class="fa-solid fa-arrow-down"></i> {delta} (yesterday)</p>'
     elif delta == 0:
         code += f'<p class="compare_plus"><i class="fa-solid fa-arrow-right"></i> +0 (yesterday)</p>'
     else:
