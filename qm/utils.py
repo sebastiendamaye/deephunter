@@ -300,7 +300,8 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
 
     # Close Campaign
     campaign.date_end = datetime.now()
-    campaign.nb_queries = Analytic.objects.filter(run_daily=True).count()
+    campaign.nb_queries = Analytic.objects.exclude(status='ARCH').filter(run_daily=True).count()
+    campaign.nb_analytics = Analytic.objects.exclude(status='ARCH').count()
     campaign.save()
 
     # Delete Celery task in DB if celery is used

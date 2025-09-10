@@ -226,8 +226,8 @@ class SnapshotAdmin(admin.ModelAdmin):
         return obj.campaign
     
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'date_start', 'date_end', 'nb_queries')
-    list_filter = ['date_start', 'date_end', 'nb_queries']
+    list_display = ('name', 'description', 'date_start', 'date_end', 'nb_queries', 'nb_analytics')
+    list_filter = ['date_start', 'date_end']
     search_fields = ['name', 'description']
 
 class MitreTacticAdmin(admin.ModelAdmin):

@@ -219,7 +219,8 @@ class Campaign(models.Model):
     description = models.TextField(blank=True)
     date_start = models.DateTimeField()
     date_end = models.DateTimeField(blank=True, null=True)
-    nb_queries = models.IntegerField(default=0)
+    nb_queries = models.IntegerField(default=0, help_text="Number of TH analytics run in this campaign")
+    nb_analytics = models.IntegerField(default=0, help_text="Total number of TH analytics (even if not run in this campaign)")
     
     def __str__(self):
         return self.name
