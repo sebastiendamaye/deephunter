@@ -13,10 +13,8 @@
 
 <div class="container_trend">
 
-	<div class="charts_left">
-		<div class="chartContainer{% if tab == 1 %}_small{% endif %}" id="chartContainer_runtime_{{ analytic.id }}"></div>
-		<div class="chartContainer{% if tab == 1 %}_small{% endif %}" id="chartContainer_count_{{ analytic.id }}"></div>
-		<div class="chartContainer{% if tab == 1 %}_small{% endif %}" id="chartContainer_endpoints_{{ analytic.id }}"></div>
+	<div class="charts_left" hx-get="/qm/{{ analytic.id }}/trend-graph/{{ tab }}/" hx-trigger="load, every 15s">
+        <img alt="loading..." src="/static/images/bars.svg"/>
 	</div>
 
 	<div class="charts_right{% if tab == 1 %}_tab{% endif %}">
@@ -60,135 +58,6 @@
 	</div>
 
 </div>
-
-<script type="text/javascript" nonce="jg6kl5z3v2">
-$(document).ready(function() {
-
-	var options_runtime = {
-		animationEnabled: false,
-		axisX:{
-			valueFormatString: "DD MMM"
-		},
-		toolTip:{
-			shared:true
-		},  
-		legend:{
-			cursor:"pointer",
-			verticalAlign: "bottom",
-			horizontalAlign: "left",
-			dockInsidePlotArea: true
-		},
-		data: [
-		{
-			type: "line",
-			showInLegend: true,
-			name: "runtime (sec)",
-			markerType: "square",
-			xValueFormatString: "DD MMM, YYYY",
-			color: "#2596be",
-			yValueFormatString: "#,##0",
-			dataPoints: [
-				{% for s in stats %}
-					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.runtime }} },
-				{% endfor %}
-			]
-		}
-		]
-	};
-
-	var options_count = {
-		animationEnabled: false,
-		axisX:{
-			valueFormatString: "DD MMM",
-			stripLines: [
-				{% for s in stats %}
-					{% if s.anomaly_alert_count %}
-						{
-							value:new Date("{{ s.date|date:"Y-m-d" }}"),
-							thickness: 50,
-							color:"#ff0000",
-							opacity: .3
-						},
-					{% endif %}
-				{% endfor %}
-			]
-		},
-		toolTip:{
-			shared:true
-		},  
-		legend:{
-			cursor:"pointer",
-			verticalAlign: "bottom",
-			horizontalAlign: "left",
-			dockInsidePlotArea: true
-		},
-		data: [
-		{
-			type: "line",
-			showInLegend: true,
-			name: "#hits",
-			markerType: "square",
-			xValueFormatString: "DD MMM, YYYY",
-			color: "#2596be",
-			yValueFormatString: "#,##0",
-			dataPoints: [
-				{% for s in stats %}
-					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_count }}, click: function(e) { open('/qm/events/{{ analytic.id }}/{{ s.date|date:"Y-m-d" }}/', '_blank'); } },
-				{% endfor %}
-			]
-		}
-		]
-	};
-
-	var options_endpoints = {
-		animationEnabled: false,
-		axisX:{
-			valueFormatString: "DD MMM",
-			stripLines: [
-				{% for s in stats %}
-					{% if s.anomaly_alert_endpoints %}
-						{
-							value:new Date("{{ s.date|date:"Y-m-d" }}"),
-							thickness: 50,
-							color:"#ff0000",
-							opacity: .3
-						},
-					{% endif %}
-				{% endfor %}
-			]
-		},
-		toolTip:{
-			shared:true
-		},  
-		legend:{
-			cursor:"pointer",
-			verticalAlign: "bottom",
-			horizontalAlign: "left",
-			dockInsidePlotArea: true
-		},
-		data: [
-		{
-			type: "line",
-			showInLegend: true,
-			name: "#endpoints",
-			markerType: "square",
-			xValueFormatString: "DD MMM, YYYY",
-			color: "#2596be",
-			yValueFormatString: "#,##0",
-			dataPoints: [
-				{% for s in stats %}
-					{ x: new Date("{{ s.date|date:"Y-m-d" }}"), y: {{ s.hits_endpoints }}, click: function(e) { open('/qm/events/{{ analytic.id }}/{{ s.date|date:"Y-m-d" }}/', '_blank'); } },
-				{% endfor %}
-			]
-		}]
-	};
-
-	$("#chartContainer_runtime_{{ analytic.id }}").CanvasJSChart(options_runtime);
-	$("#chartContainer_count_{{ analytic.id }}").CanvasJSChart(options_count);
-	$("#chartContainer_endpoints_{{ analytic.id }}").CanvasJSChart(options_endpoints);
-
-});
-</script>
 
 </body>
 </html>

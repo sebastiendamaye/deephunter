@@ -5,6 +5,7 @@ urlpatterns = [
     path('listanalytics/', views.list_analytics, name='list_analytics'),
     path('<int:analytic_id>/trend/', views.trend, name='trend'),
     path('<int:analytic_id>/trend/<int:tab>/', views.trend, name='trend'),
+    path('<int:analytic_id>/trend-graph/<int:tab>/', views.trend_graph, name='trend_graph'),
     path('events/<int:analytic_id>/<str:eventdate>/<str:endpointname>/', views.events, name='events'),
     path('events/<int:analytic_id>/<str:eventdate>/', views.events, name='events'),
     path('events/<int:analytic_id>/', views.events, name='events'),

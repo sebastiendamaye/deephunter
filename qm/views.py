@@ -326,6 +326,20 @@ def list_analytics(request):
 @permission_required("qm.view_snapshot", raise_exception=True)
 def trend(request, analytic_id, tab=0):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
+    endpoints = Endpoint.objects.filter(snapshot__analytic=analytic).values('hostname').distinct()
+
+    context = {
+        'analytic': analytic,
+        'distinct_endpoints': endpoints.count(),
+        'endpoints': endpoints,
+        'tab': tab,
+        }
+    return render(request, 'trend.html', context)
+
+@login_required
+@permission_required("qm.view_snapshot", raise_exception=True)
+def trend_graph(request, analytic_id, tab=0):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
     # show graph for last 90 days only
     snapshots = Snapshot.objects.filter(analytic=analytic, date__gt=datetime.today()-timedelta(days=90)).order_by('date')
     
@@ -351,16 +365,12 @@ def trend(request, analytic_id, tab=0):
             'anomaly_alert_endpoints': a_anomaly_alert_endpoints[i]
             } )
 
-    endpoints = Endpoint.objects.filter(snapshot__analytic=analytic).values('hostname').distinct()
-
     context = {
         'analytic': analytic,
         'stats': stats_vals,
-        'distinct_endpoints': endpoints.count(),
-        'endpoints': endpoints,
         'tab': tab,
         }
-    return render(request, 'trend.html', context)
+    return render(request, 'trend_graph.html', context)
 
 @login_required
 @permission_required("qm.view_analytic", raise_exception=True)
