@@ -16,9 +16,19 @@ def dashboards(request):
 @permission_required('qm.view_analytic', raise_exception=True)
 def db_totalnumberanalytics(request):
     analytics = Analytic.objects.exclude(status='ARCH')    
-    
+    created_since_last_month = Analytic.objects.filter(
+        pub_date__gte=datetime.now() - timedelta(days=30)
+    ).count()
+
     code = "<h3>Total number of analytics</h3>"
     code += f'<p class="num"><a href="/qm/listanalytics/">{analytics.count()}</a></p>'
+    if created_since_last_month < 0:
+        code += f'<p class="compare_minus"><i class="fa-solid fa-arrow-down"></i> {created_since_last_month} (last 30d)</p>'
+    elif created_since_last_month == 0:
+        code += f'<p class="compare_plus"><i class="fa-solid fa-arrow-right"></i> +0 (last 30d)</p>'
+    else:
+        code += f'<p class="compare_plus"><i class="fa-solid fa-arrow-up"></i> +{created_since_last_month} (last 30d)</p>'
+    return HttpResponse(code)
     return HttpResponse(code)
 
 @login_required
