@@ -16,7 +16,7 @@ def dashboards(request):
 @permission_required('qm.view_analytic', raise_exception=True)
 def db_totalnumberanalytics(request):
     analytics = Analytic.objects.exclude(status='ARCH')    
-    created_since_last_month = Analytic.objects.filter(
+    created_since_last_month = analytics.filter(
         pub_date__gte=datetime.now() - timedelta(days=30)
     ).count()
 
