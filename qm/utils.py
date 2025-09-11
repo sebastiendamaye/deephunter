@@ -234,6 +234,7 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
                 # If DISABLE_RUN_DAILY is set and run_daily_lock is not set, we disable the run_daily flag for the analytic
                 if ON_MAXHOSTS_REACHED['DISABLE_RUN_DAILY'] and not analytic.run_daily_lock:
                     analytic.run_daily = False
+                    analytic.status = 'PENDING'
                 # If DELETE_STATS is set and run_daily_lock is not set, we delete all stats for the analytic
                 if ON_MAXHOSTS_REACHED['DELETE_STATS'] and not analytic.run_daily_lock:
                     Snapshot.objects.filter(analytic=analytic).delete()
