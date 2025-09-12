@@ -12,7 +12,7 @@ BASE_DIR = settings.BASE_DIR
 @login_required
 @permission_required('user.is_superuser', raise_exception=True)
 def connector_conf(request):
-    context = { 'connectors': Connector.objects.all() }
+    context = { 'connectors': Connector.objects.all().order_by('name') }
     return render(request, "connector_conf.html", context)
 
 
@@ -38,3 +38,10 @@ def selected_connector_settings(request, connector_id):
         "formset": formset,
         "connector": connector,
     })
+
+@login_required
+@permission_required('user.is_superuser', raise_exception=True)
+def toggle_connector(request, connector_id):
+    connector = get_object_or_404(Connector, pk=connector_id)
+    connector.enabled = not connector.enabled
+    connector.save()

@@ -14,6 +14,9 @@ class Connector(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name']
+
 class ConnectorConf(models.Model):
     connector = models.ForeignKey(Connector, on_delete=models.CASCADE)
     key = models.CharField(max_length=50)
