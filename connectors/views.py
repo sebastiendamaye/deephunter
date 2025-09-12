@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from .forms import ConnectorConfFormSet
 from connectors.models import Connector, ConnectorConf
+from qm.models import Analytic
 from django.contrib.auth.decorators import login_required, permission_required
 from config.utils import touch
 from django.conf import settings
@@ -37,6 +38,7 @@ def selected_connector_settings(request, connector_id):
     return render(request, "selected_connector_settings.html", {
         "formset": formset,
         "connector": connector,
+        "is_used": Analytic.objects.filter(connector=connector).exists(),
     })
 
 @login_required

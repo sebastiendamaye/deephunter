@@ -1,20 +1,29 @@
-<div class="alert alert-info d-flex flex-row">
-    <div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
-    <div class="notification-message">
-        {{ connector.description }}
-    </div>
+<div class="connector-title">
+    {{ connector.name }}
+</div>
+<div class="connector-description">
+    {{ connector.description }}
 </div>
 
-<div class="container-switch-toggle">
-    <span class="switch-status-label">Enable/disable connector: </span>
-    <label class="switch">
-      <input id="connector-enabled-{{ connector.id }}"
-        type="checkbox"
-        hx-get="/connectors/toggle-connector/{{ connector.id }}/"
-        {% if connector.enabled %}checked{% endif %}>
-      <span class="slider round"></span>
-    </label>
-</div>
+{% if is_used %}
+    <div class="alert alert-warning d-flex flex-row">
+        <div class="padright20"><i class="fas fa-fw fa-exclamation-triangle mr-3 mt-1"></i></div>
+        <div class="notification-message">
+            You can't disable this connector because it is currently in use by one or more threat hunting analytics.
+        </div>
+    </div>
+{% else %}
+    <div class="container-switch-toggle">
+        <span class="switch-status-label">Enable/disable connector: </span>
+        <label class="switch">
+        <input id="connector-enabled-{{ connector.id }}"
+            type="checkbox"
+            hx-get="/connectors/toggle-connector/{{ connector.id }}/"
+            {% if connector.enabled %}checked{% endif %}>
+        <span class="slider round"></span>
+        </label>
+    </div>
+{% endif %}
 
 <form method="post" id="connector-form-{{ connector.id }}" action="/connectors/selected-connector-settings/{{ connector.pk }}/" class="connector-form {% if connector.enabled %}visible{% else %}hidden{% endif %}">
 

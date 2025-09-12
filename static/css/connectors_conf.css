@@ -92,3 +92,15 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+div.connector-title {
+    margin-bottom: 10px;
+    color: #888;
+    text-transform: uppercase;
+    font-size: 18px;
+    font-weight: bold;
+}
+div.connector-description {
+    margin-bottom: 30px;
+    color: #888;
+}
