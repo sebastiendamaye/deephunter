@@ -304,7 +304,7 @@ def list_analytics(request):
         'query_string': query_string,
         'filtered_query_string': filtered_query_string,
         'analytics_count': analytics_count,
-        'connectors': Connector.objects.filter(domain="analytics"),
+        'connectors': Connector.objects.filter(domain="analytics", enabled=True).order_by('name'),
         'repos': Repo.objects.all(),
         'target_os': TargetOs.objects.all(),
         'vulnerabilities': Vulnerability.objects.all(),

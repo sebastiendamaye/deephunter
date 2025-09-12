@@ -182,7 +182,7 @@ class AnalyticAdmin(SimpleHistoryAdmin):
     # When creating or updating analytics, only show connectors that are flagged for TH analytics
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "connector":
-            kwargs["queryset"] = Connector.objects.filter(domain="analytics")
+            kwargs["queryset"] = Connector.objects.filter(domain="analytics", enabled=True).order_by('name')
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change): 
