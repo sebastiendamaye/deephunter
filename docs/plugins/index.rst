@@ -39,6 +39,7 @@ Plugins
    activedirectory
    loldrivers
    malwarebazaar
+   microsoftdefender
    microsoftsentinel
    sentinelone
    virustotal

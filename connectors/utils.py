@@ -70,24 +70,25 @@ def is_valid_ip(ip: str) -> bool:
     return re.match(pattern, ip) is not None
 
 
-def gzip_base64_urlencode(input_string):
-    # Step 1: Gzip compress the string
+def gzip_base64_urlencode(input_string, encoding=None):
+
+    # Gzip compress the string
     # Create a BytesIO buffer to hold the compressed data
     buffer = BytesIO()
     
     with gzip.GzipFile(fileobj=buffer, mode='wb') as f:
-        f.write(input_string.encode('utf-8'))
-    
+        f.write(input_string.encode(encoding or 'utf-8'))
+
     # Get the compressed byte data
     compressed_data = buffer.getvalue()
     
-    # Step 2: Base64 encode the compressed data
+    # Base64 encode the compressed data
     base64_encoded = base64.b64encode(compressed_data).decode('utf-8')
     
-    # Step 3: URL encode the Base64 string
+    # URL encode the Base64 string
     url_encoded = urllib.parse.quote(base64_encoded, safe='')  # encode all special chars
-    
     return url_encoded
+
 
 def manage_analytic_error(analytic, error_message):
     """

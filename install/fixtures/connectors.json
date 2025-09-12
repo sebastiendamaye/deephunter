@@ -6,7 +6,7 @@
             "name": "sentinelone",
             "description": "SentinelOne EDR",
             "enabled": true,
-            "visible_in_analytics": true
+            "domain": "analytics"
         }
     },
     {
@@ -16,7 +16,7 @@
             "name": "activedirectory",
             "description": "The Active Directory connector is used in the timeline view to get additional information about the owner of an endpoint.",
             "enabled": true,
-            "visible_in_analytics": false
+            "domain": ""
         }
     },
     {
@@ -26,7 +26,7 @@
             "name": "virustotal",
             "description": "Used to consolidate IP reputation in the netview module, and used by the VT hash checker and VT IP checker tools.",
             "enabled": true,
-            "visible_in_analytics": false
+            "domain": ""
         }
     },
     {
@@ -36,7 +36,7 @@
             "name": "malwarebazaar",
             "description": "MalwareBazaar is a platform from abuse.ch and Spamhaus, dedicated to sharing malware samples with the infosec community, antivirus vendors, and threat intelligence providers.",
             "enabled": true,
-            "visible_in_analytics": false
+            "domain": ""
         }
     },
     {
@@ -44,9 +44,9 @@
         "pk": 5,
         "fields": {
             "name": "microsoftsentinel",
-            "description": "Microsoft Sentinel data lake",
+            "description": "The \"microsoft\" connector is the legacy connector. You are advised to use the \"microsoftdefender\" connector instead.\r\n\r\nStarting in July 2026, Microsoft Sentinel will be supported in the Defender portal only, and any remaining customers using the Azure portal will be automatically redirected.",
             "enabled": true,
-            "visible_in_analytics": true
+            "domain": "analytics"
         }
     },
     {
@@ -56,7 +56,7 @@
             "name": "loldrivers",
             "description": "Living Off The Land Drivers is a curated list of Windows drivers used by adversaries to bypass security controls and carry out attacks. The project helps security professionals stay informed and mitigate potential threats.",
             "enabled": true,
-            "visible_in_analytics": false
+            "domain": ""
         }
     },
     {
@@ -66,7 +66,37 @@
             "name": "whois",
             "description": "WHOIS information from the https://www.whois.com website",
             "enabled": true,
-            "visible_in_analytics": false
+            "domain": ""
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 8,
+        "fields": {
+            "name": "github",
+            "description": "Github repo sync",
+            "enabled": true,
+            "domain": "repos"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 9,
+        "fields": {
+            "name": "bitbucket",
+            "description": "Bitbucket repo sync",
+            "enabled": true,
+            "domain": "repos"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 10,
+        "fields": {
+            "name": "microsoftdefender",
+            "description": "This connector replaces the \"microsoftsentinel\" connector (legacy). Notice that it requires the \"AdvancedHunting.Read.All\" permission.\r\n\r\nMicrosoft Defender provides a unified cybersecurity solution that integrates endpoint protection, cloud security, identity protection, email security, threat intelligence, exposure management, and SIEM into a centralized platform powered by a modern data lake.",
+            "enabled": true,
+            "domain": "analytics"
         }
     },
     {
@@ -75,7 +105,7 @@
         "fields": {
             "connector": 2,
             "key": "LDAP_SERVER",
-            "value": "ldap.domain.com",
+            "value": "gc.domain.com",
             "description": "Address of your LDAP server (e.g. \"ldap.domain.com\")"
         }
     },
@@ -105,7 +135,7 @@
         "fields": {
             "connector": 2,
             "key": "LDAP_USER",
-            "value": "user@gad.domain.com",
+            "value": "USER@domain.com",
             "description": "Username used to query your LDAP."
         }
     },
@@ -125,7 +155,7 @@
         "fields": {
             "connector": 2,
             "key": "LDAP_SEARCH_BASE",
-            "value": "DC=gad,DC=domain,DC=com",
+            "value": "DC=global,DC=domain,DC=com",
             "description": "The search base DN. This specifies the base of the subtree in which the search is to be constrained. It is denoted as the distinguished name of the search base directory object. Example: CN=Users,DC=domain,DC=com."
         }
     },
@@ -185,7 +215,7 @@
         "fields": {
             "connector": 1,
             "key": "S1_URL",
-            "value": "https://tenant.sentinelone.net",
+            "value": "https://company.sentinelone.net",
             "description": "S1_URL is the SentinelOne URL for your tenant and is used for any API call to SentinelOne."
         }
     },
@@ -195,7 +225,7 @@
         "fields": {
             "connector": 1,
             "key": "S1_TOKEN",
-            "value": "*******************************************************",
+            "value": "************************",
             "description": "S1_TOKEN is the token associated to your API."
         }
     },
@@ -225,7 +255,7 @@
         "fields": {
             "connector": 1,
             "key": "S1_THREATS_URL",
-            "value": "https://se-prod.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS",
+            "value": "https://company.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS",
             "description": "URL address used to point to the threats page in SentinelOne. Notice that S1_THREATS_URL is dnyamically rendered by the Django view using format to evaluate the correct hostname. This is why the {} string appears in the URL. For legacy UI, use the following URL:  'https://tenant.sentinelone.net/incidents/threats?filter={\"computerName__contains\":\"{}\",\"timeTitle\":\"Last%203%20Months\"}'. For the new UI, use 'https://tenant.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS'"
         }
     },
@@ -235,7 +265,7 @@
         "fields": {
             "connector": 1,
             "key": "SYNC_STAR_RULES",
-            "value": "False",
+            "value": "True",
             "description": "If set to True, DeepHunter will automatically synchronize your threat hunting analytics (create, modify or delete) with corresponding STAR rules in SentinelOne. Possible values: True|False"
         }
     },
@@ -311,21 +341,11 @@
     },
     {
         "model": "connectors.connectorconf",
-        "pk": 49,
-        "fields": {
-            "connector": 1,
-            "key": "QUERY_ERROR_INFO",
-            "value": "",
-            "description": "Regular expression to filter what should be considered INFO instead of ERROR in query error message"
-        }
-    },
-    {
-        "model": "connectors.connectorconf",
         "pk": 58,
         "fields": {
             "connector": 3,
             "key": "API_KEY",
-            "value": "abcdefghijklmnopqrstuvwxyz1234567890",
+            "value": "***********************************",
             "description": "VirusTotal API key"
         }
     },
@@ -335,7 +355,7 @@
         "fields": {
             "connector": 4,
             "key": "API_KEY",
-            "value": "abcdefghijklmnopqrstuvwxyz1234567890",
+            "value": "********************************",
             "description": "MalwareBazaar API key"
         }
     },
@@ -345,7 +365,7 @@
         "fields": {
             "connector": 5,
             "key": "TENANT_ID",
-            "value": "1234567-89ab-cdef-0123-456789abcdef",
+            "value": "",
             "description": ""
         }
     },
@@ -355,7 +375,7 @@
         "fields": {
             "connector": 5,
             "key": "CLIENT_ID",
-            "value": "1234567-89ab-cdef-0123-456789abcdef",
+            "value": "",
             "description": ""
         }
     },
@@ -365,7 +385,7 @@
         "fields": {
             "connector": 5,
             "key": "CLIENT_SECRET",
-            "value": "*********************",
+            "value": "********************************",
             "description": ""
         }
     },
@@ -375,7 +395,7 @@
         "fields": {
             "connector": 5,
             "key": "WORKSPACE_ID",
-            "value": "1234567-89ab-cdef-0123-456789abcdef",
+            "value": "********************************",
             "description": "Log Analytics Workspace ID"
         }
     },
@@ -395,7 +415,7 @@
         "fields": {
             "connector": 5,
             "key": "SUBSCRIPTION_ID",
-            "value": "1234567-89ab-cdef-0123-456789abcdef",
+            "value": "********************************",
             "description": ""
         }
     },
@@ -405,7 +425,7 @@
         "fields": {
             "connector": 5,
             "key": "RESOURCE_GROUP",
-            "value": "MyResourceGroup",
+            "value": "blah-foo",
             "description": ""
         }
     },
@@ -415,7 +435,7 @@
         "fields": {
             "connector": 5,
             "key": "WORKSPACE_NAME",
-            "value": "MyWorkspaceName",
+            "value": "blah-foo",
             "description": ""
         }
     },
@@ -423,7 +443,67 @@
         "model": "connectors.connectorconf",
         "pk": 72,
         "fields": {
+            "connector": 1,
+            "key": "QUERY_ERROR_INFO",
+            "value": "status['\"]:\\s?['\"]FINISHED['\"]",
+            "description": "Regular expression to filter what should be considered INFO instead of ERROR in query error message"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 73,
+        "fields": {
             "connector": 5,
+            "key": "QUERY_ERROR_INFO",
+            "value": "",
+            "description": "Regular expression to filter what should be considered INFO instead of ERROR in query error message"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 74,
+        "fields": {
+            "connector": 10,
+            "key": "TENANT_ID",
+            "value": "",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 75,
+        "fields": {
+            "connector": 10,
+            "key": "CLIENT_ID",
+            "value": "********************************",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 76,
+        "fields": {
+            "connector": 10,
+            "key": "CLIENT_SECRET",
+            "value": "********************************",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 77,
+        "fields": {
+            "connector": 10,
+            "key": "SYNC_RULES",
+            "value": "False",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 78,
+        "fields": {
+            "connector": 10,
             "key": "QUERY_ERROR_INFO",
             "value": "",
             "description": "Regular expression to filter what should be considered INFO instead of ERROR in query error message"

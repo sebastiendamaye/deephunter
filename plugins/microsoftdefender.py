@@ -1,13 +1,18 @@
 """
-Microsoft Sentinel connector
+Microsoft Defender XDR connector
 
 Requirements
 ------------
-pip install azure-identity azure-monitor-query
+pip install msal
+Notice that it requires the "AdvancedHunting.Read.All" permission.
 
 Description
 -----------
-This connector allows querying Microsoft Sentinel logs using KQL (Kusto Query Language).
+This connector replaces the "microsoftsentinel" connector (https://learn.microsoft.com/en-us/azure/sentinel/move-to-defender).
+
+Microsoft Defender provides a unified cybersecurity solution that integrates endpoint protection, cloud security, identity protection, email security, threat intelligence, exposure management, and SIEM into a centralized platform powered by a modern data lake.
+
+This connector allows querying Microsoft Defender XDR logs using KQL (Kusto Query Language).
 Queries have to return a "Computer" column, corresponding to either a native "Computer" field, or a transformation.
 If a transformation is required, it has to be part of the "query" field (not in the "columns" field).
 You can define "Computer" by copying the value from another field: | project Computer = DstDvcHostname
@@ -19,10 +24,10 @@ To do
 - get_threats() not implemented yet.
 """
 
-from azure.identity import ClientSecretCredential
-from azure.monitor.query import LogsQueryClient
-from azure.monitor.query import LogsQueryStatus
+import requests
+from msal import ConfidentialClientApplication
 from connectors.utils import get_connector_conf, gzip_base64_urlencode, manage_analytic_error
+from django.conf import settings
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, unquote
 import re
@@ -30,29 +35,36 @@ from notifications.utils import add_debug_notification
 
 _globals_initialized = False
 def init_globals():
-    global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, \
-            WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES, QUERY_ERROR_INFO
+    global DEBUG, PROXY, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SYNC_RULES, QUERY_ERROR_INFO, \
+            AUTHORITY, SCOPE, ENDPOINT
     global _globals_initialized
     if not _globals_initialized:
-        DEBUG = False
-        TENANT_ID = get_connector_conf('microsoftsentinel', 'TENANT_ID')
-        CLIENT_ID = get_connector_conf('microsoftsentinel', 'CLIENT_ID')
-        CLIENT_SECRET = get_connector_conf('microsoftsentinel', 'CLIENT_SECRET')
-        SUBSCRIPTION_ID = get_connector_conf('microsoftsentinel', 'SUBSCRIPTION_ID')
-        WORKSPACE_ID = get_connector_conf('microsoftsentinel', 'WORKSPACE_ID')
-        WORKSPACE_NAME = get_connector_conf('microsoftsentinel', 'WORKSPACE_NAME').lower()
-        RESOURCE_GROUP = get_connector_conf('microsoftsentinel', 'RESOURCE_GROUP')
-        SYNC_RULES = get_connector_conf('microsoftsentinel', 'SYNC_RULES')
-        QUERY_ERROR_INFO = get_connector_conf('microsoftsentinel', 'QUERY_ERROR_INFO')
+        DEBUG = True
+        PROXY = settings.PROXY
+        TENANT_ID = get_connector_conf('microsoftdefender', 'TENANT_ID')
+        CLIENT_ID = get_connector_conf('microsoftdefender', 'CLIENT_ID')
+        CLIENT_SECRET = get_connector_conf('microsoftdefender', 'CLIENT_SECRET')
+        SYNC_RULES = get_connector_conf('microsoftdefender', 'SYNC_RULES')
+        QUERY_ERROR_INFO = get_connector_conf('microsoftdefender', 'QUERY_ERROR_INFO')
+
+        # Microsoft Graph API endpoint
+        AUTHORITY = f'https://login.microsoftonline.com/{TENANT_ID}'
+        SCOPE = ['https://graph.microsoft.com/.default']
+        ENDPOINT = 'https://graph.microsoft.com/v1.0/security/runHuntingQuery'
+
         _globals_initialized = True
 
 
 def authenticate():
+    """
+    Authenticate and get token
+    :return: access token
+    """
     init_globals()
-    credential = ClientSecretCredential(TENANT_ID, CLIENT_ID, CLIENT_SECRET)
-    client = LogsQueryClient(credential)
-    return client
-
+    app = ConfidentialClientApplication(CLIENT_ID, authority=AUTHORITY, client_credential=CLIENT_SECRET)
+    token_response = app.acquire_token_for_client(scopes=SCOPE)
+    access_token = token_response['access_token']
+    return access_token
 
 def query(analytic, from_date=None, to_date=None, debug=None):
     """
@@ -62,58 +74,61 @@ def query(analytic, from_date=None, to_date=None, debug=None):
     :param to_date: Optional end date for the query. Date received in isoformat.
     :return: The result of the query (array with 4 fields: endpoint.name, NULL, number of hits, NULL), or "ERROR" if the query failed.
     """
-    
+
     init_globals()
 
     # Authentication
     try:
-        client = authenticate()
+        access_token = authenticate()
     except:
         if debug or DEBUG:
-            print(f"[ ERROR ] Analytic {analytic.name} failed. Failed to connect to MS Sentinel. Check report for more info.")        
-        manage_analytic_error(analytic, f"Failed to connect to MS Sentinel while executing the analytic {analytic.name}.")
+            print(f"[ ERROR ] Analytic {analytic.name} failed. Failed to connect to MS Defender. Check report for more info.")
+        manage_analytic_error(analytic, f"Failed to connect to MS Defender while executing the analytic {analytic.name}.")
         return []
 
-
+    # Define time range
     if from_date and to_date:
-        start_date = datetime.fromisoformat(from_date)
-        start_date_utc = start_date.replace(tzinfo=timezone.utc)
-        end_date = datetime.fromisoformat(to_date)
-        end_date_utc = end_date.replace(tzinfo=timezone.utc)
-        timespan = (start_date_utc, end_date_utc)
+        timespan = f"{from_date.split('.')[0]}Z/{to_date.split('.')[0]}Z"
     else:
         # Default to the last 24 hours if no dates are provided
-        timespan = timedelta(hours=24)
+        timespan = 'P1D'
 
-
+    # Define query and headers
     q = f'{analytic.query} | summarize count() by Computer'
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json'
+    }
+    body = {
+        'query': q,
+        'timespan': timespan,
+    }
     if debug or DEBUG:
-        print(f"Query: {q}")
-    
+        print(f"Query: {q} | timespan: {timespan}")
+ 
+    # Execute query
     try:
-        # Execute query
-        response = client.query_workspace(
-            workspace_id=WORKSPACE_ID,
-            query=q,
-            timespan=timespan
-        )
+        response = requests.post(ENDPOINT, headers=headers, proxies=PROXY, json=body)
     except Exception as e:
         if debug or DEBUG:
             print(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
-        manage_analytic_error(analytic, e.message)
+        manage_analytic_error(analytic, str(e))
         return "ERROR"
 
     # Handle response
-    if response.status == LogsQueryStatus.SUCCESS:
+    if response.status_code == 200:
         res = []
-        for table in response.tables:
-            for row in table.rows:
-                res.append([row[0], '', row[1], ''])
+        results = response.json()
+        if 'results' in results and len(results['results']) > 0:
+            for row in results['results']:
+                computer = row.get('Computer', '')
+                count = row.get('count_', 0)
+                res.append([computer, '', count, ''])
         return res
     else:
         if debug or DEBUG:
             print(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
-        manage_analytic_error(analytic, response.error)
+        manage_analytic_error(analytic, f"Error: {response.status_code} - {response.text}")
         return "ERROR"
 
 def need_to_sync_rule():
@@ -147,20 +162,25 @@ def delete_rule(analytic):
 
 
 def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
-
-    ### pre-filling the KQL query field via URL in the Microsoft Sentinel LogsBlade.
-    ###
+    """
+    Get the redirect link to run the analytic in MS Defender portal.
+    :param analytic: Analytic object containing the query string and columns.
+    :param date: Date to filter the analytic by, in YYYY-MM-DD format (range will be date-date+1day).
+    :param endpoint_name: Name of the endpoint to filter the analytic by.
+    :return: String containing the redirect link for the analytic.
+    """
 
     init_globals()
     if not date:
-        timespan = "P1D"  # Default to 1 day
+        # Default to 1 day
+        timespan = "timeRangeId=day"
     else:
-        # Convert date to ISO format and create a timespan
-        # example: /2025-07-01T00%3A00%3A00.000Z%2F2025-07-08T12%3A00%3A00.000Z/
+        # Convert date to ISO format and create a timespan (fromDate, toDate)
+        # date format: 2025-07-01T00:00:00.000Z
         start_date = datetime.strptime(date, "%Y-%m-%d")
         end_date = start_date + timedelta(days=1)
-        timespan = quote(f"{start_date.isoformat()}Z/{end_date.isoformat()}Z", safe='')
-    
+        timespan = f"fromDate={quote(start_date.isoformat(), safe='')}.000Z&toDate={quote(end_date.isoformat(), safe='')}.000Z"
+
     if endpoint_name:
         customized_query = f'{analytic.query} \n| where Computer startswith "{endpoint_name}"'
     else:
@@ -176,17 +196,14 @@ def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
     else:
         q = quote(customized_query)
 
-    # Query needs to be encoded using gzip and base64 URL encoding
-    encoded_query = gzip_base64_urlencode(unquote(q))
+    # Query needs to be encoded: utf-16le > gzip > base64 > URL encoding
+    encoded_query = gzip_base64_urlencode(unquote(q), encoding='utf-16le')
 
     # Build the full URL
-    url = (
-        f"https://portal.azure.com#@{TENANT_ID}/blade/Microsoft_OperationsManagementSuite_Workspace/Logs.ReactView/resourceId/"
-        f"%2Fsubscriptions%2F{SUBSCRIPTION_ID}%2FresourceGroups%2F{RESOURCE_GROUP}%2Fproviders%2FMicrosoft.OperationalInsights"
-        f"%2Fworkspaces%2F{WORKSPACE_NAME}/source/LogsBlade.AnalyticsShareLinkToQuery/q/{encoded_query}/timespan/{timespan}/limit/100000"
-    )
+    url = f"https://security.microsoft.com/v2/advanced-hunting?query={encoded_query}&{timespan}"
 
     return url
+
 
 def error_is_info(error):
     """ 

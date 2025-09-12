@@ -158,7 +158,11 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
             to_date=to_date.isoformat(),
             debug=debug
             )
-        
+
+        # if error, we exit the for loop
+        if data == "ERROR":
+            break
+
         # store current time (used to update snapshot runtime)
         end_runtime = datetime.now()
 
