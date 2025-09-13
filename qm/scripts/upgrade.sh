@@ -324,6 +324,26 @@ echo -n -e "[\033[90mINFO\033[0m] CLEANING /TMP DIR ............................
 rm -fR /tmp/deephunter* /tmp/settings.py
 echo -e "[\033[32mdone\033[0m]"
 
+# Search for debug = true in the codebase
+matches=$(find "$APP_PATH" -type f -name '*.py' -exec grep -EniI 'debug[[:space:]]*=[[:space:]]*true' {} + 2>/dev/null)
+# Check if matches were found
+if [[ -n "$matches" ]]; then
+	echo ""
+	echo "****************************************************************************************"
+    echo "WARNING: Found 'debug = true' in the following files:"
+    echo ""
+    printf "%-50s %-6s %s\n" "FILE" "LINE" "MATCH"
+    printf "%-50s %-6s %s\n" "----" "----" "-----"
+    while IFS= read -r line; do
+        file=$(echo "$line" | cut -d: -f1)
+        lineno=$(echo "$line" | cut -d: -f2)
+        content=$(echo "$line" | cut -d: -f3-)
+        printf "%-50s %-6s %s\n" "$file" "$lineno" "$content"
+    done <<< "$matches"
+	echo "****************************************************************************************"
+	echo ""
+fi
+
 echo ""
 echo "****************************************************************************************"
 echo "* Your DATA_TEMP folder has not been removed and keeps a copy of your old installation *"
