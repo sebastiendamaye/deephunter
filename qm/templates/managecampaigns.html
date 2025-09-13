@@ -7,12 +7,15 @@
 {% block body %}
 <div class="padaround">
     <h1>Manage campaigns</h1>
-    <div class="warning">
-        <ul>
-            <li><b>Warning</b>: regenerating a campaign will destroy existing data for the selected campaign.</li>
-            <li><b>Info</b>: the regenerated campaign will run threat analytics with the "run_daily" flag set as of today. You may see differences in the results compared to the previous campaign, as the "run_daily" flag may have been updated for some analytics, and newer analytics may have been created since.</li>
-        </ul>
+
+    <div class="alert alert-warning d-flex flex-row">
+        <div class="padright20"><i class="fas fa-fw fa-exclamation-triangle mr-3 mt-1"></i></div>
+        <div class="notification-message">
+            <li>Regenerating a campaign will destroy existing data for the selected campaign.</li>
+            <li>The regenerated campaign will run threat analytics with the "run_daily" flag set as of today. You may see differences in the results compared to the previous campaign, as the "run_daily" flag may have been updated for some analytics, and newer analytics may have been created since.</li>
+        </div>
     </div>
+
 
     {% if campaigns %}
         <table class="mitre">
