@@ -39,7 +39,7 @@ def init_globals():
             AUTHORITY, SCOPE, ENDPOINT
     global _globals_initialized
     if not _globals_initialized:
-        DEBUG = True
+        DEBUG = False
         PROXY = settings.PROXY
         TENANT_ID = get_connector_conf('microsoftdefender', 'TENANT_ID')
         CLIENT_ID = get_connector_conf('microsoftdefender', 'CLIENT_ID')
