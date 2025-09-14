@@ -170,7 +170,7 @@ def db_runningtasks(request):
     tasks = TasksStatus.objects.all()
     
     code = f"""<h3>Running tasks</h3>
-        <p class="num"><a href="/admin/qm/tasksstatus/">{tasks.count()}</a></p>
+        <p class="num"><a href="/config/running-tasks/">{tasks.count()}</a></p>
         """
     return HttpResponse(code)
 

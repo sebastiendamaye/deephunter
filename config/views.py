@@ -4,8 +4,10 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from .models import Module, ModulePermission
-from notifications.utils import add_debug_notification
+from qm.models import TasksStatus
+from notifications.utils import add_debug_notification, add_error_notification, add_success_notification
 from .utils import check_group_permission
+from celery import current_app
 
 DEBUG = settings.DEBUG
 
@@ -67,3 +69,36 @@ def update_permission(request, group_id, permission_id):
         if DEBUG:
             add_debug_notification(f"Added {permission.permission} to {group.name}")
     return HttpResponse(status=204)
+
+@login_required
+@permission_required('qm.delete_tasksstatus', raise_exception=True)
+def running_tasks(request):
+    context = {
+        'running_tasks': TasksStatus.objects.all(),
+    }
+    return render(request, 'running_tasks.html', context)
+
+@login_required
+@permission_required('qm.delete_tasksstatus', raise_exception=True)
+def task_status(request, task_id):
+    task_status = get_object_or_404(TasksStatus, pk=task_id)
+    code = f"{round(task_status.progress)}%"
+    if task_status.taskid:
+        code += f' | <button class="buttonred" hx-get="/config/stop-running-task/{task_status.id}/" hx-swap="outerHTML">Stop</button>'
+    return HttpResponse(code)
+
+@login_required
+@permission_required('qm.delete_tasksstatus', raise_exception=True)
+def stop_running_task(request, task_id):
+    try:
+        task = get_object_or_404(TasksStatus, pk=task_id)
+        # without signal='SIGKILL', the task is not cancelled immediately
+        current_app.control.revoke(task.taskid, terminate=True, signal='SIGKILL')
+        # delete task in DB
+        celery_status = get_object_or_404(TasksStatus, taskid=task.taskid)
+        celery_status.delete()
+        add_success_notification(f'Celery Task {task.taskname} terminated')
+        return HttpResponse('Task terminated')
+    except Exception as e:
+        add_error_notification(f'Error terminating Celery Task: {e}')
+        return HttpResponse(f'Error terminating Celery Task: {e}')

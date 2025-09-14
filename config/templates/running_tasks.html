@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/list_analytics.css" />
+{% endblock %}
+
+{% block body %}
+<div class="padaround">
+    <h1>Running tasks</h1>
+
+	<div class="alert alert-info d-flex flex-row">
+		<div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+        <div class="notification-message">
+            You can only stop tasks that are run in the background via Celery. Cron jobs can't be stopped from here.
+        </div>
+	</div>
+
+    {% if running_tasks %}
+        <table class="mitre">
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in running_tasks %}
+                    <tr>
+                        <td>{{ task.taskname }}</td>
+                        <td>{{ task.date }}</td>
+                        <td><div hx-get="/config/task-status/{{ task.id }}/" hx-trigger="load, every 3s"></div></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No running tasks found.</p>
+    {% endif %}
+
+</div>
+{% endblock %}
