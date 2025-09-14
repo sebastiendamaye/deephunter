@@ -14,7 +14,7 @@ def deephunter_settings(request):
     return render(request, 'deephunter_settings.html')
 
 @login_required
-@permission_required('request.user.is_superuser', raise_exception=True)
+@permission_required('config.change_modulepermission', raise_exception=True)
 def permissions(request):
     groups = Group.objects.order_by('name')
     modules = []
@@ -47,7 +47,7 @@ def permissions(request):
     return render(request, 'permissions.html', context)
 
 @login_required
-@permission_required('request.user.is_superuser', raise_exception=True)
+@permission_required('config.change_modulepermission', raise_exception=True)
 def update_permission(request, group_id, permission_id):
 
     group = get_object_or_404(Group, id=group_id)
@@ -67,4 +67,3 @@ def update_permission(request, group_id, permission_id):
         if DEBUG:
             add_debug_notification(f"Added {permission.permission} to {group.name}")
     return HttpResponse(status=204)
-    

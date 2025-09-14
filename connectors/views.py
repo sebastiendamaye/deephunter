@@ -11,14 +11,14 @@ import os
 BASE_DIR = settings.BASE_DIR
 
 @login_required
-@permission_required('user.is_superuser', raise_exception=True)
+@permission_required('connectors.change_connectorconf', raise_exception=True)
 def connector_conf(request):
     context = { 'connectors': Connector.objects.all().order_by('name') }
     return render(request, "connector_conf.html", context)
 
 
 @login_required
-@permission_required('user.is_superuser', raise_exception=True)
+@permission_required('connectors.change_connectorconf', raise_exception=True)
 def selected_connector_settings(request, connector_id):
     connector = get_object_or_404(Connector, pk=connector_id)
     qs = ConnectorConf.objects.filter(connector=connector)
@@ -42,7 +42,7 @@ def selected_connector_settings(request, connector_id):
     })
 
 @login_required
-@permission_required('user.is_superuser', raise_exception=True)
+@permission_required('connectors.change_connectorconf', raise_exception=True)
 def toggle_connector(request, connector_id):
     connector = get_object_or_404(Connector, pk=connector_id)
     connector.enabled = not connector.enabled

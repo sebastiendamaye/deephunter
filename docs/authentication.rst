@@ -80,8 +80,3 @@ Privileges are assigned to groups. Use the User Interface to assign privileges t
 .. image:: img/groups_permissions.png
   :width: 800
   :alt: DeepHunter groups and privileges
-
-settings
-========
-
-To access the settings, you'll need the superuser privileges. Either grant a user the ``superuser`` status, or use the ``admin`` account.

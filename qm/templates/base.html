@@ -87,8 +87,8 @@
 								<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin">Admin interface</a></li>
 								{% if perms.qm.view_campaign %}<li><a class="{{ request.path|isactiveurl:"/qm/managecampaigns" }}" href="/qm/managecampaigns">Manage campaigns</a></li>{% endif %}
 								{% if perms.repos.view_repo %}<li><a class="{{ request.path|isactiveurl:"/repos/listrepos/" }}" href="/repos/listrepos/">Manage repos</a></li>{% endif %}
-								{% if perms.qm.view_tasksstatus %}<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin/qm/tasksstatus/">Running tasks</a></li>{% endif %}
-								{% if request.user.is_superuser %}<li><a class="{{ request.path|isactiveurl:"/config/deephunter-settings/" }}" href="/config/deephunter-settings/">Settings</a></li>{% endif %}
+								{% if perms.qm.view_tasksstatus %}<li><a class="{{ request.path|isactiveurl:"/config/running-tasks/" }}" href="/config/running-tasks/">Running tasks</a></li>{% endif %}
+								<li><a class="{{ request.path|isactiveurl:"/config/deephunter-settings/" }}" href="/config/deephunter-settings/">Settings</a></li>
 							</ul> 
 							</li>
 
