@@ -1,11 +1,17 @@
 <div id="tabs_connectors">
     <ul>
         {% for connector in connectors %}
-            <li><a href="#connector_{{ connector.id }}"
-                hx-get="/connectors/selected-connector-settings/{{ connector.id }}/"
-                hx-target="#connector_{{ connector.id }}"
-                {% if forloop.first %}hx-trigger="load"{% endif %}>
-                <span>{{ connector.name }}</span></a></li>
+            <li>
+                <a href="#connector_{{ connector.id }}"
+                    hx-get="/connectors/selected-connector-settings/{{ connector.id }}/"
+                    hx-target="#connector_{{ connector.id }}"
+                    {% if forloop.first %}hx-trigger="load"{% endif %}>
+                    <span>{{ connector.name }}</span>
+                    {% if connector.domain %}
+                        <span class="button">{{ connector.domain }}</span>
+                    {% endif %}
+                </a>
+            </li>
         {% endfor %}
     </ul>
 
