@@ -340,6 +340,18 @@ AUTO_DELETE_NOTIFICATIONS_AFTER
 		'error':   30,
 	}
 
+AI_CONNECTOR
+************
+- **Type**: string
+- **Possible values**: ``gemini``, or empty string (to disable AI features)
+- **Description**: Choose the AI connector to use for AI features (e.g., automatic identification of MITRE techniques based on query). If you don't want to use AI features, leave it as an empty string.
+- **Example**:
+
+.. code-block:: python
+
+	AI_CONNECTOR = "gemini"
+
+
 PROXY
 *****
 - **Type**: dictionary

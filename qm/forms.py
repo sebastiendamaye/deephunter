@@ -1,5 +1,6 @@
 from django import forms
-from .models import Review, Analytic, SavedSearch
+from .models import Review, Analytic, SavedSearch, Tag, ThreatName, ThreatActor, Vulnerability
+from connectors.models import Connector
 
 class ReviewForm(forms.ModelForm):
     class Meta:
@@ -68,3 +69,69 @@ class SavedSearchForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 3, 'cols': 100}),
             'search': forms.Textarea(attrs={'rows': 3, 'cols': 100}),
         }
+
+class AnalyticForm(forms.ModelForm):
+    class Meta:
+        model = Analytic
+        exclude = ['repo', 'created_by', 'pub_date', 'update_date', 'maxhosts_count', 'query_error', 'query_error_message', 'query_error_date', 'next_review_date', 'last_time_seen']
+        widgets = {
+            'name': forms.TextInput(attrs={'size': 100}),
+            'description': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
+            'notes': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
+            'query': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
+            'columns': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
+            'emulation_validation': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
+            'references': forms.Textarea(attrs={'rows': 5, 'cols': 100}),
+            'anomaly_threshold_count': forms.TextInput(attrs={'size': 3}),
+            'anomaly_threshold_endpoints': forms.TextInput(attrs={'size': 3}),
+        }
+
+    def __init__(self, *args, allowed_status_choices=None, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Limit status choices to DRAFT and PUB
+        if allowed_status_choices is not None:
+            self.fields['status'].choices = [
+                choice for choice in self.fields['status'].choices
+                if choice[0] in allowed_status_choices
+            ]
+
+        self.fields['connector'].queryset = Connector.objects.filter(domain='analytics', enabled=True)
+        
+        self.fields['tags'].queryset = self.fields['tags'].queryset.model.objects.all()
+        self.fields['tags'].widget.attrs.update({'class': 'form-select', 'data-placeholder': 'Choose Tags'})
+
+        self.fields['mitre_techniques'].queryset = self.fields['mitre_techniques'].queryset.model.objects.all()
+        self.fields['mitre_techniques'].widget.attrs.update({'class': 'form-select', 'data-placeholder': 'Choose MITRE Techniques'})
+
+        self.fields['threats'].queryset = self.fields['threats'].queryset.model.objects.all()
+        self.fields['threats'].widget.attrs.update({'class': 'form-select', 'data-placeholder': 'Choose Threats'})
+
+        self.fields['actors'].queryset = self.fields['actors'].queryset.model.objects.all()
+        self.fields['actors'].widget.attrs.update({'class': 'form-select', 'data-placeholder': 'Choose Threat Actors'})
+
+        self.fields['target_os'].queryset = self.fields['target_os'].queryset.model.objects.all()
+        self.fields['target_os'].widget.attrs.update({'class': 'form-select', 'data-placeholder': 'Choose Target OS'})
+
+        self.fields['vulnerabilities'].queryset = self.fields['vulnerabilities'].queryset.model.objects.all()
+        self.fields['vulnerabilities'].widget.attrs.update({'class': 'form-select', 'data-placeholder': 'Choose Vulnerabilities'})
+
+class TagForm(forms.ModelForm):
+    class Meta:
+        model = Tag
+        fields = ['name']
+
+class ThreatForm(forms.ModelForm):
+    class Meta:
+        model = ThreatName
+        fields = ['name', 'aka_name', 'references']
+
+class ActorForm(forms.ModelForm):
+    class Meta:
+        model = ThreatActor
+        fields = ['name', 'aka_name', 'source_country', 'references']
+
+class VulnerabilityForm(forms.ModelForm):
+    class Meta:
+        model = Vulnerability
+        fields = ['name', 'base_score', 'description', 'references']

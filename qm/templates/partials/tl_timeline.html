@@ -38,7 +38,7 @@
 			<a id="link_storylineid" href="" target="_blank">Open Storyline ID</a>
 		{% endif %}
 		{% if perms.qm.view_snapshot %}<a id="link_trend" href="" target="_blank">See trend</a>{% endif %}
-		{% if perms.qm.change_analytic %}<a id="link_admin" href="" target="_blank">Edit in admin</a>{% endif %}
+		{% if perms.qm.change_analytic %}<a id="link_admin" href="" target="_blank">Edit analytic</a>{% endif %}
 	</div>
 
 	<script type="text/javascript" nonce="jc3vgs67dm">
@@ -166,7 +166,7 @@
 				$('#link_storylineid').addClass('disabled');
 			}
 			
-			$('#link_admin').attr('href', '/admin/qm/analytic/'+mygroups[properties['group']]+'/change/');
+			$('#link_admin').attr('href', '/qm/analytic/'+mygroups[properties['group']]+'/change/');
 			$('#link_trend').attr('href', '/qm/'+mygroups[properties['group']]+'/trend/');
 
 			var x = properties.pageX+10;

@@ -315,38 +315,83 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
     add_success_notification(f"Campaign for date {campaigndate.strftime('%Y-%m-%d')} complete")
 
 
-def get_available_statuses(analytic):
+def get_available_statuses(analytic, edit=False):
     statuses = {}
     if analytic.status == "DRAFT":
-        statuses = {
-            "PUB_RUNDAILY": "Publish (run daily set)",
-            "PUB_NO_RUNDAILY": "Publish (run daily unset)",
-            "ARCH": "Archive",
-            }
-    elif analytic.status == "PUB":
-        # if analytic is locked, it's protected against review
-        if analytic.run_daily_lock:
+        if not edit:
             statuses = {
+                "PUB_RUNDAILY": "Publish (run daily set)",
+                "PUB_NO_RUNDAILY": "Publish (run daily unset)",
                 "ARCH": "Archive",
                 }
         else:
             statuses = {
+                "DRAFT": "Draft",
+                "PUB": "Publish",
+                "ARCH": "Archive",
+                }
+    elif analytic.status == "PUB":
+        # if analytic is locked, it's protected against review
+        if analytic.run_daily_lock:
+            if not edit:
+                statuses = {
+                    "PENDING": "Pending Update",
+                    "ARCH": "Archive",
+                    }
+            else:
+                statuses = {
+                    "PUB": "Publish",
+                    "PENDING": "Pending Update",
+                    "ARCH": "Archive",
+                    }
+        else:
+            if not edit:
+                statuses = {
+                    "PENDING": "Pending Update",
+                    "REVIEW": "To review",
+                    "ARCH": "Archive",
+                    }
+            else:
+                statuses = {
+                    "PUB": "Publish",
+                    "PENDING": "Pending Update",
+                    "REVIEW": "To review",
+                    "ARCH": "Archive",
+                    }
+    elif analytic.status == "REVIEW":
+        if not edit:
+            statuses = {}
+        else:
+            statuses = {
+                "REVIEW": "To review",
+                }
+    elif analytic.status == "PENDING":
+        if not edit:
+            statuses = {
+                "DRAFT": "Draft",
+                "ARCH": "Archive",
+                }
+        else:
+            statuses = {
+                "DRAFT": "Draft",
+                "PENDING": "Pending Update",
+                "ARCH": "Archive",
+                }
+
+    elif analytic.status == "ARCH":
+        if not edit:
+            statuses = {
+                "DRAFT": "Draft",
+                "PUB_RUNDAILY": "Publish (run daily set)",
+                "PUB_NO_RUNDAILY": "Publish (run daily unset)",
+                "REVIEW": "To review",
+                }
+        else:
+            statuses = {
+                "DRAFT": "Draft",
+                "PUB": "Publish",
                 "REVIEW": "To review",
                 "ARCH": "Archive",
                 }
-    elif analytic.status == "REVIEW":
-        statuses = {
-            }
-    elif analytic.status == "PENDING":
-        statuses = {
-            "DRAFT": "Draft",
-            "ARCH": "Archive",
-            }
-    elif analytic.status == "ARCH":
-        statuses = {
-            "DRAFT": "Draft",
-            "PUB_RUNDAILY": "Publish (run daily set)",
-            "PUB_NO_RUNDAILY": "Publish (run daily unset)",
-            "REVIEW": "To review",
-            }
+    
     return statuses

@@ -57,4 +57,12 @@ urlpatterns = [
     path('submit_review/<int:analytic_id>/', views.submit_review, name='submit_review'),
     path('reviews_table/<int:analytic_id>/', views.reviews_table, name='reviews_table'),
 
+    path('analytic/add/', views.add_analytic, name='add_analytic'),
+    path('analytic/<int:analytic_id>/change/', views.edit_analytic, name='edit_analytic'),
+    path('suggest-mitre-with-ai/', views.suggest_mitre_with_ai, name='suggest_mitre_with_ai'),
+
+    path('add-tag/', views.add_tag, name='add_tag'),
+    path('add-threat/', views.add_threat, name='add_threat'),
+    path('add-actor/', views.add_actor, name='add_actor'),
+    path('add-vulnerability/', views.add_vulnerability, name='add_vulnerability'),
 ]

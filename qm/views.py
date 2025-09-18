@@ -12,7 +12,8 @@ import numpy as np
 from scipy import stats
 from math import isnan
 from .models import (Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor,
-    ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category, Review, SavedSearch, Repo)
+    ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category, Review,
+    SavedSearch, Repo)
 from notifications.models import UserNotification
 from connectors.models import Connector
 from .tasks import regenerate_stats, regenerate_campaign
@@ -21,7 +22,9 @@ from connectors.utils import is_connector_enabled, is_connector_for_analytics, g
 from celery import current_app
 from qm.utils import get_campaign_date, get_available_statuses
 from urllib.parse import urlencode, quote
-from .forms import ReviewForm, EditAnalyticDescriptionForm, EditAnalyticNotesForm, EditAnalyticQueryForm, SavedSearchForm
+from .forms import (ReviewForm, EditAnalyticDescriptionForm, EditAnalyticNotesForm,
+                    EditAnalyticQueryForm, SavedSearchForm, AnalyticForm, TagForm,
+                    ThreatForm, ActorForm, VulnerabilityForm)
 from notifications.utils import add_error_notification, add_debug_notification
 
 # Dynamically import all connectors
@@ -45,7 +48,7 @@ CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
 ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
 ANALYTICS_PER_PAGE = settings.ANALYTICS_PER_PAGE
 DAYS_BEFORE_REVIEW = settings.DAYS_BEFORE_REVIEW
-
+AI_CONNECTOR = settings.AI_CONNECTOR
 
 @login_required
 @permission_required("qm.view_analytic", raise_exception=True)
@@ -1152,3 +1155,98 @@ def reviews_table(request, analytic_id):
         'analytic': analytic,
         'reviews': reviews,
     })
+
+
+@login_required
+@permission_required("qm.add_analytic", raise_exception=True)
+def add_analytic(request):
+    # For new analytics, only DRAFT and PUB statuses are allowed
+    form = AnalyticForm(request.POST if request.method == "POST" else None,
+                        allowed_status_choices=["DRAFT", "PUB"])
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(f'/qm/listanalytics/?search={form.cleaned_data["name"]}')
+    context = {'form': form, 'AI_CONNECTOR': AI_CONNECTOR}
+    return render(request, 'analytic_form.html', context)
+
+@login_required
+@permission_required("qm.change_analytic", raise_exception=True)
+def edit_analytic(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    # For existing analytics, allowed statuses depend on current status and defined workflow
+    form = AnalyticForm(request.POST if request.method == "POST" else None,
+                        instance=analytic,
+                        allowed_status_choices=get_available_statuses(analytic, edit=True))
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(f'/qm/listanalytics/?search={form.cleaned_data["name"]}')
+    context = {
+        'form': form,
+        'analytic_id': analytic_id,
+        'AI_CONNECTOR': AI_CONNECTOR
+    }
+    return render(request, 'analytic_form.html', context)
+
+@login_required
+@permission_required("qm.add_analytic", raise_exception=True)
+def suggest_mitre_with_ai(request):
+    if request.method == "POST":
+        query = request.POST.get('query', '')
+        #add_debug_notification(f'AI Suggest MITRE Techniques for query: {query}')
+        selected_values = all_connectors.get(AI_CONNECTOR).get_mitre_techniques_from_query(query)
+
+    return JsonResponse(selected_values, safe=False)
+
+@login_required
+@permission_required("qm.add_tag", raise_exception=True)
+def add_tag(request):
+    form = TagForm(request.POST or None)
+    if form.is_valid():
+        tag = form.save()
+        response = HttpResponse("")
+        response['HX-Trigger'] = 'closeModal'
+        response['HX-Tag-id'] = tag.id
+        response['HX-Tag-name'] = tag.name
+        return response
+    return render(request, "partials/add_tag.html", {"form": form})
+
+@login_required
+@permission_required("qm.add_threatname", raise_exception=True)
+def add_threat(request):
+    form = ThreatForm(request.POST or None)
+    if form.is_valid():
+        threat = form.save()
+        response = HttpResponse("")
+        response['HX-Trigger'] = 'closeModal'
+        response['HX-Threat-id'] = threat.id
+        response['HX-Threat-name'] = threat.name
+        return response
+    return render(request, "partials/add_threat.html", {"form": form})
+
+@login_required
+@permission_required("qm.add_threatactor", raise_exception=True)
+def add_actor(request):
+    form = ActorForm(request.POST or None)
+    if form.is_valid():
+        actor = form.save()
+        response = HttpResponse("")
+        response['HX-Trigger'] = 'closeModal'
+        response['HX-Actor-id'] = actor.id
+        response['HX-Actor-name'] = actor.name
+        return response
+    return render(request, "partials/add_actor.html", {"form": form})
+
+@login_required
+@permission_required("qm.add_vulnerability", raise_exception=True)
+def add_vulnerability(request):
+    form = VulnerabilityForm(request.POST or None)
+    if form.is_valid():
+        vulnerability = form.save()
+        response = HttpResponse("")
+        response['HX-Trigger'] = 'closeModal'
+        response['HX-Vulnerability-id'] = vulnerability.id
+        response['HX-Vulnerability-name'] = vulnerability.name
+        return response
+    return render(request, "partials/add_vulnerability.html", {"form": form})

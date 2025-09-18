@@ -4,6 +4,7 @@ class Connector(models.Model):
     DOMAIN_CHOICES = [
         ('analytics', 'Analytics'),
         ('repos', 'Repos'),
+        ('ai', 'AI'),
     ]
 
     name = models.CharField(max_length=20, unique=True)

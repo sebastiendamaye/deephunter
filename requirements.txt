@@ -1,7 +1,8 @@
-azure-identity==1.24.0
+azure-identity==1.25.0
 azure-monitor-query==2.0.0
 Authlib==1.6.3
 beautifulsoup4==4.13.5
+bleach==6.2.0
 celery==5.5.3
 Django==5.2.6
 django-auto-logout==0.5.1
@@ -9,8 +10,10 @@ django-dbbackup==5.0.0
 django-extensions==4.1
 django-markup==1.10
 django-simple-history==3.10.1
+google-genai==1.38.0
 ldap3==2.9.1
 lxml==6.0.1
+Markdown==3.9
 msal==1.33.0
 mysqlclient==2.2.7
 numpy==2.2.6

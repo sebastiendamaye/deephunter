@@ -124,6 +124,9 @@ AUTO_DELETE_NOTIFICATIONS_AFTER = {
     'error':   30,
 }
 
+# Choose AI connector. Leave empty string to disable AI features
+AI_CONNECTOR = "gemini"
+
 # Proxy settings
 PROXY = {
     'http': 'http://proxy:port',

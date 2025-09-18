@@ -19,7 +19,7 @@
 
 		<div class="m10">
 			{% if perms.qm.run_query %}<a href="/qm/events/{{ analytic.id }}/" target="_blank" class="button">Run query</a>{% endif %}
-			{% if perms.qm.change_analytic %}<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank" class="button">Edit in admin</a>{% endif %}
+			{% if perms.qm.change_analytic %}<a href="/qm/analytic/{{ analytic.id }}/change/" class="button">Edit analytic</a>{% endif %}
 			{% if perms.qm.view_historicalanalytic %}<a href="/admin/qm/analytic/{{ analytic.id }}/history/" target="_blank" class="button">History</a>{% endif %}
 			{% if perms.qm.delete_analytic %}<span class="pad20"><a href="/qm/deleteanalytic/{{ analytic.id }}/" class="buttonred">Delete</a></span>{% endif %}
 		</div>

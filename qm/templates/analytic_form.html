@@ -1,0 +1,457 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/list_analytics.css" />
+    <link rel="stylesheet" href="/static/css/analytics_form.css" />
+    <link rel="stylesheet" href="/static/select2/dist/css/select2.min.css" />
+    <link rel="stylesheet" href="/static/select2-bootstrap-5-theme/select2-bootstrap-5-theme.min.css" />
+{% endblock %}
+{% block js %}
+    <script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/select2/dist/js/select2.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="padaround">
+    <h1>{% if analytic_id %}Edit Threat Hunting Analytic{% else %}Create a new Threat Hunting Analytic{% endif %}</h1>
+
+    <div class="alert alert-info d-flex flex-row">
+		<div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+        <div class="notification-message">
+            Fields in bold are required.
+        </div>
+	</div>
+
+    <form id="analytic-form" method="post" action="{% if analytic_id %}{% url 'edit_analytic' analytic_id=analytic_id %}{% else %}{% url 'add_analytic' %}{% endif %}">
+        {% csrf_token %}
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.name.id_for_label }}" class="required margin">{{ form.name.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.name.errors }}</div>
+                <div>{{ form.name }}</div>
+                <div class="helptext">{{ form.name.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="margin">{{ form.description.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.description.errors }}</div>
+                <div>{{ form.description }}</div>
+                <div class="helptext">{{ form.description.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.notes.id_for_label }}" class="margin">{{ form.notes.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.notes.errors }}</div>
+                <div>{{ form.notes }}</div>
+                <div class="helptext">{{ form.notes.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.status.id_for_label }}" class="required margin">{{ form.status.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.status.errors }}</div>
+                <div>{{ form.status }}</div>
+                <div class="helptext">{{ form.status.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.confidence.id_for_label }}" class="required margin">{{ form.confidence.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.confidence.errors }}</div>
+                <div>{{ form.confidence }}</div>
+                <div class="helptext">{{ form.confidence.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.relevance.id_for_label }}" class="required margin">{{ form.relevance.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.relevance.errors }}</div>
+                <div>{{ form.relevance }}</div>
+                <div class="helptext">{{ form.relevance.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.category.id_for_label }}" class="margin">{{ form.category.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.category.errors }}</div>
+                <div>{{ form.category }}</div>
+                <div class="helptext">{{ form.category.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.connector.id_for_label }}" class="required margin">{{ form.connector.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.connector.errors }}</div>
+                <div>{{ form.connector }}</div>
+                <div class="helptext">{{ form.connector.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.query.id_for_label }}" class="required margin">{{ form.query.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.query.errors }}</div>
+                <div>{{ form.query }}</div>
+                <div class="helptext">{{ form.query.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.columns.id_for_label }}" class="margin">{{ form.columns.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.columns.errors }}</div>
+                <div>{{ form.columns }}</div>
+                <div class="helptext">{{ form.columns.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.tags.id_for_label }}" class="margin">{{ form.tags.label }}</label>
+                {% if perms.qm.add_tag %}
+                    <div>
+                        <button type="button"
+                            class="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalWindow"
+                            hx-get="/qm/add-tag/"
+                            hx-target="#modalContent"
+                            title="Add another tag">
+                            <span>Add Tag</span>
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+            <div>
+                <div>{{ form.tags.errors }}</div>
+                <div>{{ form.tags }}</div>
+                <div class="helptext">{{ form.tags.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.mitre_techniques.id_for_label }}" class="margin">{{ form.mitre_techniques.label }}</label>
+                {% if AI_CONNECTOR %}
+                    <div>
+                        <button
+                            type="button"
+                            class="button"
+                            id="loadValuesMitre"
+                            hx-post="/qm/suggest-mitre-with-ai/"
+                            hx-include="#id_query"
+                            hx-trigger="click"
+                            hx-target="#id_mitre_techniques"
+                            hx-swap="none">
+                            <span id="mitre-btn-text"><i class="fa-solid fa-robot"></i> Suggest with AI</span>
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+            <div>
+                <div>{{ form.mitre_techniques.errors }}</div>
+                <div>{{ form.mitre_techniques }}</div>
+                <div class="helptext">{{ form.mitre_techniques.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.threats.id_for_label }}" class="margin">{{ form.threats.label }}</label>
+                {% if perms.qm.add_threatname %}
+                    <div>
+                        <button type="button"
+                            class="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalWindow"
+                            hx-get="/qm/add-threat/"
+                            hx-target="#modalContent"
+                            title="Add another threat">
+                            <span>Add Threat</span>
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+            <div>
+                <div>{{ form.threats.errors }}</div>
+                <div>{{ form.threats }}</div>
+                <div class="helptext">{{ form.threats.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.actors.id_for_label }}" class="margin">{{ form.actors.label }}</label>
+                {% if perms.qm.add_threatactor %}
+                    <div>
+                        <button type="button"
+                            class="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalWindow"
+                            hx-get="/qm/add-actor/"
+                            hx-target="#modalContent"
+                            title="Add another actor">
+                            <span>Add Actor</span>
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+            <div>
+                <div>{{ form.actors.errors }}</div>
+                <div>{{ form.actors }}</div>
+                <div class="helptext">{{ form.actors.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.target_os.id_for_label }}" class="margin">{{ form.target_os.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.target_os.errors }}</div>
+                <div>{{ form.target_os }}</div>
+                <div class="helptext">{{ form.target_os.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.vulnerabilities.id_for_label }}" class="margin">{{ form.vulnerabilities.label }}</label>
+                {% if perms.qm.add_vulnerability %}
+                    <div>
+                        <button type="button"
+                            class="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalWindow"
+                            hx-get="/qm/add-vulnerability/"
+                            hx-target="#modalContent"
+                            title="Add another vulnerability">
+                            <span>Add Vulnerability</span>
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+            <div>
+                <div>{{ form.vulnerabilities.errors }}</div>
+                <div>{{ form.vulnerabilities }}</div>
+                <div class="helptext">{{ form.vulnerabilities.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.emulation_validation.id_for_label }}" class="margin">{{ form.emulation_validation.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.emulation_validation.errors }}</div>
+                <div>{{ form.emulation_validation }}</div>
+                <div class="helptext">{{ form.emulation_validation.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.references.id_for_label }}" class="margin">{{ form.references.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.references.errors }}</div>
+                <div>{{ form.references }}</div>
+                <div class="helptext">{{ form.references.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.create_rule.id_for_label }}" class="margin">{{ form.create_rule.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.create_rule.errors }}</div>
+                <div>{{ form.create_rule }}</div>
+                <div class="helptext">{{ form.create_rule.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.run_daily.id_for_label }}" class="margin">{{ form.run_daily.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.run_daily.errors }}</div>
+                <div>{{ form.run_daily }}</div>
+                <div class="helptext">{{ form.run_daily.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.run_daily_lock.id_for_label }}" class="margin">{{ form.run_daily_lock.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.run_daily_lock.errors }}</div>
+                <div>{{ form.run_daily_lock }}</div>
+                <div class="helptext">{{ form.run_daily_lock.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.dynamic_query.id_for_label }}" class="margin">{{ form.dynamic_query.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.dynamic_query.errors }}</div>
+                <div>{{ form.dynamic_query }}</div>
+                <div class="helptext">{{ form.dynamic_query.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.anomaly_threshold_count.id_for_label }}" class="required margin">{{ form.anomaly_threshold_count.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.anomaly_threshold_count.errors }}</div>
+                <div>{{ form.anomaly_threshold_count }}</div>
+                <div class="helptext">{{ form.anomaly_threshold_count.help_text }}</div>
+            </div>
+        </div>
+
+        <div class="form-section-container">
+            <div>
+                <label for="{{ form.anomaly_threshold_endpoints.id_for_label }}" class="required margin">{{ form.anomaly_threshold_endpoints.label }}</label>
+            </div>
+            <div>
+                <div>{{ form.anomaly_threshold_endpoints.errors }}</div>
+                <div>{{ form.anomaly_threshold_endpoints }}</div>
+                <div class="helptext">{{ form.anomaly_threshold_endpoints.help_text }}</div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{% url 'list_analytics' %}" class="btn btn-secondary">Cancel</a>
+
+    </form>
+</div>
+
+
+
+
+
+<!-- Modal Container -->
+<div class="modal fade" id="modalWindow" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content" id="modalContent">
+      <!-- HTMX will load content here -->
+    </div>
+  </div>
+</div>
+
+
+
+
+<script type="text/javascript" nonce="jK4hG2t713">
+$( '#id_tags' ).select2( {
+    theme: "bootstrap-5",
+    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+    placeholder: $( this ).data( 'placeholder' ),
+    closeOnSelect: false,
+    allowClear: true,
+} );
+$( '#id_mitre_techniques' ).select2( {
+    theme: "bootstrap-5",
+    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+    placeholder: $( this ).data( 'placeholder' ),
+    closeOnSelect: false,
+    allowClear: true,
+} );
+$( '#id_threats' ).select2( {
+    theme: "bootstrap-5",
+    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+    placeholder: $( this ).data( 'placeholder' ),
+    closeOnSelect: false,
+    allowClear: true,
+} );
+$( '#id_actors' ).select2( {
+    theme: "bootstrap-5",
+    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+    placeholder: $( this ).data( 'placeholder' ),
+    closeOnSelect: false,
+    allowClear: true,
+} );
+$( '#id_target_os' ).select2( {
+    theme: "bootstrap-5",
+    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+    placeholder: $( this ).data( 'placeholder' ),
+    closeOnSelect: false,
+    allowClear: true,
+} );
+$( '#id_vulnerabilities' ).select2( {
+    theme: "bootstrap-5",
+    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+    placeholder: $( this ).data( 'placeholder' ),
+    closeOnSelect: false,
+    allowClear: true,
+} );
+
+/* Suggest with AI (MITRE techniques) */
+
+document.body.addEventListener('htmx:beforeRequest', function(evt) {
+    // change button state to processing...
+    if (evt.detail.elt.id === 'loadValuesMitre') {
+        document.getElementById('mitre-btn-text').innerHTML =
+            '<span class="loading-dots">processing<span>.</span><span>.</span><span>.</span></span>';
+        document.getElementById('loadValuesMitre').classList.replace('button', 'nobutton');
+    }
+});
+
+document.body.addEventListener('htmx:afterRequest', function(evt) {
+    // restore button state
+    if (evt.detail.elt.id === 'loadValuesMitre') {
+        document.getElementById('mitre-btn-text').innerHTML =
+            '<i class="fa-solid fa-robot"></i> Suggest with AI';
+        document.getElementById('loadValuesMitre').classList.replace('nobutton', 'button');
+    }
+
+    if (evt.detail.target.id === 'id_mitre_techniques') {
+        // Parse response as JSON
+        let response = evt.detail.xhr.responseText;
+        let selectedIds = JSON.parse(response);
+
+        // Update select options to match selectedIds
+        $('#id_mitre_techniques').val(selectedIds).trigger('change');
+    }
+});
+</script>
+
+
+{% endblock %}

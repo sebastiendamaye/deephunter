@@ -60,7 +60,7 @@
 						<td class="acenter">
 							{% if perms.qm.run_query %}<a class="button" href="{{ analytic.xdrlink }}" target="_blank">events</a>{% endif %}
 							{% if perms.qm.view_snapshot %}<a class="button" href="/qm/{{ analytic.analyticid }}/trend/" target="_blank">trend</a>{% endif %}
-							{% if perms.qm.change_analytic %}<a class="button" href="/admin/qm/analytic/{{ analytic.analyticid }}/change/" target="_blank">admin</a>{% endif %}
+							{% if perms.qm.change_analytic %}<a class="button" href="/qm/analytic/{{ analytic.analyticid }}/change/">edit analytic</a>{% endif %}
 							</td>
 					</tr>
 					{% endfor %}

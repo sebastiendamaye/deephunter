@@ -20,7 +20,7 @@
 	<div class="charts_right{% if tab == 1 %}_tab{% endif %}">
 		<div class="paragraph">
 			{% if tab == 0 %}
-				[<a href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank">edit in admin</a>]
+				[<a href="/qm/analytic/{{ analytic.id }}/change/">edit analytic</a>]
 				[<a href="/admin/qm/endpoint/?snapshot__analytic__name={{ analytic.name }}" target="_blank">see endpoints</a>]
 			{% endif %}
 			{% if perms.qm.change_snapshot %}<div class="progress"><a hx-get="/qm/{{ analytic.id }}/progress/" hx-trigger="load, every 3s"></a></div>&nbsp;{% endif %}

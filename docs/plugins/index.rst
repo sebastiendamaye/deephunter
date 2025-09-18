@@ -37,6 +37,7 @@ Plugins
    :maxdepth: 1
   
    activedirectory
+   gemini
    loldrivers
    malwarebazaar
    microsoftdefender

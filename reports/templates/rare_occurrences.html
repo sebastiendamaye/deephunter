@@ -27,7 +27,7 @@
         <td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
         <td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>
 		<td class="acenter">
-			{% if perms.qm.change_analytic %}<a class="button" href="/admin/qm/analytic/{{ analytic.id }}/change/" target="_blank">admin</a>{% endif %}
+			{% if perms.qm.change_analytic %}<a class="button" href="/qm/analytic/{{ analytic.id }}/change/">edit analytic</a>{% endif %}
 			{% if perms.qm.view_snapshot %}<a class="button" href="/qm/{{ analytic.id }}/trend/" target="_blank">stats</a>{% endif %}
 		</td>
 		<td class="acenter">{{ analytic.distinct_hostnames }}</td>

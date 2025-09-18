@@ -1,0 +1,47 @@
+<form hx-post="/qm/add-tag/" hx-target="this">
+    <div class="modal-header">
+        <h5 class="modal-title">Create a new tag</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        {% csrf_token %}
+        {{ form.as_p }}
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>
+
+<script nonce="kj5fcv07a2">
+document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+    // Check for a custom header indicating success
+    if (evt.detail.xhr.getResponseHeader('HX-Trigger') === 'closeModal') {
+        
+        // Close the modal window
+        var modalEl = document.getElementById('modalWindow');
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) {
+            modal.hide();
+        }
+
+        // Add the new option to the multiselect
+        var data = {
+            id: evt.detail.xhr.getResponseHeader('HX-Tag-id'),
+            text: evt.detail.xhr.getResponseHeader('HX-Tag-name')
+        };
+
+        if (data.id && data.text) {
+            // Check if the option with the same ID already exists
+            if ($('#id_tags option[value="' + data.id + '"]').length === 0) {
+                // If it doesn't exist, add the new option and select it
+                var newOption = new Option(data.text, data.id, true, true);
+                $('#id_tags').append(newOption).trigger('change');
+            } else {
+                // Option already exists, just select it
+                $('#id_tags').val($('#id_tags').val().concat(data.id.toString())).trigger('change');
+            }
+        }
+    }
+});
+</script>

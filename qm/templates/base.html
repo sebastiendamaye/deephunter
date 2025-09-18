@@ -45,7 +45,7 @@
 							<li><a href="#">Analytics</a>
 							<ul>
 								{% if perms.qm.view_analytic %}<li><a class="{{ request.path|isactiveurl:"/qm/listanalytics/" }}" href="/qm/listanalytics/">List analytics</a></li>{% endif %}
-								{% if perms.qm.add_analytic %}<li><a class="{{ request.path|isactiveurl:"/admin" }}" href="/admin/qm/analytic/add/">Create analytic</a></li>{% endif %}
+								{% if perms.qm.add_analytic %}<li><a class="{{ request.path|isactiveurl:"/qm/analytic/add/" }}" href="/qm/analytic/add/">Create analytic</a></li>{% endif %}
 								{% if perms.qm.view_savedsearch %}<li><a class="{{ request.path|isactiveurl:"/qm/saved_searches/" }}" href="/qm/saved_searches/">Saved searches</a></li>{% endif %}
 							</ul>        
 							</li>

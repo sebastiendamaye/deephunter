@@ -25,7 +25,7 @@
 		<td class="acenter">{{ analytic.runtime|floatformat }} sec</td>
 		<td><span id="sparkline_{{ analytic.id }}"></span></td>
 		<td>
-			{% if perms.qm.change_analytic %}<a class="button" target="_blank" href="/admin/qm/analytic/{{ analytic.id }}/change/">admin</a>{% endif %}
+			{% if perms.qm.change_analytic %}<a class="button" href="/qm/analytic/{{ analytic.id }}/change/">edit analytic</a>{% endif %}
 			{% if perms.qm.view_snapshot %}<a class="button" target="_blank" href="/qm/{{ analytic.id }}/trend/">stats</a>{% endif %}
 		</td>
 		<td>{{ analytic.connector }}</td>
