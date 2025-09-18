@@ -34,8 +34,10 @@
 			<th>Dest IP</th>
 			<th>Priv/Publ</th>
 			<th>Popularity*</th>
-			<th>VT malicious</th>
-			<th>VT suspicious</th>
+			{% if "virustotal"|connector_is_enabled %}
+				<th>VT malicious</th>
+				<th>VT suspicious</th>
+			{% endif %}
 			<th>Ports</th>
 		</tr>
 		{% for i in ips %}
@@ -43,8 +45,10 @@
 			<td>{% if i.iptype == "PUBL" %}<a title="{{ i.vt.whois }}" href="https://www.virustotal.com/gui/ip-address/{{ i.dstip }}" target="_blank">{{ i.dstip }}</a>{% else %}{{ i.dstip }}{% endif %}</td>
 			<td class="acenter">{{ i.iptype }}</td>
 			<td class="aright">{{ i.freq }}</td>
-			<td class="acenter">{{ i.vt.malicious }}</td>
-			<td class="acenter">{{ i.vt.suspicious }}</td>
+			{% if "virustotal"|connector_is_enabled %}
+				<td class="acenter">{{ i.vt.malicious }}</td>
+				<td class="acenter">{{ i.vt.suspicious }}</td>
+			{% endif %}
 			<td class="w800">{{ i.dstports }}</td>
 		</tr>
 		{% endfor %}

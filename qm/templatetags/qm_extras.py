@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from qm.models import (Country, TargetOs, ThreatActor, ThreatName, Vulnerability,
     MitreTactic, MitreTechnique, Tag, Category, Review, Analytic, Repo)
 from connectors.models import Connector
+from connectors.utils import is_connector_enabled
 from django.conf import settings
 import re
 
@@ -13,6 +14,10 @@ register = template.Library()
 @register.simple_tag
 def settings_value(name):
     return getattr(settings, name, "")
+
+@register.filter
+def connector_is_enabled(connector_name):
+    return is_connector_enabled(connector_name)
 
 @register.filter
 def repl(v):

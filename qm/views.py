@@ -576,12 +576,13 @@ def tl_host(request, hostname):
             if agent_id:
                 # Get username
                 username = all_connectors.get('sentinelone').get_last_logged_in_user(agent_id)
-                entry = all_connectors.get('activedirectory').ldap_search(username)
-                if entry:
-                    user_name = entry.displayName
-                    job_title = entry.title
-                    business_unit = entry.division
-                    location = "{}, {}".format(entry.physicalDeliveryOfficeName, entry.co)
+                if is_connector_enabled('activedirectory'):
+                    entry = all_connectors.get('activedirectory').ldap_search(username)
+                    if entry:
+                        user_name = entry.displayName
+                        job_title = entry.title
+                        business_unit = entry.division
+                        location = "{}, {}".format(entry.physicalDeliveryOfficeName, entry.co)
     
     context = {
         'machinedetails': machinedetails,
@@ -739,16 +740,17 @@ def netview(request):
                         else:
                             iptype = 'PUBL'
                             vt = {}
-                            response = all_connectors.get('virustotal').check_ip(ip[0])
-                            try:
-                                vt['malicious'] = response['attributes']['last_analysis_stats']['malicious']
-                                vt['suspicious'] = response['attributes']['last_analysis_stats']['suspicious']
-                                vt['whois'] = response['attributes']['whois']
-                            except KeyError:
-                                vt['malicious'] = 0
-                                vt['suspicious'] = 0
-                                vt['whois'] = ''
-                                debug = 'No VT data for IP: {}'.format(ip[0])
+                            if is_connector_enabled('virustotal'):
+                                response = all_connectors.get('virustotal').check_ip(ip[0])
+                                try:
+                                    vt['malicious'] = response['attributes']['last_analysis_stats']['malicious']
+                                    vt['suspicious'] = response['attributes']['last_analysis_stats']['suspicious']
+                                    vt['whois'] = response['attributes']['whois']
+                                except KeyError:
+                                    vt['malicious'] = 0
+                                    vt['suspicious'] = 0
+                                    vt['whois'] = ''
+                                    debug = 'No VT data for IP: {}'.format(ip[0])
                         
                         ips.append({
                             'dstip': ip[0],

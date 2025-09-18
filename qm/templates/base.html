@@ -51,7 +51,7 @@
 							</li>
 
 							{% if perms.qm.view_timeline %}<li><a class="{{ request.path|isactiveurl:"/qm/timeline/" }}" href="/qm/timeline/">Timeline</a></li>{% endif %}
-							{% if perms.qm.view_netview %}<li><a class="{{ request.path|isactiveurl:"/qm/netview/" }}" href="/qm/netview/">Netview</a></li>{% endif %}
+							{% if "sentinelone"|connector_is_enabled and perms.qm.view_netview %}<li><a class="{{ request.path|isactiveurl:"/qm/netview/" }}" href="/qm/netview/">Netview</a></li>{% endif %}
 
 							{% if perms.qm.view_reports %}
 								<li><a href="#">Reports</a>
@@ -73,11 +73,19 @@
 							{% if perms.extensions.view_extensions %}
 								<li><a href="#">Tools</a>
 								<ul>
-									<li><a class="{{ request.path|isactiveurl:"/extensions/vthashchecker/" }}" href="/extensions/vthashchecker/">VirusTotal Hash Checker</a></li>
-									<li><a class="{{ request.path|isactiveurl:"/extensions/vtipchecker/" }}" href="/extensions/vtipchecker/">VirusTotal IP Checker</a></li>
-									<li><a class="{{ request.path|isactiveurl:"/extensions/malwarebazaarhashchecker/" }}" href="/extensions/malwarebazaarhashchecker/">MalwareBazaar Hash Check</a></li>
-									<li><a class="{{ request.path|isactiveurl:"/extensions/loldriverhashchecker/" }}" href="/extensions/loldriverhashchecker/">LOL Driver Hash Checker</a></li>
-									<li><a class="{{ request.path|isactiveurl:"/extensions/whois/" }}" href="/extensions/whois/">Whois</a></li>
+									{% if "virustotal"|connector_is_enabled %}
+										<li><a class="{{ request.path|isactiveurl:"/extensions/vthashchecker/" }}" href="/extensions/vthashchecker/">VirusTotal Hash Checker</a></li>
+										<li><a class="{{ request.path|isactiveurl:"/extensions/vtipchecker/" }}" href="/extensions/vtipchecker/">VirusTotal IP Checker</a></li>
+									{% endif %}
+									{% if "malwarebazaar"|connector_is_enabled %}
+										<li><a class="{{ request.path|isactiveurl:"/extensions/malwarebazaarhashchecker/" }}" href="/extensions/malwarebazaarhashchecker/">MalwareBazaar Hash Check</a></li>
+									{% endif %}
+									{% if "loldrivers"|connector_is_enabled %}
+										<li><a class="{{ request.path|isactiveurl:"/extensions/loldriverhashchecker/" }}" href="/extensions/loldriverhashchecker/">LOL Driver Hash Checker</a></li>
+									{% endif %}
+									{% if "whois"|connector_is_enabled %}
+										<li><a class="{{ request.path|isactiveurl:"/extensions/whois/" }}" href="/extensions/whois/">Whois</a></li>
+									{% endif %}
 								</ul>        
 								</li>
 							{% endif %}

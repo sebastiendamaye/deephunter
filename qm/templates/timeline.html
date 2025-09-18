@@ -28,13 +28,17 @@
 		<ul>
 			<li><a href="#timeline" hx-get="/qm/tl_timeline/{{ hostname }}/" hx-target="#timeline" hx-trigger="load"><span>TIMELINE</span></a></li>
 			<li><a href="#hostuser" hx-get="/qm/tl_host/{{ hostname }}/" hx-target="#hostuser"><span>HOST/USER</span></a></li>
-			<li><a href="#activedirectory" hx-get="/qm/tl_ad/{{ hostname }}/" hx-target="#activedirectory"><span>ACTIVE DIRECTORY</span></a></li>
-			<li><a href="#appinventory" hx-get="/qm/tl_apps/{{ hostname }}/" hx-target="#appinventory"><span>APP INVENTORY</span></a></li>
+			{% if "sentinelone"|connector_is_enabled %}
+				<li><a href="#activedirectory" hx-get="/qm/tl_ad/{{ hostname }}/" hx-target="#activedirectory"><span>ACTIVE DIRECTORY</span></a></li>
+				<li><a href="#appinventory" hx-get="/qm/tl_apps/{{ hostname }}/" hx-target="#appinventory"><span>APP INVENTORY</span></a></li>
+			{% endif %}
 		</ul>
 		<div id="timeline"><img alt="Result loading..." src="/static/images/bars.svg"/></div>
 		<div id="hostuser"><img alt="Result loading..." src="/static/images/bars.svg"/></div>
-		<div id="activedirectory"><img alt="Result loading..." src="/static/images/bars.svg"/></div>
-		<div id="appinventory"><img alt="Result loading..." src="/static/images/bars.svg"/></div>
+		{% if "sentinelone"|connector_is_enabled %}
+			<div id="activedirectory"><img alt="Result loading..." src="/static/images/bars.svg"/></div>
+			<div id="appinventory"><img alt="Result loading..." src="/static/images/bars.svg"/></div>
+		{% endif %}
 
 	</div>
 
