@@ -21,7 +21,6 @@ Python file
 Methods are listed below (M/O = Mandatory / Optional).
 
 .. list-table::
-   :widths: 250 300 20 500 500
    :header-rows: 1
 
    * - Method
@@ -90,6 +89,13 @@ Methods are listed below (M/O = Mandatory / Optional).
      - M
      - ``error``: The error message to check.
      - Boolean indicating whether the error is informational.
+   * - ``get_network_connections``
+     - Get a list of network connections grouped by dest IP (IP address, ports, popularity).
+     - O
+     - * ``endpoint_name``: Name of the endpoint to filter the analytic by.
+       * ``timerange``: Time range in hours to filter the analytic by.
+       * ``storyline_id``: storyline ID to retrieve network connections for (only relevant for SentinelOne).
+     - Array containing the network connections (dest IP, number of events, list of port numbers separated by #, dest IP popularity).
 
 Template
 ********
@@ -232,3 +238,28 @@ You can use the following template to create your own plugin:
           if re.search(QUERY_ERROR_INFO, error):
               return True
       return False
+
+  def get_network_connections(endpoint_name, timerange, storyline_id=None):
+      """
+      Get network connections for a specific storyline ID and endpoint name.
+      
+      :param endpoint_name: Name of the endpoint to filter the analytic by.
+      :param timerange: Time range (in hours) to filter the analytic by.
+      :param storyline_id: storyline ID to retrieve network connections for (only relevant for SentinelOne).
+      :return: List of network connections ([dst_ip, nb_events, dst_ports_separator_hash_sign, nb_hosts_same_dstip]) or None if not found.
+      """
+      init_globals()
+      # Example data, replace with actual API call and data processing
+      data = [
+          ('23.45.67.89', 1, '#80#49152#', 21),
+          ('192.168.10.5', 2, '#443#32000#', 78),
+          ('172.20.14.3', 1, '#54000', 9),
+          ('203.0.113.77', 3, '#80#443#', 62),
+          ('10.1.2.3', 1, '#25000#', 95),
+          ('198.51.100.88', 2, '#10240#', 33),
+          ('8.26.56.26', 4, '#32767#', 14),
+          ('100.64.1.2', 5, '#40960#', 87),
+          ('192.0.2.55', 9, '#55555#', 5),
+          ('172.16.0.99', 1, '#60001#', 46)
+      ]
+      return data

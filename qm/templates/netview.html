@@ -3,64 +3,70 @@
 
 {% block style %}
 	<link rel="stylesheet" href="/static/css/stats.css" />
+	<link rel="stylesheet" href="/static/css/list_analytics.css" />
 {% endblock %}
 
 {% block body %}
-<h1>Network View</h1>
-<form action="" method="get">
-	{% csrf_token %}
-	<label for="hostname">Endpoint</label>
-	<input id="hostname" name="hostname" type="text" value="{{ hostname }}">
-	<label for="storylineid">Storyline ID</label>
-	<input id="storylineid" name="storylineid" type="text" value="{{ storylineid }}">
-	<label for="timerange">Time range</label>
-	<select id="timerange" name="timerange">
-		<option value="24" {{ timerange|isselectedoption:"24" }}>Last 24h</option>
-		<option value="36" {{ timerange|isselectedoption:"36" }}>Last 36h</option>
-		<option value="48" {{ timerange|isselectedoption:"48" }}>Last 48h</option>
-		<option value="72" {{ timerange|isselectedoption:"72" }}>Last 72h</option>
-	</select>
-	<input type="submit" />
-</form>
-<input type="checkbox" id="togglevis" checked />
-<label for="togglevis">Hide private IP addresses</label>
+<div class="padaround">
+	<h1>Network View</h1>
+	<form action="" method="get">
+		{% csrf_token %}
+		<label for="hostname">Endpoint</label>
+		<input id="hostname" name="hostname" type="text" value="{{ hostname }}">
+		<label for="storylineid">Storyline ID</label>
+		<input id="storylineid" name="storylineid" type="text" value="{{ storylineid }}">
+		<label for="timerange">Time range</label>
+		<select id="timerange" name="timerange">
+			<option value="24" {{ timerange|isselectedoption:"24" }}>Last 24h</option>
+			<option value="36" {{ timerange|isselectedoption:"36" }}>Last 36h</option>
+			<option value="48" {{ timerange|isselectedoption:"48" }}>Last 48h</option>
+			<option value="72" {{ timerange|isselectedoption:"72" }}>Last 72h</option>
+		</select>
+		<input type="submit" />
+	</form>
+	<input type="checkbox" id="togglevis" checked />
+	<label for="togglevis">Hide private IP addresses</label>
 
-<br />
-<pre>{{ debug }}</pre>
+	{% if ips|length > 0 %}
+		<p>Showing all IP addresses but localhost. VT score only shown for public IP addresses.</p>
+		<table id="tableip" class="mitre">
+			<tr>
+				<th>Connector</th>
+				<th>Dest IP</th>
+				<th>Priv/Publ</th>
+				<th>Popularity*</th>
+				{% if "virustotal"|connector_is_enabled %}
+					<th>VT malicious</th>
+					<th>VT suspicious</th>
+				{% endif %}
+				<th>Ports</th>
+			</tr>
+			{% for i in ips %}
+			<tr{% if i.iptype == "PRIV" %} class="priv"{% endif %}>
+				<td>{{ i.connector }}</td>
+				<td>{% if i.iptype == "PUBL" %}<a title="{{ i.vt.whois }}" href="https://www.virustotal.com/gui/ip-address/{{ i.dstip }}" target="_blank">{{ i.dstip }}</a>{% else %}{{ i.dstip }}{% endif %}</td>
+				<td class="acenter">{{ i.iptype }}</td>
+				<td class="aright">{{ i.freq }}</td>
+				{% if "virustotal"|connector_is_enabled %}
+					<td class="acenter">{{ i.vt.malicious }}</td>
+					<td class="acenter">{{ i.vt.suspicious }}</td>
+				{% endif %}
+				<td class="w800">{{ i.dstports }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		(*) How many endpoints have also reached this destination IP in the same time range
+	{% endif %}
+
+</div>
+
 {% if ips|length > 0 %}
-	<p>Showing all IP addresses but localhost. VT score only shown for public IP addresses.</p>
-	<table id="tableip">
-		<tr>
-			<th>Dest IP</th>
-			<th>Priv/Publ</th>
-			<th>Popularity*</th>
-			{% if "virustotal"|connector_is_enabled %}
-				<th>VT malicious</th>
-				<th>VT suspicious</th>
-			{% endif %}
-			<th>Ports</th>
-		</tr>
-		{% for i in ips %}
-		<tr{% if i.iptype == "PRIV" %} class="priv"{% endif %}>
-			<td>{% if i.iptype == "PUBL" %}<a title="{{ i.vt.whois }}" href="https://www.virustotal.com/gui/ip-address/{{ i.dstip }}" target="_blank">{{ i.dstip }}</a>{% else %}{{ i.dstip }}{% endif %}</td>
-			<td class="acenter">{{ i.iptype }}</td>
-			<td class="aright">{{ i.freq }}</td>
-			{% if "virustotal"|connector_is_enabled %}
-				<td class="acenter">{{ i.vt.malicious }}</td>
-				<td class="acenter">{{ i.vt.suspicious }}</td>
-			{% endif %}
-			<td class="w800">{{ i.dstports }}</td>
-		</tr>
-		{% endfor %}
-	</table>
-	(*) How many endpoints have also reached this destination IP in the same time range
-
-<script type="text/javascript" nonce="hg45dkl6m4">
-$('#tableip').find('tr.priv').hide();
-$('#togglevis').on('click', function() {
-    $('#tableip').find('tr.priv').toggle();
-});
-</script>
+	<script type="text/javascript" nonce="hg45dkl6m4">
+		$('#tableip').find('tr.priv').hide();
+		$('#togglevis').on('click', function() {
+			$('#tableip').find('tr.priv').toggle();
+		});
+	</script>
 {% endif %}
 
 {% endblock %}

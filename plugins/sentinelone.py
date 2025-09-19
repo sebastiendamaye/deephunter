@@ -367,22 +367,23 @@ def get_redirect_storyline_link(storyline_ids, date):
     
     return '{}/events?filter={}&startTime={}&endTime=%2B1+day&{}'.format(XDR_URL, quote_plus(filter), date, XDR_PARAMS)
 
-def get_network_connections(storyline_id, endpoint_name, timerange):
+def get_network_connections(endpoint_name, timerange, storyline_id=None):
     """
     Get network connections for a specific storyline ID and endpoint name.
     
-    :param storyline_id: ID of the storyline to retrieve network connections for.
     :param endpoint_name: Name of the endpoint to filter the analytic by.
     :param timerange: Time range in hours to filter the analytic by.
-    :return: List of network connections (array) or None if not found.
+    :param storyline_id: storyline ID to retrieve network connections for (only relevant for SentinelOne).
+    :return: List of network connections ([dst_ip, nb_events, dst_ports_separator_hash_sign, nb_hosts_same_dstip]) or None if not found.
     """
-    
+
     init_globals()
+
     query = "| join ("
     if endpoint_name:
-        query += "endpoint.name = '{}' and ".format(endpoint_name)
+        query += f"endpoint.name = '{endpoint_name}' and "
     if storyline_id:
-        query += "src.process.storyline.id = '{}' and ".format(storyline_id)
+        query += f"src.process.storyline.id = '{storyline_id}' and "
     query += """
 event.category = 'ip' 
 and dst.ip.address != '127.0.0.1' 
@@ -420,7 +421,7 @@ and dst.ip.address != '127.0.0.1'
             
             sleep(1)
 
-        return r.json()['data'] if r.status_code == 200 and r.json()['data'] else None
+        return r.json()['data']['data'] if r.status_code == 200 and r.json()['data']['data'] else None
     
     except:
         return None

@@ -726,22 +726,43 @@ def netview(request):
 
         else:
 
-            r = all_connectors.get('sentinelone').get_network_connections(storylineid, hostname, timerange)
+            # Recursively call the get_network_connections function in each connector to build a consolidated list of network connections
+            network_connections = []
+            for connector in all_connectors.values():
+                connector_name = connector.__name__.split('.')[1]
+                # we only call get_network_connections() if the connector is enabled and has this method
+                if is_connector_enabled(connector_name) and is_connector_for_analytics(connector_name) and hasattr(connector, 'get_network_connections'):
+                    # If the connector has a get_network_connections method, call it
+                    #try:
+                    connections = connector.get_network_connections(endpoint_name=hostname, timerange=timerange, storyline_id=storylineid)
+                    if connections:
+                        network_connections.append({
+                            'connector': connector_name,
+                            'connections': connections
+                            })
 
-            if len(r['data']) != 0:
-                data = r['data']
-                for ip in data:
+            # Merge all connections from different connectors into a single list
+            data = []
+            if network_connections:
+                for entry in network_connections:
+                    for conn in entry['connections']:
+                        data.append( (entry['connector'], conn[0], conn[2], conn[3]) )
+            # Sort data by ascending popularity (all connectors mixed)
+            sorted_data = sorted(data, key=lambda x: x[-1])
+
+            if len(sorted_data) != 0:
+                for ip in sorted_data:
                     
-                    if ip[0]:
+                    if ip[1]:
                         # if private ip, don't scan with VT
-                        if ipaddress.ip_address(ip[0]).is_private:
+                        if ipaddress.ip_address(ip[1]).is_private:
                             iptype = 'PRIV'
                             vt = ''
                         else:
                             iptype = 'PUBL'
                             vt = {}
                             if is_connector_enabled('virustotal'):
-                                response = all_connectors.get('virustotal').check_ip(ip[0])
+                                response = all_connectors.get('virustotal').check_ip(ip[1])
                                 try:
                                     vt['malicious'] = response['attributes']['last_analysis_stats']['malicious']
                                     vt['suspicious'] = response['attributes']['last_analysis_stats']['suspicious']
@@ -750,10 +771,11 @@ def netview(request):
                                     vt['malicious'] = 0
                                     vt['suspicious'] = 0
                                     vt['whois'] = ''
-                                    debug = 'No VT data for IP: {}'.format(ip[0])
-                        
+                                    debug = 'No VT data for IP: {}'.format(ip[1])
+
                         ips.append({
-                            'dstip': ip[0],
+                            'connector': ip[0],
+                            'dstip': ip[1],
                             'iptype': iptype,
                             'dstports': ip[2],
                             'freq': int(ip[3]),

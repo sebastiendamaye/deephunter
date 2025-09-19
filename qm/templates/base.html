@@ -51,7 +51,7 @@
 							</li>
 
 							{% if perms.qm.view_timeline %}<li><a class="{{ request.path|isactiveurl:"/qm/timeline/" }}" href="/qm/timeline/">Timeline</a></li>{% endif %}
-							{% if "sentinelone"|connector_is_enabled and perms.qm.view_netview %}<li><a class="{{ request.path|isactiveurl:"/qm/netview/" }}" href="/qm/netview/">Netview</a></li>{% endif %}
+							<li><a class="{{ request.path|isactiveurl:"/qm/netview/" }}" href="/qm/netview/">Netview</a></li>
 
 							{% if perms.qm.view_reports %}
 								<li><a href="#">Reports</a>
