@@ -430,14 +430,20 @@ and dst.ip.address != '127.0.0.1'
 def get_token_expiration():
     """
     Get the expiration (in days) of the SentinelOne API token.
-    :return: integer (number of days)or None.
+    :return: integer (number of days) or None.
     """
 
     init_globals()
-    r = requests.post(f'{S1_URL}/web/api/v2.1/users/api-token-details',
-        headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
-        json={ "data": { "apiToken": S1_TOKEN } },
-        proxies=PROXY)
+    try:
+        r = requests.post(f'{S1_URL}/web/api/v2.1/users/api-token-details',
+            headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
+            json={ "data": { "apiToken": S1_TOKEN } },
+            proxies=PROXY)
+    except Exception as e:
+        if DEBUG:
+            print(f"[ ERROR ] SentinelOne connector: Failed to retrieve token expiration date: {e}")
+        add_error_notification(f"SentinelOne connector: Failed to retrieve token expiration date: {e}")
+        return None
     
     if r.status_code == 200 and 'data' in r.json():
         expires_at = r.json()['data']['expiresAt']
