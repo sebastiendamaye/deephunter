@@ -5,15 +5,13 @@ form.hidden {
     display: none;
 }
 
-form.connector-form input {
-    width: 350px;
-    border: none;
-    font-size: 10pt;
-}
-
 form.connector-form textarea {
     width: 1200px;
     height: 30px;
+}
+
+form.connector-form input.url-field {
+    width: 1200px;
 }
 
 #connector-conf-submit {
@@ -104,3 +102,10 @@ div.connector-description {
     margin-bottom: 30px;
     color: #888;
 }
+
+span.toggle-eye {
+  position: absolute;
+  transform: translateX(-30px);
+  cursor: pointer;
+}
+

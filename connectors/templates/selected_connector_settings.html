@@ -26,15 +26,8 @@
 {% endif %}
 
 <form method="post" id="connector-form-{{ connector.id }}" action="/connectors/selected-connector-settings/{{ connector.pk }}/" class="connector-form {% if connector.enabled %}visible{% else %}hidden{% endif %}">
-
-    {% if formset.0.fields|length == 0 %}
-        <div class="alert alert-info d-flex flex-row">
-            <div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
-            <div class="notification-message">
-                There are no settings for this connector.
-            </div>
-        </div>
-    {% else %}
+    {{ formset.management_form }}
+    {% if formset.total_form_count > 0 %}
 
         {% csrf_token %}
         {{ formset.management_form }}
@@ -44,19 +37,26 @@
                 <th>Value</th>
             </tr>
             {% for conf_form in formset %}
-                <tr>
                 {{ conf_form.id }}
-                {% for field in conf_form.visible_fields %}
-                    <td>
-                    {{ field }}
+                <tr>
+                    <td><label for="{{ conf_form.value.id_for_label }}" title="{{ conf_form.instance.description }}">{{ conf_form.instance.key }}</label></td>
+                    <td><span>{{ conf_form.value }}</span>
+                        {% if 'password-field' in conf_form.value.field.widget.attrs.class %}
+                            <span class="toggle-eye"><i class="fa fa-eye-slash"></i></span>
+                        {% endif %}
                     </td>
-                {% endfor %}
                 </tr>
             {% endfor %}
         </table>
         <div id="connector-conf-submit"><button type="submit" class="button" name="save_changes" value="1">Save Changes</button></div>
 
+    {% else %}
+        <div class="alert alert-info d-flex flex-row">
+            <div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+            <div class="notification-message">
+                There are no settings for this connector.
+            </div>
+        </div>
     {% endif %}
-
 </form>
 <script src="/static/js/selected_connector_settings.js"></script>
