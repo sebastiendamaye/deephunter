@@ -1,6 +1,6 @@
 azure-identity==1.25.0
 azure-monitor-query==2.0.0
-Authlib==1.6.3
+Authlib==1.6.4
 beautifulsoup4==4.13.5
 bleach==6.2.0
 celery==5.5.3
@@ -17,6 +17,7 @@ Markdown==3.9
 msal==1.33.0
 mysqlclient==2.2.7
 numpy==2.2.6
+openai==1.108.1
 python-gnupg==0.5.5
 redis==6.4.0
 requests==2.32.5
