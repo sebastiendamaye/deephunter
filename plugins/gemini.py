@@ -20,12 +20,13 @@ from qm.models import MitreTechnique
 
 _globals_initialized = False
 def init_globals():
-    global DEBUG, PROXY, API_KEY, TEMPERATURE, TOP_P, TOP_K, MAX_OUTPUT_TOKENS
+    global DEBUG, PROXY, API_KEY, TEMPERATURE, TOP_P, TOP_K, MAX_OUTPUT_TOKENS, MODEL
     global _globals_initialized
     if not _globals_initialized:
         DEBUG = False
         PROXY = settings.PROXY
         API_KEY = get_connector_conf('gemini', 'API_KEY')
+        MODEL = get_connector_conf('gemini', 'MODEL')
         TEMPERATURE = float(get_connector_conf('gemini', 'TEMPERATURE'))
         TOP_P = float(get_connector_conf('gemini', 'TOP_P'))
         TOP_K = int(get_connector_conf('gemini', 'TOP_K'))
@@ -52,7 +53,7 @@ def get_mitre_techniques_from_query(query):
     )
 
     response = client.models.generate_content(
-        model="gemini-1.5-flash",
+        model=MODEL,
         contents=prompt,
         config=config
     )
