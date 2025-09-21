@@ -12,17 +12,71 @@
 {% endblock %}
 
 {% block body %}
-		<br />
-		<input type="checkbox" id="compactview">
-		<label for="compactview">Compact view</label>
-		<br />
-	<div>
-		<ul>
-			<li>Click on item to highlight related analytics (based on storyline ID)</li>
-			<li>Double click to open related events or threats (new window)</li>
-		</ul>
-	</div>
+	<div class="container-cols">
+		<div id="col1">
+			<div>
+				<input type="checkbox" id="compactview">
+				<label for="compactview">Compact view</label>
+			</div>
+			<ul>
+				<li>Click on item to highlight related analytics (based on storyline ID)</li>
+				<li>Double click to open related events or threats (new window)</li>
+			</ul>
+		</div>
 
+		<div class="separator"></div>
+		<div id="col2">
+			<div>
+				<b>Potential threats</b>:
+				{% if potential_threat_names %}
+					{% for threat in potential_threat_names %}
+						<span title="{{ threat.aka_name }}">
+							<a class="button" href="/qm/listanalytics/?threats={{ threat.id }}">{{ threat.name }}</a>
+						</span>
+					{% endfor %}
+				{% endif %}
+			</div>
+			<div>
+				<b>Potential threat actors</b>:
+				{% if potential_threat_actors %}
+					{% for actor in potential_threat_actors %}
+						<span title="{{ actor.aka_name }}">
+							<a class="button" href="/qm/listanalytics/?actors={{ actor.id }}">{{ actor.name }}</a>
+						</span>
+					{% endfor %}
+				{% endif %}
+			</div>
+			<div>
+				<b>Potential vulnerabilities</b>:
+				{% if potential_vulnerabilities %}
+					{% for vulnerability in potential_vulnerabilities %}
+						<span title="{{ vulnerability.description }}">
+							<a class="button" href="/qm/listanalytics/?vulnerabilities={{ vulnerability.id }}">{{ vulnerability.name }}</a>
+						</span>
+					{% endfor %}
+				{% endif %}
+			</div>
+		</div>
+
+		<div class="separator"></div>
+		<div id="col3">
+			<div>
+				<b>MITRE techniques seen in this timeline</b>:
+				{% if mitre_coverage %}
+					<ul>
+						{% for m in mitre_coverage %}
+							<li>
+								<span title="{{ m.description }}">
+									<a class="button" href="/qm/listanalytics/?mitre_techniques={{ m.id }}">{{ m }}</a>
+								</span>
+							</li>
+						{% endfor %}
+					</ul>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+	
 	<div class="outer-top-row">
 		<div id="visualization2"></div>
 	</div>

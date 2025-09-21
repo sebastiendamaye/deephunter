@@ -432,6 +432,11 @@ def tl_timeline(request, hostname):
     storylineid_json = {}
     connectors_json = {}
 
+    potential_threat_names = []
+    potential_threat_actors = []
+    potential_vulnerabilities = []
+    mitre_coverage = []
+
     apps = ''
 
     endpoints = Endpoint.objects.filter(hostname=hostname).order_by('snapshot__date')
@@ -459,7 +464,12 @@ def tl_timeline(request, hostname):
         storylineid_json[iid] = e.storylineid.split('#')
         connectors_json[iid] = e.snapshot.analytic.connector.name
         iid += 1
-    
+
+        potential_threat_names.extend(e.snapshot.analytic.threats.all())
+        potential_threat_actors.extend(e.snapshot.analytic.actors.all())
+        potential_vulnerabilities.extend(e.snapshot.analytic.vulnerabilities.all())
+        mitre_coverage.extend(e.snapshot.analytic.mitre_techniques.all())
+
 
     # Populate threats (group ID >= 1000 for easy identification in template)
     gid = 1000
@@ -552,7 +562,11 @@ def tl_timeline(request, hostname):
         'maxdate': datetime.today()+timedelta(days=1),
         'storylineid_json': storylineid_json,
         'connectors_json': connectors_json,
-        }
+        'potential_threat_names': list(set(potential_threat_names)),
+        'potential_threat_actors': list(set(potential_threat_actors)),
+        'potential_vulnerabilities': list(set(potential_vulnerabilities)),
+        'mitre_coverage': list(set(mitre_coverage)),
+    }
     return render(request, 'partials/tl_timeline.html', context)
 
 
@@ -1219,9 +1233,21 @@ def suggest_mitre_with_ai(request):
     if request.method == "POST":
         query = request.POST.get('query', '')
         #add_debug_notification(f'AI Suggest MITRE Techniques for query: {query}')
-        selected_values = all_connectors.get(AI_CONNECTOR).get_mitre_techniques_from_query(query)
+        
+        if is_connector_enabled(AI_CONNECTOR):
+            # call the AI connector to get MITRE ATT&CK techniques
+            mitre_ttps = all_connectors.get(AI_CONNECTOR).get_mitre_techniques_from_query(query)
+            # extract IDs corresponding to MitreTechnique objects in DB
+            ttp_ids = []
+            for mitre_ttp in mitre_ttps:
+                if MitreTechnique.objects.filter(mitre_id=mitre_ttp).exists():
+                    id = MitreTechnique.objects.get(mitre_id=mitre_ttp).id
+                    ttp_ids.append(id)
 
-    return JsonResponse(selected_values, safe=False)
+            return JsonResponse(list(set(ttp_ids)), safe=False)
+    
+    # in case of connector not enabled or not POST, return empty list
+    return JsonResponse([], safe=False)
 
 @login_required
 @permission_required("qm.add_tag", raise_exception=True)

@@ -21,3 +21,26 @@ a.disabled {
   cursor: default;
   opacity: 0.5;
 }
+
+div.container-cols {
+  display: flex;
+  gap: 20px;
+}
+
+.separator {
+  width: 1px;
+  background-color: #eee;
+}
+.button {
+  font: bold 13px Arial;
+  text-decoration: none;
+  color: #417690; /*#21c488;*/
+  padding: 2px 6px 2px 6px;
+  border: solid 1px #417690; /*#21c488;*/
+	border-radius: 8px;
+}
+#col3 li {
+  list-style: none;
+  padding-left: 0px;
+  margin-left: 0; 
+}

@@ -67,7 +67,7 @@ $(document).ready(function() {
 	chart.options.data[0].click = function(e) {
 		if (e.dataPoint.hostname) {
 			var searchUrl = "/qm/timeline/?hostname=" + e.dataPoint.hostname;
-			window.open(searchUrl, "_blank");
+			window.location = searchUrl;
 		}
 	};
 	chart.render();
