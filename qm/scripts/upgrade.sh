@@ -236,6 +236,15 @@ mkdir -p $TEMP_FOLDER
 cp -R $APP_PATH $TEMP_FOLDER
 echo -e "[\033[32mdone\033[0m]"
 
+# Installing pip dependencies in the virtual env
+echo -n -e "[\033[90mINFO\033[0m] INSTALLING PIP DEPENDENCIES ..................... "
+source $VENV_PATH/bin/activate
+pip install -q -q --upgrade pip
+pip install -q -q --upgrade -r /tmp/deephunter/requirements.txt
+#leave virtual env
+deactivate
+echo -e "[\033[32mdone\033[0m]"
+
 # Installation of the update
 while true; do
 	echo -n -e "[\033[34mCONFIRM\033[0m] "
