@@ -14,7 +14,7 @@ DeepHunter is a Threat Hunting platform that features:
 - Reports (`Campaigns performance report <reports_stats.html>`_, `Top endpoints identified in the last campaign <reports_endpoints.html>`_, `MITRE coverage <reports_mitre_coverage.html>`_, `List of analytics with missing MITRE coverage <reports_missing_mitre.html>`_)
 - Tools (`LOL Driver Hash Checker <tools_lol_drivers_hash_checker.html>`_, `VirusTotal Hash Checker <tools_vt_hash_checker.html>`_, `Whois <tools_whois.html>`_).
 
-.. image:: img/dashboards.png
+.. image:: img/dashboard_widgets.png
   :width: 800
   :alt: Dashboards
 .. image:: img/deephunter_analytics.png

@@ -45,6 +45,7 @@ div.widget_chart h3{
     font-weight: 700;
 }
 
+/*
 p.num {
 
     font-family: "Roboto", sans-serif;
@@ -73,6 +74,41 @@ p.compare_minus {
     text-align: center;
     font-weight: bold;
 }
+*/
+
+div.num {
+
+    font-family: "Roboto", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 900;
+    font-size: 2.5em;
+    text-align: center;
+    color: #303030;
+}
+
+div.num a {
+    text-decoration: none;
+    color: #303030;
+}
+
+div.compare_plus {
+    font-size: 0.8em;
+    color: rgba(10, 156, 10, 0.801);
+    text-align: center;
+    font-weight: bold;
+}
+
+div.compare_minus {
+    font-size: 0.8em;
+    color: rgba(209, 49, 0, 0.801);
+    text-align: center;
+    font-weight: bold;
+}
+
+
+
+
+
 
 
 div.widget_chart {
@@ -94,4 +130,12 @@ div.chartContainer {
     width: 432px; /* div.widget_chart - 40 */
     height: 260px; /* div.widget_chart - 40 */
     padding: 0px;
+}
+
+/* container within widgets to align total and trend */
+.container_number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
 }

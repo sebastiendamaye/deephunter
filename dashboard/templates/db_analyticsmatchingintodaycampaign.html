@@ -1,0 +1,18 @@
+<h3>Analytics triggered in last campaign</h3>
+<div class="container_number">
+    <div class="num"><a href="/qm/listanalytics/?hits=1">{{ analytics_yesterday_count }}</a></div>
+    {% if delta < 0 %}
+        <div class="compare_minus"><i class="fa-solid fa-arrow-down"></i> {{ delta }}<br />(yesterday)</div>
+    {% elif delta == 0 %}
+        <div class="compare_plus"><i class="fa-solid fa-arrow-right"></i> +0<br />(yesterday)</div>
+    {% else %}
+        <div class="compare_plus"><i class="fa-solid fa-arrow-up"></i> +{{ delta }}<br />(yesterday)</div>
+    {% endif %}
+</div>
+<div id="db_analyticsmatchingtodaycampaign"></div>
+
+<script type="text/javascript" nonce="hf7hgo1ilm">
+    $(function() {		
+        $('#db_analyticsmatchingtodaycampaign').sparkline({{ sparkline }}, {'width': 150, height: '35px'}); //,  {type: 'bar', barColor: '#4f81bc'});
+    });
+</script>
