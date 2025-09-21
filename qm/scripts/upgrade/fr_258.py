@@ -45,6 +45,7 @@ This plugin integrates OpenAI's ChatGPT to suggest MITRE techniques based on a g
             defaults={
                 'value': conf['value'],
                 'description': conf['description'],
+                'fieldtype': conf['fieldtype'],
             }
         )
         if created:
