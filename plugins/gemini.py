@@ -16,7 +16,6 @@ from google.genai.types import GenerateContentConfig
 from django.conf import settings
 from connectors.utils import get_connector_conf
 import re
-from qm.models import MitreTechnique
 
 _globals_initialized = False
 def init_globals():
@@ -60,10 +59,4 @@ def get_mitre_techniques_from_query(query):
 
     mitre_ttps = re.findall(r'T\d{4}(?:\.\d{3})?', response.text)
 
-    ttp_ids = []
-    for mitre_ttp in mitre_ttps:
-        if MitreTechnique.objects.filter(mitre_id=mitre_ttp).exists():
-            id = MitreTechnique.objects.get(mitre_id=mitre_ttp).id
-            ttp_ids.append(id)
-
-    return list(set(ttp_ids))  # Return unique TTP IDs
+    return list(set(mitre_ttps))

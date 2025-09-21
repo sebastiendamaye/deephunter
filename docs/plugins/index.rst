@@ -42,6 +42,7 @@ Plugins
    malwarebazaar
    microsoftdefender
    microsoftsentinel
+   openai
    sentinelone
    virustotal
    whois
