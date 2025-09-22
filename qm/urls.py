@@ -71,4 +71,6 @@ urlpatterns = [
     path('add-threat/', views.add_threat, name='add_threat'),
     path('add-actor/', views.add_actor, name='add_actor'),
     path('add-vulnerability/', views.add_vulnerability, name='add_vulnerability'),
+
+    path('test-query/', views.test_query, name='test_query'),
 ]

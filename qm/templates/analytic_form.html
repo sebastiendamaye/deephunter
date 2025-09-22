@@ -117,6 +117,16 @@
         <div class="form-section-container">
             <div>
                 <label for="{{ form.query.id_for_label }}" class="required margin">{{ form.query.label }}</label>
+                <div>
+                    <a href="#" class="button"
+                        id="testQueryButton"
+                        hx-post="/qm/test-query/"
+                        hx-trigger="click"
+                        hx-swap="none"
+                        title="Test the query (connector and query fields are required)">
+                        <span>Test query</span>
+                    </a>
+                </div>
             </div>
             <div>
                 <div>{{ form.query.errors }}</div>
@@ -291,7 +301,7 @@
             </div>
         </div>
 
-        <div class="form-section-container">
+        <div class="form-section-container">            
             <div>
                 <label for="{{ form.create_rule.id_for_label }}" class="margin">{{ form.create_rule.label }}</label>
             </div>
@@ -450,6 +460,15 @@ document.body.addEventListener('htmx:afterRequest', function(evt) {
         // Update select options to match selectedIds
         $('#id_mitre_techniques').val(selectedIds).trigger('change');
     }
+
+    // Open link in new tab if response is a URL
+    if (evt.target.id === 'testQueryButton') {
+        const responseText = evt.detail.xhr.responseText;
+        if (responseText.startsWith('http')) {
+            window.open(responseText, '_blank');
+        }
+    }
+
 });
 </script>
 

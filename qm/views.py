@@ -1364,3 +1364,29 @@ def add_vulnerability(request):
         response['HX-Vulnerability-name'] = vulnerability.name
         return response
     return render(request, "partials/add_vulnerability.html", {"form": form})
+
+@login_required
+@permission_required("qm.run_query", raise_exception=True)
+def test_query(request):
+    if request.method == "POST":
+
+        connector = get_object_or_404(Connector, pk=int(request.POST.get('connector')))
+        query = request.POST.get('query', '')
+        columns = request.POST.get('columns', '')
+
+        if connector.name and query:
+            if is_connector_enabled(connector.name):
+                connector = get_object_or_404(Connector, name=connector.name)
+                # Create a temporary Analytic object (not saved in DB) because get_redirect_analytic_link() needs it as input
+                analytic = Analytic(
+                    connector=connector,
+                    query=f"{query} {columns}"
+                )
+
+                return HttpResponse(all_connectors.get(connector.name).get_redirect_analytic_link(analytic))
+            else:
+                return HttpResponse("error: connector not enabled")
+        else:
+            return HttpResponse("error: missing connector and/or query")
+    else:
+        return HttpResponse("error: not a POST request")
