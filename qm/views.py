@@ -1267,7 +1267,9 @@ def add_analytic(request):
                         allowed_status_choices=["DRAFT", "PUB"])
     if request.method == "POST":
         if form.is_valid():
-            form.save()
+            analytic = form.save(commit=False)
+            analytic.created_by = request.user
+            analytic.save()
             return HttpResponseRedirect(f'/qm/listanalytics/?search={form.cleaned_data["name"]}')
     context = {'form': form, 'AI_CONNECTOR': AI_CONNECTOR}
     return render(request, 'analytic_form.html', context)
