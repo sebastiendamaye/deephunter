@@ -22,9 +22,27 @@ a.disabled {
   opacity: 0.5;
 }
 
-div.container-cols {
+.expandable-container {
+  overflow: hidden;
+}
+div#container-cols {
   display: flex;
   gap: 20px;
+}
+.expandable-content {
+  max-height: 100px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.expandable-container.expanded .expandable-content {
+  max-height: 1000px; /* large enough to show all content */
+}
+.toggle-button {
+  text-align: center;
+  cursor: pointer;
+  background: #fafafa; /*#f0f0f0;*/
+  padding: 2px;
+  display: none; /* Hidden by default */
 }
 
 .separator {
