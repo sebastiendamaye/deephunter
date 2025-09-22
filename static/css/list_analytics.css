@@ -169,35 +169,34 @@ h4 {
 	padding-top:30px;
 }
 
-.confidence_1 {
+.level {
+	font-size: 13px;
+	border: none;
+	width:70px;
+	text-align:center;
+	padding: 1px;
+	border-radius: 5px;
+}
+
+.level_1 {
     /*confidence low, yellow*/
-	text-align:center;
     background:#ffff00;
-	padding: 1px;
-	border-radius: 5px;
+	color:#000;
 }
-.confidence_2 {
+.level_2 {
 	/* confidence medium, orange */
-	text-align:center;
 	background:#fca40a;
-	padding: 1px;
-	border-radius: 5px;
+	color: #fff;
 }
-.confidence_3 {
+.level_3 {
 	/* confidence high, red */
-	text-align:center;
 	background:#ff0000;
 	color:#fff;
-	padding: 1px;
-	border-radius: 5px;
 }
-.confidence_4 {
+.level_4 {
 	/* confidence critical, dark blue */
-	text-align:center;
 	background:#3a3470;
 	color:#fff;
-	padding: 1px;
-	border-radius: 5px;
 }
 
 .acenter {

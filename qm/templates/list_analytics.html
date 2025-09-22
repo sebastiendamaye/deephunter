@@ -545,12 +545,39 @@
         <td>{{ analytic.name }}</td>
 		<td>{{ analytic.connector.name }}</td>
         <td class="acenter">
-			<div id="analytic_status_{{ analytic.id }}" class="dropdown" hx-get="/qm/statusbutton/{{ analytic.id }}/" hx-trigger="load, every 10s"></div>
+			<div id="analytic_status_{{ analytic.id }}"
+				class="dropdown"
+				hx-get="/qm/statusbutton/{{ analytic.id }}/"
+				hx-trigger="load, every 10s">
+			</div>
 		</td>
-        <td class="acenter">{{ analytic.category.short_name }}</td>
-        <td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
-        <td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>
-        <td class="acenter"><div id="analytic_rundaily_{{ analytic.id }}" hx-get="/qm/rundailycheckbox/{{ analytic.id }}/" hx-trigger="load, every 10s"></div></td>
+        <td class="acenter">
+			<div id="analytic_category_{{ analytic.id }}"
+				class="dropdown"
+				hx-get="/qm/categorybutton/{{ analytic.id }}/"
+				hx-trigger="load, every 10s">
+			</div>
+		</td>
+        <td class="acenter">
+			<div id="analytic_confidence_{{ analytic.id }}"
+				class="dropdown"
+				hx-get="/qm/confidencebutton/{{ analytic.id }}/"
+				hx-trigger="load, every 10s">
+			</div>
+		</td>
+        <td class="acenter">
+			<div id="analytic_relevance_{{ analytic.id }}"
+				class="dropdown"
+				hx-get="/qm/relevancebutton/{{ analytic.id }}/"
+				hx-trigger="load, every 10s">
+			</div>
+		</td>
+        <td class="acenter">
+			<div id="analytic_rundaily_{{ analytic.id }}"
+				hx-get="/qm/rundailycheckbox/{{ analytic.id }}/"
+				hx-trigger="load, every 10s">
+			</div>
+		</td>
 		<td class="acenter">{% if analytic.create_rule %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
 		<td class="acenter">{% if analytic.dynamic_query %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
 		<td class="acenter">{{ analytic.maxhosts_count }}</td>

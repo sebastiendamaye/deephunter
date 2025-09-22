@@ -1,0 +1,15 @@
+{% if perms.qm.change_analytic %}
+    <button class="level dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        {{ analytic.category.short_name }}
+    </button>
+    <ul class="dropdown-menu">
+        {% for category in category_choices %}
+            <li><a class="dropdown-item"
+                hx-get="/qm/changecategory/{{ analytic.id }}/{{ category.id }}/"
+                hx-target="#analytic_category_{{ analytic.id }}">{{ category.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <div class="level">{{ analytic.category.short_name }}</div>
+{% endif %}

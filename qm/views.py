@@ -1101,6 +1101,70 @@ def change_status(request, analytic_id, updated_status):
     return render(request, 'partials/status_button.html', context)
 
 @login_required
+def confidence_button(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    context = {
+        "analytic": analytic,
+        "confidence_choices": {str(k): v for k, v in Analytic.CONFIDENCE_CHOICES if k != analytic.confidence},
+    }
+    return render(request, 'partials/confidence_button.html', context)
+
+@login_required
+@permission_required("qm.change_analytic", raise_exception=True)
+def change_confidence(request, analytic_id, updated_confidence):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    analytic.confidence = updated_confidence
+    analytic.save()
+    
+    context = {
+        "analytic": analytic,
+    }
+    return render(request, 'partials/confidence_button.html', context)
+
+@login_required
+def relevance_button(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    context = {
+        "analytic": analytic,
+        "relevance_choices": {str(k): v for k, v in Analytic.RELEVANCE_CHOICES if k != analytic.relevance},
+    }
+    return render(request, 'partials/relevance_button.html', context)
+
+@login_required
+@permission_required("qm.change_analytic", raise_exception=True)
+def change_relevance(request, analytic_id, updated_relevance):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    analytic.relevance = updated_relevance
+    analytic.save()
+    
+    context = {
+        "analytic": analytic,
+    }
+    return render(request, 'partials/relevance_button.html', context)
+
+@login_required
+def category_button(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    context = {
+        "analytic": analytic,
+        "category_choices": Category.objects.exclude(id=analytic.category.id) if analytic.category else Category.objects.all(),
+    }
+    return render(request, 'partials/category_button.html', context)
+
+@login_required
+@permission_required("qm.change_analytic", raise_exception=True)
+def change_category(request, analytic_id, updated_category_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    updated_category = get_object_or_404(Category, pk=updated_category_id)
+    analytic.category = updated_category
+    analytic.save()
+    
+    context = {
+        "analytic": analytic,
+    }
+    return render(request, 'partials/category_button.html', context)
+
+@login_required
 @permission_required("qm.delete_analytic", raise_exception=True)
 def delete_analytic(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)

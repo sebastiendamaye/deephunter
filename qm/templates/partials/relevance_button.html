@@ -1,0 +1,16 @@
+{% load qm_extras %}
+{% if perms.qm.change_analytic %}
+    <button class="level_{{ analytic.relevance }} level btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        {{ analytic.relevance|confidencelabel }}
+    </button>
+    <ul class="dropdown-menu">
+        {% for k,v in relevance_choices.items %}
+            <li><a class="dropdown-item"
+                hx-get="/qm/changerelevance/{{ analytic.id }}/{{ k|upper }}/"
+                hx-target="#analytic_relevance_{{ analytic.id }}">{{ v }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <div class="level_{{ analytic.relevance }} level">{{ analytic.relevance|confidencelabel }}</div>
+{% endif %}

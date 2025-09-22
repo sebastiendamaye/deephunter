@@ -52,6 +52,12 @@ urlpatterns = [
     path('changestatus/<int:analytic_id>/<str:updated_status>/', views.change_status, name='change_status'),
     path('deleteanalytic/<int:analytic_id>/', views.delete_analytic, name='delete_analytic'),
     path('rundailycheckbox/<int:analytic_id>/', views.rundailycheckbox, name='rundailycheckbox'),
+    path('confidencebutton/<int:analytic_id>/', views.confidence_button, name='confidence_button'),
+    path('changeconfidence/<int:analytic_id>/<str:updated_confidence>/', views.change_confidence, name='change_confidence'),
+    path('relevancebutton/<int:analytic_id>/', views.relevance_button, name='relevance_button'),
+    path('changerelevance/<int:analytic_id>/<str:updated_relevance>/', views.change_relevance, name='change_relevance'),
+    path('categorybutton/<int:analytic_id>/', views.category_button, name='category_button'),
+    path('changecategory/<int:analytic_id>/<int:updated_category_id>/', views.change_category, name='change_category'),
 
     path('review_page/<int:analytic_id>/', views.review_page, name='review_page'),
     path('submit_review/<int:analytic_id>/', views.submit_review, name='submit_review'),
