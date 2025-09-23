@@ -38,6 +38,7 @@ for loader, module_name, is_pkg in pkgutil.iter_modules(plugins.__path__):
 
 
 PROXY = settings.PROXY
+DEBUG = settings.DEBUG
 STATIC_PATH = settings.STATIC_ROOT
 BASE_DIR = settings.BASE_DIR
 UPDATE_ON = settings.UPDATE_ON
@@ -489,23 +490,28 @@ def tl_timeline(request, hostname):
             if threats:
                 groups.append({'id':gid, 'content':f'Threats ({connector_name})'})
                 for threat in threats:
-                    detectedat = threat['threatInfo']['identifiedAt']
-                    items.append({
-                        'id': iid,
-                        'group': gid,
-                        'start': datetime.strptime(detectedat, '%Y-%m-%dT%H:%M:%S.%fZ'),
-                        'end': datetime.strptime(detectedat, '%Y-%m-%dT%H:%M:%S.%fZ')+timedelta(days=1),
-                        'description': '{} [{}] [{}]'.format(
-                            threat['threatInfo']['threatName'],
-                            threat['threatInfo']['analystVerdict'],
-                            threat['threatInfo']['confidenceLevel']
-                            ),
-                        'storylineid': 'StorylineID: {}'.format(threat['threatInfo']['storyline']),
-                        'connector': f'Connector: {connector_name}'
-                        })
-                    storylineid_json[iid] = [threat['threatInfo']['storyline']]
-                    connectors_json[iid] = connector_name
-                    iid += 1
+                    try:
+                        detectedat = threat['threatInfo']['identifiedAt']
+                        detectedatdate = datetime.strptime(detectedat[:10], '%Y-%m-%d')
+                        items.append({
+                            'id': iid,
+                            'group': gid,
+                            'start': detectedatdate,
+                            'end': detectedatdate + timedelta(days=1),
+                            'description': '{} [{}] [{}]'.format(
+                                threat['threatInfo']['threatName'],
+                                threat['threatInfo']['analystVerdict'],
+                                threat['threatInfo']['confidenceLevel']
+                                ),
+                            'storylineid': 'StorylineID: {}'.format(threat['threatInfo']['storyline']),
+                            'connector': f'Connector: {connector_name}'
+                            })
+                        storylineid_json[iid] = [threat['threatInfo']['storyline']]
+                        connectors_json[iid] = connector_name
+                        iid += 1
+                    except Exception as e:
+                        if DEBUG:
+                            add_debug_notification(f"Error adding threat for {hostname} in timeline: {e}")
             #except Exception as e:
             #    print(f"Error getting threats for {hostname}")
         
