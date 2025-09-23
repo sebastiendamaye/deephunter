@@ -24,8 +24,9 @@ from qm.utils import get_campaign_date, get_available_statuses
 from urllib.parse import urlencode, quote
 from .forms import (ReviewForm, EditAnalyticDescriptionForm, EditAnalyticNotesForm,
                     EditAnalyticQueryForm, SavedSearchForm, AnalyticForm, TagForm,
-                    ThreatForm, ActorForm, VulnerabilityForm)
+                    ThreatForm, ActorForm, VulnerabilityForm, QueryAIAssistantForm)
 from notifications.utils import add_error_notification, add_debug_notification
+import base64
 
 # Dynamically import all connectors
 import importlib
@@ -1398,3 +1399,35 @@ def test_query(request):
             return HttpResponse("error: missing connector and/or query")
     else:
         return HttpResponse("error: not a POST request")
+
+@login_required
+@permission_required("qm.run_query", raise_exception=True)
+def query_ai_assistant(request):
+    connector_id = request.GET.get('connector') if request.method == 'GET' else None
+    form = QueryAIAssistantForm(request.POST or None, selected_connector_id=connector_id)
+    if form.is_valid():
+        response = HttpResponse("")
+        response['HX-Trigger'] = 'closeModal'
+        
+        query_language = all_connectors.get(form.cleaned_data['connector'].name).query_language()
+        question_for_ai = f"""Write a {query_language} query to detect the logic below. No explanations, only the query.
+        
+        Logic:
+
+        {form.cleaned_data['question']}
+        """
+        #add_debug_notification(f'Question for AI: {question_for_ai}')
+
+        # Here AI response.... 
+        ai_response = all_connectors.get(AI_CONNECTOR).write_query_with_ai(question_for_ai)
+        #add_debug_notification(f'AI response: {ai_response}')
+        # we need to encode the response because it can't contain new lines
+        encoded_response = base64.b64encode(ai_response.encode('utf-8'))
+        response['HX-Query'] = encoded_response
+        response['HX-Connector'] = form.cleaned_data['connector'].id
+        return response
+
+    context = {
+        'form': form,
+    }
+    return render(request, 'partials/query_ai_assistant.html', context)

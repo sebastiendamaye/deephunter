@@ -16,10 +16,11 @@ _globals_initialized = False
 def init_globals():
     global DEBUG, PROXY, DB_DATA_RETENTION, CAMPAIGN_MAX_HOSTS_THRESHOLD, \
             S1_URL, S1_TOKEN, S1_THREATS_URL, XDR_URL, XDR_PARAMS, SYNC_STAR_RULES, STAR_RULES_PREFIX, \
-            STAR_RULES_DEFAULTS, QUERY_ERROR_INFO
+            STAR_RULES_DEFAULTS, QUERY_ERROR_INFO, QUERY_LANGUAGE
     global _globals_initialized
     if not _globals_initialized:
         DEBUG = False
+        QUERY_LANGUAGE = "SentinelOne PowerQuery v2.0"
         PROXY = settings.PROXY
         DB_DATA_RETENTION = settings.DB_DATA_RETENTION
         CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
@@ -41,6 +42,12 @@ def init_globals():
         QUERY_ERROR_INFO = get_connector_conf('sentinelone', 'QUERY_ERROR_INFO')
         _globals_initialized = True
 
+def query_language():
+    """
+    Return the query language used by SentinelOne.
+    """
+    init_globals()
+    return QUERY_LANGUAGE
 
 def query(analytic, from_date=None, to_date=None, debug=None):
     init_globals()

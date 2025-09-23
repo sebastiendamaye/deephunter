@@ -1,0 +1,36 @@
+<form hx-post="/qm/query-ai-assistant/" hx-target="this">
+    {% csrf_token %}
+    <div class="modal-header">
+        <h5 class="modal-title">Ask the AI Assistant</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        {{ form.as_p }}
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Ask AI</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+</form>
+
+<script nonce="kj5fcv07a2">
+document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+
+    // Check for a custom header indicating success
+    if (evt.detail.xhr.getResponseHeader('HX-Trigger') === 'closeModal') {
+        
+        // Close the modal window
+        var modalEl = document.getElementById('modalWindow');
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) {
+            modal.hide();
+        }
+
+        // Change the connector accordingly to the choice made in the AI assistant form
+        $('#id_connector').val(evt.detail.xhr.getResponseHeader('HX-Connector')).change();
+
+        // Write the query
+        $('#id_query').text(atob(evt.detail.xhr.getResponseHeader('HX-Query')));
+    }
+});
+</script>

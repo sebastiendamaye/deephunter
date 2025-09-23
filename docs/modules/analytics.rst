@@ -3,6 +3,14 @@ Analytics
 
 The analytics page is where you will first land once successfully logged in to DeepHunter. This is the main dashboard that shows the list of threat hunting analytics available in DeepHunter. There are many actions you can do from this screen and you can also navigate to other modules.
 
+Create threat hunting analytics
+*******************************
+To create new threat hunting analytic, go to the **Aalytics > Create analytic** menu.
+
+.. image:: ../img/create_analytic.png
+  :width: 1500
+  :alt: create threat hunting analytic
+
 Interface
 *********
 Refer to the objects number for details.

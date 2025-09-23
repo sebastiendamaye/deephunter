@@ -127,6 +127,20 @@
                         <span>Test query</span>
                     </a>
                 </div>
+                <div>
+                    {% if AI_CONNECTOR %}
+                        <button type="button"
+                            class="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalWindow"
+                            hx-get="/qm/query-ai-assistant/"
+                            hx-include="#id_connector"
+                            hx-target="#modalContent"
+                            title="Ask the AI assistant to help you write the query (connector should be selected)">
+                            <span><i class="fa-solid fa-robot"></i> AI assistant</span>
+                        </button>
+                    {% endif %}
+                </div>
             </div>
             <div>
                 <div>{{ form.query.errors }}</div>

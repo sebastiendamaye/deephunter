@@ -29,10 +29,15 @@ Methods are listed below (M/O = Mandatory / Optional).
      - inputs
      - outputs
    * - ``init_globals``
-     - Define global variables and initialize them. This method should be called in the beginning of all other methods.
+     - Define global variables and initialize them. This method should be called in the beginning of all other methods. Global variables are defined inside this function to delay their initialization until they are actually needed. This avoids side effects at import time.
      - M
      - 
      - 
+   * - ``query_language``
+     - Return the query language used by the connector (e.g., KQL for Microsoft Sentinel, PowerQuery for SentinelOne, etc). This is used by the AI assistant to generate queries. 
+     - M
+     - 
+     - String containing the query language.
    * - ``query``
      - API calls to the remote data lake to query logs. Used by the "campaign" daily cron, and the "regenerate stats" script
      - M

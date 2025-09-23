@@ -31,10 +31,11 @@ from notifications.utils import add_debug_notification
 _globals_initialized = False
 def init_globals():
     global DEBUG, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SUBSCRIPTION_ID, WORKSPACE_ID, \
-            WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES, QUERY_ERROR_INFO
+            WORKSPACE_NAME, RESOURCE_GROUP, SYNC_RULES, QUERY_ERROR_INFO, QUERY_LANGUAGE
     global _globals_initialized
     if not _globals_initialized:
         DEBUG = False
+        QUERY_LANGUAGE = "Kusto Query Language (KQL)"
         TENANT_ID = get_connector_conf('microsoftsentinel', 'TENANT_ID')
         CLIENT_ID = get_connector_conf('microsoftsentinel', 'CLIENT_ID')
         CLIENT_SECRET = get_connector_conf('microsoftsentinel', 'CLIENT_SECRET')
@@ -46,6 +47,13 @@ def init_globals():
         QUERY_ERROR_INFO = get_connector_conf('microsoftsentinel', 'QUERY_ERROR_INFO')
         _globals_initialized = True
 
+
+def query_language():
+    """
+    Return the query language used by SentinelOne.
+    """
+    init_globals()
+    return QUERY_LANGUAGE
 
 def authenticate():
     init_globals()

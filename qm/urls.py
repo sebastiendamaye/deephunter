@@ -73,4 +73,5 @@ urlpatterns = [
     path('add-vulnerability/', views.add_vulnerability, name='add_vulnerability'),
 
     path('test-query/', views.test_query, name='test_query'),
+    path('query-ai-assistant/', views.query_ai_assistant, name='query_ai_assistant'),
 ]

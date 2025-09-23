@@ -47,3 +47,15 @@ def get_mitre_techniques_from_query(query):
 
     mitre_ttps = re.findall(r'T\d{4}(?:\.\d{3})?', response.output_text)
     return list(set(mitre_ttps))
+
+def write_query_with_ai(prompt):
+    init_globals()
+
+    client = OpenAI(api_key=API_KEY)
+
+    response = client.responses.create(
+        model=MODEL,
+        input=prompt
+    )
+
+    return response.output_text

@@ -60,3 +60,23 @@ def get_mitre_techniques_from_query(query):
     mitre_ttps = re.findall(r'T\d{4}(?:\.\d{3})?', response.text)
 
     return list(set(mitre_ttps))
+
+def write_query_with_ai(prompt):
+    init_globals()
+
+    client = genai.Client(api_key=API_KEY)
+
+    config = GenerateContentConfig(
+        temperature=TEMPERATURE,
+        top_p=TOP_P,
+        top_k=TOP_K,
+        max_output_tokens=MAX_OUTPUT_TOKENS
+    )
+
+    response = client.models.generate_content(
+        model=MODEL,
+        contents=prompt,
+        config=config
+    )
+
+    return response.text

@@ -135,3 +135,20 @@ class VulnerabilityForm(forms.ModelForm):
     class Meta:
         model = Vulnerability
         fields = ['name', 'base_score', 'description', 'references']
+
+class QueryAIAssistantForm(forms.Form):
+    connector = forms.ModelChoiceField(
+        queryset=Connector.objects.filter(domain='analytics', enabled=True),
+        required=True
+        )
+    question = forms.CharField(widget=forms.Textarea(
+        attrs={
+            'class': 'question-ai-assistant',
+            'placeholder': 'E.g., Detect network activity involving the rundll32.exe process.',
+        }),
+        required=True
+    )
+
+    def __init__(self, *args, selected_connector_id=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['connector'].initial = selected_connector_id

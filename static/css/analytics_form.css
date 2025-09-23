@@ -51,3 +51,12 @@ button.nobutton {
   cursor: none;
   background: none;
 }
+
+textarea.question-ai-assistant {
+    width: 100%;
+    font-size: 1.1em;
+    padding: 10px;
+    border: solid 1px #ccc;
+    border-radius: 4px;
+    resize: vertical;
+}

@@ -36,10 +36,11 @@ from notifications.utils import add_debug_notification
 _globals_initialized = False
 def init_globals():
     global DEBUG, PROXY, TENANT_ID, CLIENT_ID, CLIENT_SECRET, SYNC_RULES, QUERY_ERROR_INFO, \
-            AUTHORITY, SCOPE, ENDPOINT
+            AUTHORITY, SCOPE, ENDPOINT, QUERY_LANGUAGE
     global _globals_initialized
     if not _globals_initialized:
         DEBUG = False
+        QUERY_LANGUAGE = "Kusto Query Language (KQL)"
         PROXY = settings.PROXY
         TENANT_ID = get_connector_conf('microsoftdefender', 'TENANT_ID')
         CLIENT_ID = get_connector_conf('microsoftdefender', 'CLIENT_ID')
@@ -54,6 +55,13 @@ def init_globals():
 
         _globals_initialized = True
 
+
+def query_language():
+    """
+    Return the query language used by SentinelOne.
+    """
+    init_globals()
+    return QUERY_LANGUAGE
 
 def authenticate():
     """
