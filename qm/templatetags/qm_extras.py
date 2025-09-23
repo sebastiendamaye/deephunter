@@ -227,6 +227,8 @@ def gotodoc(url):
         return f"{doc}/modules/analytics.html#create-threat-hunting-analytics"
     elif re.match(r"^/qm/analytic/\d+/change/$", url):
         return f"{doc}/modules/analytics.html#create-threat-hunting-analytics"
+    elif re.match(r"^/qm/analytic/\d+/clone/$", url):
+        return f"{doc}/modules/analytics.html#create-threat-hunting-analytics"
     elif url == '/qm/saved_searches/':
         return f"{doc}/modules/analytics.html#saved-searches"
     elif url == '/qm/timeline/':
