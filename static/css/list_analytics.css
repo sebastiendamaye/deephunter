@@ -227,7 +227,7 @@ h4 {
 }
 
 .w1000 {
-	width; 1000px;
+	width: 1000px;
 	max-width: 1000px;
 }
 
@@ -236,7 +236,7 @@ div.vuln {
 	margin-left:10px;
 	padding-left:5px;
 	padding-right:5px;
-	background:{{ vulnerability.base_score|cvecolor }};
+	/*background:{{ vulnerability.base_score|cvecolor }};*/
 }
 
 .cve_critical {

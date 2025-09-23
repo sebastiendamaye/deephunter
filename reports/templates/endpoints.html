@@ -46,6 +46,7 @@
 						<th class="w200">Connector</th>
 						<th class="w600">Analytic</th>
 						<th class="w200">Status</th>
+						<th class="w200">Category</th>
 						<th class="w200">Confidence</th>
 						<th class="w200">Relevance</th>
 						<th class="w300">Actions</th>
@@ -55,8 +56,9 @@
 						<td>{{ analytic.connector }}</td>
 						<td>{{ analytic.name }}</td>
 						<td class="acenter"><div class="{{ analytic.status|lower }}">{{ analytic.status }}</div></td>
-						<td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
-						<td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>
+						<td>{% if analytic.category %}{{ analytic.category }}{% else %}-{% endif %}</td>
+						<td class="acenter"><div class="level_{{ analytic.confidence }} level">{{ analytic.confidence|confidencelabel }}</div></td>
+						<td class="acenter"><div class="level_{{ analytic.relevance }} level">{{ analytic.relevance|confidencelabel }}</div></td>
 						<td class="acenter">
 							{% if perms.qm.run_query %}<a class="button" href="{{ analytic.xdrlink }}" target="_blank">events</a>{% endif %}
 							{% if perms.qm.view_snapshot %}<a class="button" href="/qm/{{ analytic.analyticid }}/trend/" target="_blank">trend</a>{% endif %}

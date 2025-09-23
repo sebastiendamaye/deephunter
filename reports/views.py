@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 from datetime import datetime, timedelta
 from qm.models import Analytic, Snapshot, Campaign, MitreTactic, MitreTechnique, Endpoint, Connector
 from notifications.utils import add_debug_notification
+from collections import defaultdict
 
 # Dynamically import all connectors
 import importlib
@@ -202,55 +203,66 @@ def mitre(request):
 @login_required
 @permission_required('qm.view_endpoint', raise_exception=True)
 def endpoints(request):
-
-    # list of campaigns
     campaigns = Campaign.objects.filter(name__startswith='daily_cron_').order_by('-name')
 
     if request.method == 'POST':
-        # if a campaign is selected, filter endpoints by that campaign
         selected_campaign_id = request.POST.get('campaign')
     else:
-        # default to the most recent campaign
         selected_campaign = campaigns.first()
         selected_campaign_id = selected_campaign.id
 
     campaign = get_object_or_404(Campaign, id=selected_campaign_id)
 
-    # select TOP 20 endpoints for today's campaign
-    endpoints = Endpoint.objects.filter(
-        snapshot__campaign=campaign
-        ).values('hostname', 'site').annotate(total=Sum('snapshot__analytic__weighted_relevance')).order_by('-total')[:300]
+    # Get top endpoints
+    endpoints_qs = (
+        Endpoint.objects
+        .filter(snapshot__campaign=campaign)
+        .values('hostname', 'site')
+        .annotate(total=Sum('snapshot__analytic__weighted_relevance'))
+        .order_by('-total')[:300]
+    )
+
+    # Get all analytics for these endpoints in one query
+    hostnames = [e['hostname'] for e in endpoints_qs]
+    analytics_qs = (
+        Endpoint.objects
+        .filter(snapshot__campaign=campaign, hostname__in=hostnames)
+        .select_related(
+            'snapshot__analytic__connector',
+            'snapshot__analytic__category'
+        )
+        .order_by('-snapshot__analytic__weighted_relevance')
+    )
+
+    # Group analytics by hostname
+    analytics_by_hostname = defaultdict(list)
+    for analytic in analytics_qs:
+        a = analytic.snapshot.analytic
+        startdate = analytic.snapshot.date.strftime('%Y-%m-%d')
+        connector_name = a.connector.name
+        xdrlink = all_connectors.get(connector_name).get_redirect_analytic_link(a, date=startdate, endpoint_name=analytic.hostname)
+        analytics_by_hostname[analytic.hostname].append({
+            "analyticid": a.id,
+            "name": a.name,
+            "connector": connector_name,
+            "status": a.status,
+            "category": a.category,
+            "confidence": a.confidence,
+            "relevance": a.relevance,
+            "xdrlink": xdrlink
+        })
+
+    # Build data for template
     data = []
-    for endpoint in endpoints:
+    for endpoint in endpoints_qs:
         hostname = endpoint['hostname']
         site = endpoint['site']
-        analytics = Endpoint.objects.filter(
-            snapshot__campaign=campaign,
-            hostname=hostname
-            ).order_by('-snapshot__analytic__weighted_relevance')
-        
-        qdata = []
-        for analytic in analytics:
-            
-            startdate=analytic.snapshot.date.strftime('%Y-%m-%d')
-            xdrlink = all_connectors.get(analytic.snapshot.analytic.connector.name).get_redirect_analytic_link(analytic.snapshot.analytic, date=startdate, endpoint_name=hostname)
-
-            qdata.append({
-                "analyticid":analytic.snapshot.analytic.id,
-                "name":analytic.snapshot.analytic.name,
-                "connector":analytic.snapshot.analytic.connector.name,
-                "status":analytic.snapshot.analytic.status,
-                "confidence":analytic.snapshot.analytic.confidence,
-                "relevance":analytic.snapshot.analytic.relevance,
-                "xdrlink":xdrlink
-                })
-        
         data.append({
-            "hostname":hostname,
-            "site":site,
-            "total":endpoint['total'],
-            "analytics":qdata
-            })
+            "hostname": hostname,
+            "site": site,
+            "total": endpoint['total'],
+            "analytics": analytics_by_hostname.get(hostname, [])
+        })
 
     paginator = Paginator(data, ANALYTICS_PER_PAGE)
     page_number = int(request.GET.get('page', 1))
@@ -260,8 +272,7 @@ def endpoints(request):
         'campaigns': campaigns,
         'selected_campaign_id': selected_campaign_id,
         'endpoints': page_obj
-        }
-    
+    }
     return render(request, 'endpoints.html', context)
 
 @login_required
@@ -337,31 +348,73 @@ def query_error_table(request):
 @login_required
 @permission_required('qm.view_analytic', raise_exception=True)
 def rare_occurrences(request):
-    analytics = (
+    # Get analytics with rare occurrences
+    analytics_qs = (
         Endpoint.objects
-        .values('snapshot__analytic__id', 'snapshot__analytic__name', 'snapshot__analytic__connector__name', 'snapshot__analytic__status', 'snapshot__analytic__confidence', 'snapshot__analytic__relevance', 'snapshot__analytic__description', 'snapshot__analytic__query')
-        .annotate(distinct_hostnames=Count('hostname', distinct=True))
-        .filter(distinct_hostnames__lt=RARE_OCCURRENCES_THRESHOLD)
-        .order_by('distinct_hostnames')
+        .values(
+            'snapshot__analytic__id',
+            'snapshot__analytic__name',
+            'snapshot__analytic__connector__name',
+            'snapshot__analytic__status',
+            'snapshot__analytic__category__short_name',
+            'snapshot__analytic__confidence',
+            'snapshot__analytic__relevance',
+            'snapshot__analytic__description',
+            'snapshot__analytic__query',
+            'hostname'
         )
+        .exclude(snapshot__analytic__status='ARCH')
+    )
 
+    # Group hostnames by analytic
+    analytic_data = defaultdict(lambda: {
+        'id': None,
+        'name': None,
+        'connector': None,
+        'status': None,
+        'category': None,
+        'confidence': None,
+        'relevance': None,
+        'description': None,
+        'query': None,
+        'hostnames': set()
+    })
+
+    for row in analytics_qs:
+        aid = row['snapshot__analytic__id']
+        analytic = analytic_data[aid]
+        analytic['id'] = aid
+        analytic['name'] = row['snapshot__analytic__name']
+        analytic['connector'] = row['snapshot__analytic__connector__name']
+        analytic['status'] = row['snapshot__analytic__status']
+        analytic['category'] = row['snapshot__analytic__category__short_name']
+        analytic['confidence'] = row['snapshot__analytic__confidence']
+        analytic['relevance'] = row['snapshot__analytic__relevance']
+        analytic['description'] = row['snapshot__analytic__description']
+        analytic['query'] = row['snapshot__analytic__query']
+        analytic['hostnames'].add(row['hostname'])
+
+    # Filter analytics with rare occurrences
     data = []
-    for analytic in analytics:
-        q = get_object_or_404(Analytic, pk=analytic['snapshot__analytic__id'])
-        endpoints = Endpoint.objects.filter(snapshot__analytic=q).values('hostname').distinct()
+    for analytic in analytic_data.values():
+        distinct_hostnames = len(analytic['hostnames'])
+        if distinct_hostnames < RARE_OCCURRENCES_THRESHOLD:
+            data.append({
+                'id': analytic['id'],
+                'name': analytic['name'],
+                'connector': analytic['connector'],
+                'status': analytic['status'],
+                'category': analytic['category'],
+                'confidence': analytic['confidence'],
+                'relevance': analytic['relevance'],
+                'description': analytic['description'],
+                'query': analytic['query'],
+                'distinct_hostnames': distinct_hostnames,
+                'endpoints': list(analytic['hostnames'])
+            })
 
-        data.append({
-            'id': analytic['snapshot__analytic__id'],
-            'name': analytic['snapshot__analytic__name'],
-            'connector': analytic['snapshot__analytic__connector__name'],
-            'status': analytic['snapshot__analytic__status'],
-            'confidence': analytic['snapshot__analytic__confidence'],
-            'relevance': analytic['snapshot__analytic__relevance'],
-            'description': analytic['snapshot__analytic__description'],
-            'query': analytic['snapshot__analytic__query'],
-            'distinct_hostnames': analytic['distinct_hostnames'],
-            'endpoints': [endpoint['hostname'] for endpoint in endpoints]
-            })        
+    # Sort by distinct_hostnames
+    data.sort(key=lambda x: x['distinct_hostnames'])
 
     paginator = Paginator(data, ANALYTICS_PER_PAGE)
     page_number = int(request.GET.get('page', 1))
@@ -369,8 +422,7 @@ def rare_occurrences(request):
 
     context = {
         'analytics': page_obj
-        }
-    
+    }
     return render(request, 'rare_occurrences.html', context)
 
 

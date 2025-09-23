@@ -13,6 +13,7 @@
 		<th>Connector</th>
 		<th>Analytic</th>
 		<th>Status</th>
+		<th>Category</th>
 		<th>Confidence</th>
 		<th>Relevance</th>
 		<th>Admin/Stats</th>
@@ -24,8 +25,9 @@
 		<td class="acenter">{{ analytic.connector }}</td>
 		<td title="DESCRIPTION:&#013;===========&#013;{{ analytic.description }}&#013;&#013;QUERY:&#013;===========&#013;{{analytic.query}}">{{ analytic.name }}</td>
         <td class="acenter"><div class="{{ analytic.status|lower }}">{{ analytic.status }}</div></td>
-        <td class="acenter"><div class="confidence_{{ analytic.confidence }}">{{ analytic.confidence|confidencelabel }}</div></td>
-        <td class="acenter"><div class="confidence_{{ analytic.relevance }}">{{ analytic.relevance|confidencelabel }}</div></td>
+        <td class="acenter">{% if analytic.category %}{{ analytic.category }}{% else %}-{% endif %}</td>
+        <td class="acenter"><div class="level_{{ analytic.confidence }} level">{{ analytic.confidence|confidencelabel }}</div></td>
+        <td class="acenter"><div class="level_{{ analytic.relevance }} level">{{ analytic.relevance|confidencelabel }}</div></td>
 		<td class="acenter">
 			{% if perms.qm.change_analytic %}<a class="button" href="/qm/analytic/{{ analytic.id }}/change/">edit analytic</a>{% endif %}
 			{% if perms.qm.view_snapshot %}<a class="button" href="/qm/{{ analytic.id }}/trend/" target="_blank">stats</a>{% endif %}
