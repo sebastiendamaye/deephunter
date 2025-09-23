@@ -1302,6 +1302,25 @@ def edit_analytic(request, analytic_id):
 
 @login_required
 @permission_required("qm.add_analytic", raise_exception=True)
+def clone_analytic(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    # Prepare initial data from the analytic instance
+    initial = {field.name: getattr(analytic, field.name)
+               for field in Analytic._meta.fields
+               if field.name not in ['id', 'name', 'status', 'repo', 'created_by', 'pub_date', 'update_date', 'maxhosts_count', 'query_error', 'query_error_message', 'query_error_date', 'next_review_date', 'last_time_seen']}
+    initial['name'] = ''  # Set name to empty
+
+    # For ManyToMany fields, you need to set initial as a list of IDs
+    m2m_fields = ['tags', 'mitre_techniques', 'threats', 'actors', 'target_os', 'vulnerabilities']
+    for field in m2m_fields:
+        initial[field] = getattr(analytic, field).all()
+
+    form = AnalyticForm(initial=initial, allowed_status_choices=["DRAFT", "PUB"])
+    context = {'form': form, 'AI_CONNECTOR': AI_CONNECTOR}
+    return render(request, 'analytic_form.html', context)
+
+@login_required
+@permission_required("qm.add_analytic", raise_exception=True)
 def suggest_mitre_with_ai(request):
     if request.method == "POST":
         query = request.POST.get('query', '')

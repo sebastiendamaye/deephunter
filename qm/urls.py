@@ -65,6 +65,7 @@ urlpatterns = [
 
     path('analytic/add/', views.add_analytic, name='add_analytic'),
     path('analytic/<int:analytic_id>/change/', views.edit_analytic, name='edit_analytic'),
+    path('analytic/<int:analytic_id>/clone/', views.clone_analytic, name='clone_analytic'),
     path('suggest-mitre-with-ai/', views.suggest_mitre_with_ai, name='suggest_mitre_with_ai'),
 
     path('add-tag/', views.add_tag, name='add_tag'),
