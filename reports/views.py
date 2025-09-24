@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from qm.models import Analytic, Snapshot, Campaign, MitreTactic, MitreTechnique, Endpoint, Connector
 from notifications.utils import add_debug_notification
 from collections import defaultdict
+import time
 
 # Dynamically import all connectors
 import importlib
@@ -34,6 +35,7 @@ ANALYTICS_PER_PAGE = settings.ANALYTICS_PER_PAGE
 @login_required
 @permission_required('qm.view_campaign', raise_exception=True)
 def campaigns_stats(request):
+    start_time = time.time()
     stats = []
     seconds_in_day = 24 * 60 * 60
     
@@ -79,10 +81,12 @@ def campaigns_stats(request):
                 'count_endpoints_total':0
                 })
     
+    elapsed_time = time.time() - start_time
     context = {
         'stats': stats,
         'connector_stats': connector_stats,
-        'db_retention': DB_DATA_RETENTION
+        'db_retention': DB_DATA_RETENTION,
+        'elapsed_time': elapsed_time,
         }
     
     return render(request, 'stats.html', context)
@@ -90,6 +94,7 @@ def campaigns_stats(request):
 @login_required
 @permission_required('qm.view_analytic', raise_exception=True)
 def mitre(request):
+    start_time = time.time()
     max_score = 0
     json = """
 {
@@ -194,8 +199,10 @@ def mitre(request):
             'techniques': tmp
             })
 
+    elapsed_time = time.time() - start_time
     context = {
-        'ttp': ttp
+        'ttp': ttp,
+        'elapsed_time': elapsed_time,
         }
     
     return render(request, 'mitre.html', context)
@@ -203,6 +210,7 @@ def mitre(request):
 @login_required
 @permission_required('qm.view_endpoint', raise_exception=True)
 def endpoints(request):
+    start_time = time.time()
     campaigns = Campaign.objects.filter(name__startswith='daily_cron_').order_by('-name')
 
     if request.method == 'POST':
@@ -268,16 +276,19 @@ def endpoints(request):
     page_number = int(request.GET.get('page', 1))
     page_obj = paginator.get_page(page_number)
 
+    elapsed_time = time.time() - start_time
     context = {
         'campaigns': campaigns,
         'selected_campaign_id': selected_campaign_id,
-        'endpoints': page_obj
+        'endpoints': page_obj,
+        'elapsed_time': elapsed_time,
     }
     return render(request, 'endpoints.html', context)
 
 @login_required
 @permission_required('qm.view_campaign', raise_exception=True)
 def analytics_perfs(request):
+    start_time = time.time()
     yesterday = datetime.now() - timedelta(days=1)
     snapshots = Snapshot.objects.filter(date=yesterday).order_by('-runtime')
     analytics = []
@@ -297,8 +308,10 @@ def analytics_perfs(request):
     page_number = int(request.GET.get('page', 1))
     page_obj = paginator.get_page(page_number)
 
+    elapsed_time = time.time() - start_time
     context = {
-        'analytics': page_obj
+        'analytics': page_obj,
+        'elapsed_time': elapsed_time,
         }
     
     return render(request, 'perfs.html', context)
@@ -312,6 +325,7 @@ def query_error(request):
 @login_required
 @permission_required('qm.view_analytic', raise_exception=True)
 def query_error_table(request):
+    start_time = time.time()
     analytics_with_errors = Analytic.objects.filter(query_error = True).exclude(status='ARCH').order_by('-query_error_date')
     include_info = request.GET.get('include_info', 'off') == 'on'  # Get checkbox value
     
@@ -338,8 +352,10 @@ def query_error_table(request):
     page_number = int(request.GET.get('page', 1))
     page_obj = paginator.get_page(page_number)
 
+    elapsed_time = time.time() - start_time
     context = {
-        'analytics': page_obj
+        'analytics': page_obj,
+        'elapsed_time': elapsed_time,
         }
     
     return render(request, 'partials/query_error_table.html', context)
@@ -348,6 +364,7 @@ def query_error_table(request):
 @login_required
 @permission_required('qm.view_analytic', raise_exception=True)
 def rare_occurrences(request):
+    start_time = time.time()
     # Get analytics with rare occurrences
     analytics_qs = (
         Endpoint.objects
@@ -420,8 +437,10 @@ def rare_occurrences(request):
     page_number = int(request.GET.get('page', 1))
     page_obj = paginator.get_page(page_number)
 
+    elapsed_time = time.time() - start_time
     context = {
-        'analytics': page_obj
+        'analytics': page_obj,
+        'elapsed_time': elapsed_time,
     }
     return render(request, 'rare_occurrences.html', context)
 
@@ -429,6 +448,8 @@ def rare_occurrences(request):
 @login_required
 @permission_required('qm.view_endpoint', raise_exception=True)
 def endpoints_most_analytics(request):
+    start_time = time.time()
+
     # Limited to first 300 endpoints with the most analytics
     top_endpoints = (
         Endpoint.objects
@@ -441,14 +462,18 @@ def endpoints_most_analytics(request):
     page_number = int(request.GET.get('page', 1))
     page_obj = paginator.get_page(page_number)
 
+    elapsed_time = time.time() - start_time
+
     context = {
         'top_endpoints': page_obj,
+        'elapsed_time': elapsed_time,
     }
     return render(request, 'endpoints_most_analytics.html', context)
 
 @login_required
 @permission_required('qm.view_review', raise_exception=True)
 def upcoming_analytic_reviews(request):
+    start_time = time.time()
     analytics = (
         Analytic.objects
         .filter(next_review_date__isnull=False)
@@ -457,12 +482,17 @@ def upcoming_analytic_reviews(request):
         .annotate(count=Count('id'))
         .order_by('next_review_date')
     )
-    context = {'analytics': analytics}
+    elapsed_time = time.time() - start_time
+    context = {
+        'analytics': analytics,
+        'elapsed_time': elapsed_time,
+    }
     return render(request, 'upcoming_analytic_reviews.html', context)
 
 @login_required
 @permission_required('qm.view_campaign', raise_exception=True)
 def highest_weighted_score(request):
+    start_time = time.time()
     results = []
     highest_score = 0
     campaigns = Campaign.objects.filter(name__startswith='daily_cron_').order_by('date_start')
@@ -492,7 +522,9 @@ def highest_weighted_score(request):
         if int(item["highest_weighted_relevance"]) == max_score:
             item["color"] = "#FF6961"  # Red color for the highest score
 
+    elapsed_time = time.time() - start_time
     context = {
         'results': results,
+        'elapsed_time': elapsed_time,
     }
     return render(request, 'highest_weighted_score.html', context)
