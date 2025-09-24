@@ -683,7 +683,8 @@ def regen(request, analytic_id):
     # Create task in TasksStatus object
     celery_status = TasksStatus(
         taskname=analytic.name,
-        taskid = taskid
+        taskid = taskid,
+        started_by = request.user
     )
     celery_status.save()
 
@@ -859,7 +860,8 @@ def regencampaign(request, campaign_name):
     # Create task in TasksStatus object
     celery_status = TasksStatus(
         taskname=campaign_name,
-        taskid=taskid
+        taskid=taskid,
+        started_by=request.user
     )
     celery_status.save()
 

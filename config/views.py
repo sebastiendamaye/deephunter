@@ -73,10 +73,15 @@ def update_permission(request, group_id, permission_id):
 @login_required
 @permission_required('qm.delete_tasksstatus', raise_exception=True)
 def running_tasks(request):
+    return render(request, 'running_tasks.html')
+
+@login_required
+@permission_required('qm.delete_tasksstatus', raise_exception=True)
+def running_tasks_table(request):
     context = {
         'running_tasks': TasksStatus.objects.all(),
     }
-    return render(request, 'running_tasks.html', context)
+    return render(request, 'partials/running_tasks_table.html', context)
 
 @login_required
 @permission_required('qm.delete_tasksstatus', raise_exception=True)

@@ -283,7 +283,7 @@ class LogEntryAdmin(admin.ModelAdmin):
     list_filter = ['user', 'content_type', 'action_flag']
 
 class TasksStatusAdmin(admin.ModelAdmin):
-    list_display = ('taskname', 'taskid', 'date', 'progress')
+    list_display = ('taskname', 'started_by', 'taskid', 'date', 'progress')
 
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'short_name', 'description')
