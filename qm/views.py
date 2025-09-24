@@ -20,7 +20,7 @@ from .tasks import regenerate_stats, regenerate_campaign
 import ipaddress
 from connectors.utils import is_connector_enabled, is_connector_for_analytics, get_connector_conf
 from celery import current_app
-from qm.utils import get_campaign_date, get_available_statuses
+from .utils import get_campaign_date, get_available_statuses, find_sha_by_parent_sha
 from urllib.parse import urlencode, quote
 from .forms import (ReviewForm, EditAnalyticDescriptionForm, EditAnalyticNotesForm,
                     EditAnalyticQueryForm, SavedSearchForm, AnalyticForm, TagForm,
@@ -826,7 +826,8 @@ def about(request):
         version = f.readline().strip()
     # commit version
     with open(f'{STATIC_PATH}/commit_id.txt', 'r') as f:
-        version_commit = f.readline().strip()
+        #version_commit = find_sha_by_parent_sha(f.readline().strip())
+        version_commit = "4a3d28b7ea1c07ee12ce7b90780360635cc95c1c"
     # local version MITRE
     with open(f'{STATIC_PATH}/VERSION_MITRE', 'r') as f:
         version_mitre = f.readline().strip()

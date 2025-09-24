@@ -17,7 +17,14 @@
 <table class="mitre">
     <tr>
         <th>DeepHunter</th>
-        <td><a href="https://github.com/sebastiendamaye/deephunter/releases/tag/{{ version }}" target="_blank">{{ version }}</a> ({{ version_commit }})</td>
+        <td>
+            <a href="https://github.com/sebastiendamaye/deephunter/releases/tag/{{ version }}" target="_blank">{{ version }}</a>
+            {% if version_commit %}
+                (Commit <a href="https://github.com/sebastiendamaye/deephunter/commit/{{ version_commit }}" target="_blank">{{ version_commit|slice:"7" }}</a>)
+            {% else %}
+                (DEV)
+            {% endif %}
+        </td>
     </tr>
     <tr>
         <th>MITRE</th>

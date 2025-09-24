@@ -395,3 +395,20 @@ def get_available_statuses(analytic, edit=False):
                 }
     
     return statuses
+
+def find_sha_by_parent_sha(parent_sha, branch='main', per_page=100):
+    url = f'https://api.github.com/repos/sebastiendamaye/deephunter/commits'
+    params = {'sha': branch, 'per_page': per_page}
+    response = requests.get(
+        url,
+        params=params,
+        proxies=PROXY
+    )
+    if response.status_code != 200:
+        raise Exception(f"Failed to fetch commits: {response.status_code}")
+    commits = response.json()
+    for commit in commits:
+        parents = commit.get('parents', [])
+        if any(p['sha'] == parent_sha for p in parents):
+            return commit['sha']
+    return None
