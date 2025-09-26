@@ -1277,9 +1277,10 @@ def add_analytic(request):
                         allowed_status_choices=["DRAFT", "PUB"])
     if request.method == "POST":
         if form.is_valid():
-            analytic = form.save(commit=False)
+            analytic = form.save(commit=False) # commit=False to set created_by field
             analytic.created_by = request.user
             analytic.save()
+            form.save_m2m() # save ManyToMany relationships
             return HttpResponseRedirect(f'/qm/listanalytics/?search={form.cleaned_data["name"]}')
     context = {'form': form, 'AI_CONNECTOR': AI_CONNECTOR}
     return render(request, 'analytic_form.html', context)
