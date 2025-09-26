@@ -237,6 +237,11 @@
 
 		<tr><td><div class="filter">Target OS</div></td></tr>
 		<tr><td colspan="2">
+			<div class="form-check">
+				<input class="form-check-input" type="checkbox" id="checkos0" name="target_os" value="0"
+					{% if 0|slugify in posted_filters.target_os %} checked{% endif %}>
+				<label class="form-check-label" for="checkos0" title="No Target OS">(empty)</label>
+			</div>
 			{% for os in target_os %}
 			<div class="form-check">
 				<input class="form-check-input" type="checkbox" id="checkos{{ os.id }}" name="target_os" value="{{ os.id }}"

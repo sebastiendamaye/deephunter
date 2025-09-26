@@ -61,6 +61,8 @@ def categoryidtoname(id):
 
 @register.filter
 def osidtoname(id):
+    if id == '0':
+        return '(empty)'
     v = get_object_or_404(TargetOs, pk=id)
     return v.name
 

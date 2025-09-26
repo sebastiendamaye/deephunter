@@ -98,7 +98,21 @@ def list_analytics(request):
             posted_filters['categories'] = request.GET.getlist('categories')
 
         if 'target_os' in request.GET:
-            analytics = analytics.filter(target_os__pk__in=request.GET.getlist('target_os'))
+            if '0' in request.GET.getlist('target_os'):
+                if len(request.GET.getlist('target_os')) > 1:
+                    # the empty target OS is selected in addition to other target OS
+                    listos = request.GET.getlist('target_os')
+                    listos.remove('0')
+                    analytics = analytics.filter(
+                        Q(target_os__pk__in=listos)
+                        | Q(target_os__isnull=True)
+                    )
+                else:
+                    # only the empty target OS is selected
+                    analytics = analytics.filter(target_os__isnull=True)
+            else:
+                # only existing target OS are selected
+                analytics = analytics.filter(target_os__pk__in=request.GET.getlist('target_os'))
             posted_filters['target_os'] = request.GET.getlist('target_os')
         
         if 'vulnerabilities' in request.GET:
