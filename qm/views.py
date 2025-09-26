@@ -840,8 +840,7 @@ def about(request):
         version = f.readline().strip()
     # commit version
     with open(f'{STATIC_PATH}/commit_id.txt', 'r') as f:
-        #version_commit = find_sha_by_parent_sha(f.readline().strip())
-        version_commit = "4a3d28b7ea1c07ee12ce7b90780360635cc95c1c"
+        version_commit = find_sha_by_parent_sha(f.readline().strip())
     # local version MITRE
     with open(f'{STATIC_PATH}/VERSION_MITRE', 'r') as f:
         version_mitre = f.readline().strip()
