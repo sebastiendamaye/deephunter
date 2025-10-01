@@ -1,5 +1,5 @@
-Microsoft Sentinel
-###########################
+Microsoft Defender
+##################
 
 Description
 ***********
