@@ -15,6 +15,14 @@ If a transformation is required, it has to be part of the "query" field (not in 
 - You can define "Computer" by copying the value from another field: | project Computer = DstDvcHostname
 - You can also truncate the computer name to remove the domain: | project Computer = tostring(split(Computer, ".")[0])
 
+Queries can use the {{StartTimeISO}} and {{EndTimeISO}} placeholders to define the time range for the query. For example, you can use the following syntax to filter events from the last 14 days:
+
+.. code-block:: 
+
+    let starttime = todatetime('{{StartTimeISO}}');
+    let endtime = todatetime('{{EndTimeISO}}');
+    let lookback = starttime - 14d;
+
 Requirements
 ************
 
