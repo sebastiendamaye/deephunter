@@ -128,12 +128,22 @@ USER_GROUPS_MEMBERSHIP
 USER_GROUP
 **********
 - **Type**: string (format should be ``user:group``)
-- **Description**: User and group. Used by the deployment script (``qm/script/deploy.py``) to fix permissions.
+- **Description**: User and group. Used by the deployment script (``qm/scripts/upgrade.py``) to fix permissions.
 - **Example**: 
 
 .. code-block:: python
 	
 	USER_GROUP = "tomnook:users"
+
+SERVER_USER
+***********
+- **Type**: string
+- **Description**: User running the server service (e.g. `www-data` is running the Apache server). Used by the deployment script (``qm/scripts/upgrade.py``) to fix permissions.
+- **Example**: 
+
+.. code-block:: python
+	
+	SERVER_USER = "www-data"
 
 GITHUB_URL
 **********

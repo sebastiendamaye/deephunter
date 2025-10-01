@@ -61,6 +61,7 @@ USER_GROUPS_MEMBERSHIP = {
 
 # USER and GROUP. Used by deployment script to apply correct permissions
 USER_GROUP = "user:group"
+SERVER_USER = "www-data"
 
 # GitHub URL used by the deploy.sh script to clone the repo
 GITHUB_URL = "https://github.com/sebastiendamaye/deephunter.git"

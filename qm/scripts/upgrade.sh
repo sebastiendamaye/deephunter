@@ -151,8 +151,10 @@ VENV_PATH=$(grep -oP 'VENV_PATH\s?=\s?"\K[^"]+' /tmp/settings.py)
 check_empty "VENV_PATH" "$VENV_PATH"
 UPDATE_ON=$(grep -oP 'UPDATE_ON\s?=\s?"\K[^"]+' /tmp/settings.py)
 check_empty "UPDATE_ON" "$UPDATE_ON"
-USER=$(grep -oP 'USER_GROUP\s?=\s?"\K[^"]+' /tmp/settings.py)
-check_empty "USER" "$USER"
+USER_GROUP=$(grep -oP 'USER_GROUP\s?=\s?"\K[^"]+' /tmp/settings.py)
+check_empty "USER_GROUP" "$USER_GROUP"
+SERVER_USER=$(grep -oP 'SERVER_USER\s?=\s?"\K[^"]+' /tmp/settings.py)
+check_empty "SERVER_USER" "$SERVER_USER"
 GITHUB_URL=$(grep -oP 'GITHUB_URL\s?=\s?"\K[^"]+' /tmp/settings.py)
 check_empty "GITHUB_URL" "$GITHUB_URL"
 # List of django apps for migrations
@@ -316,8 +318,9 @@ touch $APP_PATH/static/mitre.json
 chmod 666 $APP_PATH/static/mitre.json
 chmod 664 $APP_PATH/static/VERSION*
 chmod 664 $APP_PATH/static/commit_id.txt
-chown -R $USER $VENV_PATH
+chown -R $USER_GROUP $VENV_PATH
 chmod -R 775 $VENV_PATH
+sudo chown :$SERVER_USER $APP_PATH/deephunter/wsgi.py
 echo -e "[\033[32mdone\033[0m]"
 
 # Restart apache2
