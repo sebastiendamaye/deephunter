@@ -10,13 +10,22 @@ Description
 -----------
 This connector replaces the "microsoftsentinel" connector (https://learn.microsoft.com/en-us/azure/sentinel/move-to-defender).
 
-Microsoft Defender provides a unified cybersecurity solution that integrates endpoint protection, cloud security, identity protection, email security, threat intelligence, exposure management, and SIEM into a centralized platform powered by a modern data lake.
+Microsoft Defender provides a unified cybersecurity solution that integrates endpoint protection, cloud security, identity protection,
+email security, threat intelligence, exposure management, and SIEM into a centralized platform powered by a modern data lake.
 
 This connector allows querying Microsoft Defender XDR logs using KQL (Kusto Query Language).
+
 Queries have to return a "Computer" column, corresponding to either a native "Computer" field, or a transformation.
 If a transformation is required, it has to be part of the "query" field (not in the "columns" field).
 You can define "Computer" by copying the value from another field: | project Computer = DstDvcHostname
 You can also truncate the computer name to remove the domain: | project Computer = tostring(split(Computer, ".")[0])
+
+Queries can use the {{StartTimeISO}} and {{EndTimeISO}} placeholders to define the time range for the query. For example, you can use the
+following syntax to filter events from the last 14 days:
+
+  let starttime = todatetime('{{StartTimeISO}}');
+  let endtime = todatetime('{{EndTimeISO}}');
+  let lookback = starttime - 14d;
 
 To do
 -----
@@ -28,10 +37,12 @@ import requests
 from msal import ConfidentialClientApplication
 from connectors.utils import get_connector_conf, gzip_base64_urlencode, manage_analytic_error
 from django.conf import settings
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+from django.utils import timezone
 from urllib.parse import quote, unquote
 import re
 from notifications.utils import add_debug_notification
+from datetime import date
 
 _globals_initialized = False
 def init_globals():
@@ -55,6 +66,13 @@ def init_globals():
 
         _globals_initialized = True
 
+
+def get_requirements():
+    """
+    Return the required modules for the connector.
+    """
+    init_globals()
+    return ['requests', 'msal']
 
 def query_language():
     """
@@ -94,25 +112,43 @@ def query(analytic, from_date=None, to_date=None, debug=None):
         manage_analytic_error(analytic, f"Failed to connect to MS Defender while executing the analytic {analytic.name}.")
         return []
 
-    # Define time range
-    if from_date and to_date:
-        timespan = f"{from_date.split('.')[0]}Z/{to_date.split('.')[0]}Z"
-    else:
-        # Default to the last 24 hours if no dates are provided
-        timespan = 'P1D'
-
     # Define query and headers
     q = f'{analytic.query} | summarize count() by Computer'
     headers = {
         'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json'
     }
-    body = {
-        'query': q,
-        'timespan': timespan,
-    }
+
+    ### Define time range and body    
+    # starttime and endtime are provided in the query
+    if '{{StartTimeISO}}' in analytic.query and '{{EndTimeISO}}' in analytic.query:
+        if from_date and to_date:
+            # replace placeholders with provided dates
+            q = q.replace('{{StartTimeISO}}', from_date)
+            q = q.replace('{{EndTimeISO}}', to_date)
+        else:
+            today = date.today()
+            yesterday = today - timedelta(days=1)
+            # replace placeholders with provided dates
+            q = q.replace('{{StartTimeISO}}', yesterday.isoformat())
+            q = q.replace('{{EndTimeISO}}', today.isoformat())
+        body = {
+            'query': q,
+        }
+    # starttime and endtime are not provided in the query
+    else:
+        if from_date and to_date:
+            timespan = f"{from_date.split('.')[0]}Z/{to_date.split('.')[0]}Z"
+        else:
+            # Default to the last 24 hours if no dates are provided
+            timespan = 'P1D'
+
+        body = {
+            'query': q,
+            'timespan': timespan,
+        }
     if debug or DEBUG:
-        print(f"Query: {q} | timespan: {timespan}")
+        print(f"Query: {q}")
  
     # Execute query
     try:
@@ -169,30 +205,47 @@ def delete_rule(analytic):
     return False
 
 
-def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
+def get_redirect_analytic_link(analytic, filter_date=None, endpoint_name=None):
     """
     Get the redirect link to run the analytic in MS Defender portal.
     :param analytic: Analytic object containing the query string and columns.
-    :param date: Date to filter the analytic by, in YYYY-MM-DD format (range will be date-date+1day).
+    :param filter_date: Date to filter the analytic by, in YYYY-MM-DD format (range will be date-date+1day).
     :param endpoint_name: Name of the endpoint to filter the analytic by.
     :return: String containing the redirect link for the analytic.
     """
 
     init_globals()
-    if not date:
-        # Default to 1 day
-        timespan = "timeRangeId=day"
+
+    q = analytic.query
+    
+    if '{{StartTimeISO}}' in q and '{{EndTimeISO}}' in q:
+        if not filter_date:
+            today = date.today()
+            yesterday = today - timedelta(days=1)
+            # replace placeholders with provided dates
+            q = q.replace('{{StartTimeISO}}', yesterday.isoformat())
+            q = q.replace('{{EndTimeISO}}', today.isoformat())
+        else:
+            # replace placeholders with provided dates
+            start_date = datetime.strptime(filter_date, "%Y-%m-%d")
+            end_date = start_date + timedelta(days=1)
+            q = q.replace('{{StartTimeISO}}', start_date.isoformat())
+            q = q.replace('{{EndTimeISO}}', end_date.isoformat())
     else:
-        # Convert date to ISO format and create a timespan (fromDate, toDate)
-        # date format: 2025-07-01T00:00:00.000Z
-        start_date = datetime.strptime(date, "%Y-%m-%d")
-        end_date = start_date + timedelta(days=1)
-        timespan = f"fromDate={quote(start_date.isoformat(), safe='')}.000Z&toDate={quote(end_date.isoformat(), safe='')}.000Z"
+        if not filter_date:
+            # Default to 1 day
+            timespan = "timeRangeId=day"
+        else:
+            # Convert date to ISO format and create a timespan (fromDate, toDate)
+            # date format: 2025-07-01T00:00:00.000Z
+            start_date = datetime.strptime(filter_date, "%Y-%m-%d")
+            end_date = start_date + timedelta(days=1)
+            timespan = f"fromDate={quote(start_date.isoformat(), safe='')}.000Z&toDate={quote(end_date.isoformat(), safe='')}.000Z"
 
     if endpoint_name:
-        customized_query = f'{analytic.query} \n| where Computer startswith "{endpoint_name}"'
+        customized_query = f'{q} \n| where Computer startswith "{endpoint_name}"'
     else:
-        customized_query = analytic.query
+        customized_query = q
 
     # If the query field contains a "project" statement (used for a transformation),
     # we need to comment it out in order to avoid conflicts with the "columns" field.
@@ -208,7 +261,10 @@ def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
     encoded_query = gzip_base64_urlencode(unquote(q), encoding='utf-16le')
 
     # Build the full URL
-    url = f"https://security.microsoft.com/v2/advanced-hunting?query={encoded_query}&{timespan}"
+    if '{{StartTimeISO}}' in analytic.query and '{{EndTimeISO}}' in analytic.query:
+        url = f"https://security.microsoft.com/v2/advanced-hunting?query={encoded_query}"
+    else:
+        url = f"https://security.microsoft.com/v2/advanced-hunting?query={encoded_query}&{timespan}"
 
     return url
 
