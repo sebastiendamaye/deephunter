@@ -1,5 +1,6 @@
 from django.conf import settings
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+from django.utils import timezone
 from qm.models import Campaign, Analytic, Snapshot, Endpoint, TasksStatus
 from django.shortcuts import get_object_or_404
 import numpy as np
@@ -105,7 +106,7 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
 
     if not campaigndate:
         # If no date provided, use today
-        campaigndate = datetime.now()
+        campaigndate = timezone.now()
 
     add_info_notification(f"Running campaign for date: {campaigndate.strftime('%Y-%m-%d')}")
     campaign_name = 'daily_cron_{}'.format(campaigndate.strftime("%Y-%m-%d"))
@@ -127,7 +128,7 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
     campaign = Campaign(
         name=campaign_name,
         description='Daily cron job, run all analytics',
-        date_start=datetime.now()
+        date_start=timezone.now()
         )
     campaign.save()
     
@@ -144,7 +145,7 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
         analytic.save()
                 
         # store current time (used to update snapshot runtime)
-        start_runtime = datetime.now()
+        start_runtime = timezone.now()
         
         # Call the "query" function of the appropriate connector
         # Number of endpoints is evaluated by length of data. The data arrary returned should have the following fields:
@@ -164,7 +165,7 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
             break
 
         # store current time (used to update snapshot runtime)
-        end_runtime = datetime.now()
+        end_runtime = timezone.now()
 
         # Create snapshot. Necessary to have the object to link the detected assets.
         # Stats will be updated later to the snapshot
@@ -227,8 +228,8 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
         # When the max_hosts threshold is reached (by default 1000)
         if hits_endpoints >= CAMPAIGN_MAX_HOSTS_THRESHOLD:
             # Send notification
-            del_notification_by_uid(f"max_number_hosts_reached_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
-            add_info_notification(f"Max number of hosts reached for analytic {analytic.name}", uid=f"max_number_hosts_reached_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
+            del_notification_by_uid(f"max_number_hosts_reached_{timezone.now().strftime('%Y%m%d')}_{analytic.id}")
+            add_info_notification(f"Max number of hosts reached for analytic {analytic.name}", uid=f"max_number_hosts_reached_{timezone.now().strftime('%Y%m%d')}_{analytic.id}")
             # Update the maxhost counter if reached
             analytic.maxhosts_count += 1
             # if threshold is reached
@@ -304,7 +305,7 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
 
 
     # Close Campaign
-    campaign.date_end = datetime.now()
+    campaign.date_end = timezone.now()
     campaign.nb_queries = Analytic.objects.exclude(status='ARCH').filter(run_daily=True).count()
     campaign.nb_analytics = Analytic.objects.exclude(status='ARCH').count()
     campaign.save()
