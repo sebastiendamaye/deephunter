@@ -23,7 +23,7 @@ def get_requirements():
     Return the required modules for the connector.
     """
     init_globals()
-    return ['requests', 'vt-py']
+    return ['requests', 'vt']
 
 def check_hash(hash):
     """
