@@ -1,1 +1,0 @@
-/data/deephunter/plugins/catalog/activedirectory.py
