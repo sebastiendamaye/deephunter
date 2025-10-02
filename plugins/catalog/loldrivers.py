@@ -16,6 +16,13 @@ def init_globals():
         PROXY = settings.PROXY
         _globals_initialized = True
 
+def get_requirements():
+    """
+    Return the required modules for the connector.
+    """
+    init_globals()
+    return ['requests', 'beautifulsoup4']
+
 def get_sha256_hashes():
     """
     Fetches SHA256 hashes of LOLDrivers from the website.

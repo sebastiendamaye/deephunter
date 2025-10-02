@@ -2,13 +2,15 @@ from django.db import models
 
 class Connector(models.Model):
     DOMAIN_CHOICES = [
-        ('analytics', 'Analytics'),
-        ('repos', 'Repos'),
-        ('ai', 'AI'),
+        ('analytics', 'Threat Hunting Analytics'),
+        ('repos', 'Repositories'),
+        ('ai', 'Artificial Intelligence'),
+        ('extensions', 'Extensions'),
     ]
 
     name = models.CharField(max_length=20, unique=True)
     description = models.TextField(blank=True)
+    installed = models.BooleanField(default=False)
     enabled = models.BooleanField(default=False)
     domain = models.CharField(max_length=20, choices=DOMAIN_CHOICES, blank=True)
 

@@ -3,27 +3,37 @@ Plugins
 
 Description
 ***********
-A plugin is the abstraction layer that allows DeepHunter to interact with different data sources (e.g. SentinelOne, Microsoft Sentinel, etc.) to execute queries, retrieve results, synchronize rules, etc.
+A plugin is the abstraction layer (a.k.a. connector) that allows DeepHunter to interact with different data sources (e.g. SentinelOne, Microsoft Sentinel, etc.) to execute queries, retrieve results, synchronize rules, consolidate results, etc.
 
-There are 2 types of plugins:
+There are several categories (a.k.a. domains) of plugins:
 
-- plugins that are used in the threat hunting analytics (e.g. sentinelone, microsoftsentinel, etc.) to execute queries against a remote data lake and retrieve results, synchronize rules, etc.
-- plugins that are used to enrich data with additional information (e.g. active directory), or used in tools (e.g. malwarebazaar, virustotal).
+- **AI**: plugins that are used to interact with AI services (e.g. OpenAI). Currently used to write a query based on user input and to determine the MITRE coverage of analytics.
+- **Analytics**: plugins that are used in the threat hunting analytics (e.g. sentinelone, microsoftsentinel, etc.) to execute queries against a remote data lake and retrieve results, synchronize rules, etc.
+- **Extensions**: plugins that are used to enrich data with additional information (e.g. active directory), or used in tools (e.g. malwarebazaar, virustotal).
+- **Repositories**: plugins that are used to import threat hunting analytics from remote repositories.
 
-Plugins' settings should be stored in the database (Connector and ConnectorConf objects). The plugin's code should be stored in the `plugins` folder.
+Plugins are python files within the ``./plugins/catalog`` directory. Plugins settings are stored in the database (Connector and ConnectorConf objects).
 
-Enable / disable plugins
-************************
+catalog
+*******
+The catalog is the list of available plugins.
 
-To enable or disable plugins, go to the admin panel (``/admin/connectors/connector/``).
+.. image:: ../img/catalog.png
+  :alt: Catalog
 
-.. image:: ../img/connectors.png
-  :width: 800
-  :alt: Connectors
+You can install and uninstall plugins from the catalog.
 
-Settings
-********
-You can configure each connector from the ``Admin > Settings > Connectors`` menu in DeepHunter.
+.. note::
+
+  - DeepHunter will check that prerequisites are met before installing a plugin (i.e., required python packages are installed). If missing prerequisites are detected, the installation will fail.
+	- You can't uninstall plugins that are currently in use. To uninstall a plugin that is in use, you must first remove all references to it (e.g. remove all analytics that use the plugin, or map them to another plugin).
+  - You need to first disable a plugin before uninstalling it.
+
+When a plugin is installed, a symbolic link is created in the ``./plugins/`` directory pointing to the corresponding file in the ``./plugins/catalog/`` directory.
+
+Enable, disable and configure plugins
+*************************************
+You can enable, disable and configure each connector from the ``Admin > Settings > Connectors`` menu in DeepHunter.
 
 .. image:: ../img/connector_settings.png
   :width: 800

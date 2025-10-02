@@ -212,7 +212,7 @@ else
 fi
 
 ######################################
-# UPGRADE
+# BACKUP
 #
 
 # Stop services
@@ -237,6 +237,19 @@ rm -fR $TEMP_FOLDER/deephunter
 mkdir -p $TEMP_FOLDER
 cp -R $APP_PATH $TEMP_FOLDER
 echo -e "[\033[32mdone\033[0m]"
+
+# Backup installed plugins
+installed_plugins=()
+# List all .py files in the 'plugins' directory, excluding __init__.py
+for file in $APP_PATH/plugins/*.py; do
+    if [[ "$(basename "$file")" != "__init__.py" ]]; then
+        installed_plugins+=("$(basename "$file")")
+    fi
+done
+
+######################################
+# UPGRADE
+#
 
 # Installing pip dependencies in the virtual env
 echo -n -e "[\033[90mINFO\033[0m] INSTALLING PIP DEPENDENCIES ..................... "
@@ -310,6 +323,14 @@ done
 deactivate
 echo -e "[\033[90mINFO\033[0m] DB MIGRATIONS COMPLETE"
 
+# Restore installed plugins
+echo -n -e "[\033[90mINFO\033[0m] RESTORING INSTALLED PLUGINS ..................... "
+# Loop through the array and print the file names
+for plugin in "${installed_plugins[@]}"; do
+    # recreate the symlinks
+    ln -s $APP_PATH/plugins/catalog/$plugin $APP_PATH/plugins/$plugin
+done
+echo -e "[\033[32mdone\033[0m]"
 
 # Restore permissions
 echo -n -e "[\033[90mINFO\033[0m] RESTORING PERMISSIONS ........................... "
@@ -321,6 +342,7 @@ chmod 664 $APP_PATH/static/commit_id.txt
 chown -R $USER_GROUP $VENV_PATH
 chmod -R 775 $VENV_PATH
 sudo chown :$SERVER_USER $APP_PATH/deephunter/wsgi.py
+sudo chown -R :$SERVER_USER $APP_PATH/plugins/
 echo -e "[\033[32mdone\033[0m]"
 
 # Restart apache2

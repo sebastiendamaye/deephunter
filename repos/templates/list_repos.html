@@ -23,9 +23,9 @@
 
             <div class="repo_icon">
                 {% if 'github.com' in repo.url %}
-                    <img class="img-repo-icon" src="/static/images/GitHub.png" alt="github" />
+                    <img class="img-repo-icon" src="/static/images/connectors/github.png" alt="github" />
                 {% else %}
-                    <img class="img-repo-icon" src="/static/images/BitBucket.png" alt="bitbucket" />
+                    <img class="img-repo-icon" src="/static/images/connectors/bitbucket.png" alt="bitbucket" />
                 {% endif %}
                 <div>
                     {% if perms.repos.change_repo %}<span class="icon"><a href="/repos/editrepo/{{ repo.id }}/" title="Edit"><i class="fa-solid fa-pen"></i></a></span>{% endif %}

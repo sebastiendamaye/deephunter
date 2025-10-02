@@ -1,0 +1,57 @@
+<form>
+    {% csrf_token %}
+    <div class="connector-div connectors-list">
+        <div><b>Filter domains: </b></div>
+        <div>
+            <label for="ai">AI</label>
+            <input type="checkbox" id="ai" name="domain" value="ai" 
+                hx-post="/connectors/filter-catalog/" 
+                hx-target="#connectors-list" 
+                hx-trigger="change" />
+        </div>
+        <div>
+            <label for="analytics">Analytics</label>
+            <input type="checkbox" id="analytics" name="domain" value="analytics" 
+                hx-post="/connectors/filter-catalog/" 
+                hx-target="#connectors-list" 
+                hx-trigger="change" />
+        </div>
+        <div>
+            <label for="extensions">Extensions</label>
+            <input type="checkbox" id="extensions" name="domain" value="extensions" 
+                hx-post="/connectors/filter-catalog/" 
+                hx-target="#connectors-list"
+                hx-trigger="change" />
+        </div>
+        <div>
+            <label for="repos">Repositories</label>
+            <input type="checkbox" id="repos" name="domain" value="repos" 
+                hx-post="/connectors/filter-catalog/" 
+                hx-target="#connectors-list" 
+                hx-trigger="change" />
+        </div>
+    </div>
+
+    <div class="connector-div connectors-list">
+        <div><b>Installation status: </b></div>
+        <div>
+            <label for="installed">Installed</label>
+            <input type="checkbox" id="installed" name="status" value="installed" 
+                hx-post="/connectors/filter-catalog/" 
+                hx-target="#connectors-list" 
+                hx-trigger="change" />
+        </div>
+        <div>
+            <label for="not-installed">Not installed</label>
+            <input type="checkbox" id="not-installed" name="status" value="notinstalled" 
+                hx-post="/connectors/filter-catalog/" 
+                hx-target="#connectors-list" 
+                hx-trigger="change" />
+        </div>
+
+    </div>
+</form>
+
+<div id="connectors-list" class="connectors-list" hx-get="/connectors/filter-catalog/" hx-trigger="load">
+    <img src="/static/images/bars.svg" alt="Loading..." />
+</div>

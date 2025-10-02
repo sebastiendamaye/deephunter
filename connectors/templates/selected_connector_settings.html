@@ -18,7 +18,7 @@
         <label class="switch">
         <input id="connector-enabled-{{ connector.id }}"
             type="checkbox"
-            hx-get="/connectors/toggle-connector/{{ connector.id }}/"
+            hx-get="/connectors/toggle-connector-enabled/{{ connector.id }}/"
             {% if connector.enabled %}checked{% endif %}>
         <span class="slider round"></span>
         </label>

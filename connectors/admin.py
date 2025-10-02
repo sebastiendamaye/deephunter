@@ -2,8 +2,8 @@ from django.contrib import admin
 from .models import Connector, ConnectorConf
 
 class ConnectorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'enabled', 'domain')
-    list_filter = ['name', 'description', 'domain']
+    list_display = ('name', 'description', 'installed', 'enabled', 'domain')
+    list_filter = ['domain', 'installed', 'enabled']
     search_fields = ['name', 'description']
 
 class ConnectorConfAdmin(admin.ModelAdmin):

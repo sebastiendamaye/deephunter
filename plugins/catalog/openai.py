@@ -28,6 +28,13 @@ def init_globals():
         _globals_initialized = True
 
 
+def get_requirements():
+    """
+    Return the required modules for the connector.
+    """
+    init_globals()
+    return ['openai']
+
 def get_mitre_techniques_from_query(query):
     init_globals()
 

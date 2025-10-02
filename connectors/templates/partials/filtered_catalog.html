@@ -1,0 +1,38 @@
+
+{% for connector in connectors %}
+    <div class="connector">
+        <div class="connector-div">
+            <div>
+                <img class="connector-icon" src="/static/images/connectors/{{ connector.name }}.png" alt="{{ connector.name }} connector icon" />
+            </div>                
+            <div>
+                <div class="connector-name">{{ connector.name }}</div>
+                <div><span class="button">{{ connector.domain }}</span></div>
+            </div>
+        </div>
+
+        {%if connector.description|length > 320 %}
+            <div class="connector-description" title="{{ connector.description }}">{{ connector.description|slice:":320" }}...</div>
+        {% else %}
+            <div class="connector-description">{{ connector.description }}</div>
+        {% endif %}
+
+        {% if connector.enabled %}
+            <i class="fas fa-fw fa-info-circle mr-3 mt-1"></i>
+            First disable the connector to uninstall it.
+        {% else %}
+            <div class="aright">
+                <div class="container-switch-toggle">
+                    <span class="switch-status-label">Install/Uninstall: </span>
+                    <label class="switch">
+                    <input id="connector-installed-{{ connector.id }}"
+                        type="checkbox"
+                        hx-get="/connectors/toggle-connector-installed/{{ connector.id }}/"
+                        {% if connector.installed %}checked{% endif %}>
+                    <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endfor %}

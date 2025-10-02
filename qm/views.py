@@ -1446,7 +1446,7 @@ def query_ai_assistant(request):
         response['HX-Trigger'] = 'closeModal'
         
         query_language = all_connectors.get(form.cleaned_data['connector'].name).query_language()
-        question_for_ai = f"""Write a {query_language} query to detect the logic below. No explanations, only the query.
+        question_for_ai = f"""Write a threat hunting query (Language: {query_language}) to detect the logic below. No explanations, only the query.
         
         Logic:
 

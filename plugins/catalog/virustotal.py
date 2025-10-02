@@ -18,6 +18,13 @@ def init_globals():
         API_KEY = get_connector_conf('virustotal', 'API_KEY')
         _globals_initialized = True
 
+def get_requirements():
+    """
+    Return the required modules for the connector.
+    """
+    init_globals()
+    return ['requests', 'vt-py']
+
 def check_hash(hash):
     """
     Check if a hash exists in VirusTotal.

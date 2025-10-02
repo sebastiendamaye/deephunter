@@ -8,6 +8,7 @@ import gzip
 import base64
 import urllib.parse
 from datetime import datetime
+from django.utils import timezone
 from io import BytesIO
 from django.conf import settings
 from notifications.utils import add_error_notification, del_notification_by_uid
@@ -103,8 +104,8 @@ def manage_analytic_error(analytic, error_message):
         error_message = "{} [...] {}".format(error_message[:250], error_message[-250:])
 
     # Send error as notification
-    del_notification_by_uid(f"error_analytic_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
-    add_error_notification(error_message, uid=f"error_analytic_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
+    del_notification_by_uid(f"error_analytic_{timezone.now().strftime('%Y%m%d')}_{analytic.id}")
+    add_error_notification(error_message, uid=f"error_analytic_{timezone.now().strftime('%Y%m%d')}_{analytic.id}")
 
     # Analytic query error date is always set to today, even if the campaign is regenerated retroactively
     # this is because we want to know when the error occurred exactly to investigate potential issues with the data lake
@@ -120,3 +121,4 @@ def manage_analytic_error(analytic, error_message):
         analytic.status = "PENDING"
     # we save analytic
     analytic.save()
+

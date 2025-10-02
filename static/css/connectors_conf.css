@@ -109,3 +109,42 @@ span.toggle-eye {
   cursor: pointer;
 }
 
+div.connector-div,
+div.connectors-list {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+div.connector-div {
+    gap: 10px;
+}
+
+div.connector {
+    width: 500px;
+    border: solid 1px #ddd;
+    padding: 10px;
+    margin: 5px; 
+    border-radius: 5px;
+}
+
+div.connector-description {
+    margin-top: 20px;
+    margin-bottom: 0px;
+    font-size: 13px;
+    color: #666;
+    height: 80px;
+}
+
+img.connector-icon {
+    width: 40px;
+}
+
+div.connector-name {
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+div.aright {
+    text-align: right;
+}
