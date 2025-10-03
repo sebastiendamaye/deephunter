@@ -88,7 +88,10 @@ def pre_save_handler(sender, instance, **kwargs):
         original_instance = Analytic.objects.get(pk=instance.pk)
 
         ### Reset counters, error flag and message, and last_time_seen when the "query" field of the analytic is updated
-        if original_instance.query != instance.query:
+        ### or when zscore thresholds are updated
+        if (original_instance.query != instance.query
+        or original_instance.anomaly_threshold_count != instance.anomaly_threshold_count
+        or original_instance.anomaly_threshold_endpoints != instance.anomaly_threshold_endpoints):
             # reset query flag
             instance.maxhosts_count = 0
             instance.query_error = False
