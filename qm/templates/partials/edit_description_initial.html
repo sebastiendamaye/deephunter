@@ -1,11 +1,11 @@
 {% load markup_tags %}
 <div hx-target="this" hx-swap="outerHTML">
-    {% if perms.qm.change_analytic %}
-    <span class="icon">
-        <a hx-get="/qm/edit_description_form/{{ analytic_id }}/">
-            <i class="fa-solid fa-pen"></i> edit
-        </a>
-    </span>
+    {% if perms.qm.change_analytic and analytic.status != 'REVIEW' %}
+        <span class="icon">
+            <a hx-get="/qm/edit_description_form/{{ analytic.id }}/">
+                <i class="fa-solid fa-pen"></i> edit
+            </a>
+        </span>
     {% endif %}
-    {{ analytic_description|apply_markup:"markdown" }}
+    {{ analytic.description|apply_markup:"markdown" }}
 </div>

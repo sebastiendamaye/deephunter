@@ -989,8 +989,7 @@ def search_in_admin(request):
 def edit_description_initial(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     context = {
-        "analytic_description": analytic.description,
-        "analytic_id": analytic.id
+        "analytic": analytic,
     }
     return render(request, 'partials/edit_description_initial.html', context)
 
@@ -1021,8 +1020,7 @@ def edit_description_submit(request, analytic_id):
 def edit_notes_initial(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     context = {
-        "analytic_notes": analytic.notes,
-        "analytic_id": analytic.id
+        "analytic": analytic,
     }
     return render(request, 'partials/edit_notes_initial.html', context)
 
@@ -1053,9 +1051,7 @@ def edit_notes_submit(request, analytic_id):
 def edit_query_initial(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     context = {
-        "analytic_query": analytic.query,
-        "analytic_columns": analytic.columns,
-        "analytic_id": analytic.id
+        "analytic": analytic,
     }
     return render(request, 'partials/edit_query_initial.html', context)
 
