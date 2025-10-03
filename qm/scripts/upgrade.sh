@@ -279,7 +279,8 @@ while true; do
 done
 
 echo -n -e "[\033[90mINFO\033[0m] INSTALLING UPDATE ............................... "
-rm -fR $APP_PATH
+# Sudo used here to be able to delete ""./plugins/__pycache__" that is owned by www-data)
+sudo rm -fR $APP_PATH
 cp -R /tmp/deephunter $APP_PATH
 echo -e "[\033[32mdone\033[0m]"
 
