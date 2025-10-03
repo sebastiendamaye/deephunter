@@ -551,20 +551,18 @@ def tl_timeline(request, hostname):
                 
                 createdat = (datetime.today()-timedelta(days=DB_DATA_RETENTION))
                 apps = all_connectors.get('sentinelone').get_applications(agent_id)
-                
-                for app in apps:
-                    if app['installedDate']:
-                        if datetime.strptime(app['installedDate'][:10], '%Y-%m-%d') >= createdat:
-                            items.append({
-                                'id': iid,
-                                'group': gid,
-                                'start':  datetime.strptime(app['installedDate'][:10], '%Y-%m-%d'),
-                                'end': datetime.strptime(app['installedDate'][:10], '%Y-%m-%d')+timedelta(days=1),
-                                'description': '{} ({})'.format(app['name'].strip(), app['publisher'].strip())
-                                })
-                            iid += 1
-                
-                
+                if apps:
+                    for app in apps:
+                        if app['installedDate']:
+                            if datetime.strptime(app['installedDate'][:10], '%Y-%m-%d') >= createdat:
+                                items.append({
+                                    'id': iid,
+                                    'group': gid,
+                                    'start':  datetime.strptime(app['installedDate'][:10], '%Y-%m-%d'),
+                                    'end': datetime.strptime(app['installedDate'][:10], '%Y-%m-%d')+timedelta(days=1),
+                                    'description': '{} ({})'.format(app['name'].strip(), app['publisher'].strip())
+                                    })
+                                iid += 1
 
     # Visualization #2 (graph)
     items2 = Endpoint.objects.filter(hostname=hostname) \
