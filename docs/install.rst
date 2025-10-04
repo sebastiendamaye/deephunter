@@ -156,7 +156,6 @@ Now, run the following commands to enable DeepHunter in HTTPS:
 .. code-block:: sh
 
 	$ sudo cp /data/deephunter/install/etc/apache2/sites-available/deephunter-ssl.conf /etc/apache2/sites-available/
-	$ sudo nano -c /etc/apache2/sites-enabled/deephunter-ssl.conf
 	$ sudo a2ensite deephunter-ssl
 
 Restart Apache2
@@ -192,7 +191,7 @@ To backup your database, it is recommended to use ``django-dbbackup`` and run th
 
 .. code-block:: sh
 
-	(venv) $ pip install python-gnupg>=0.5.0
+	(venv) $ pip install "python-gnupg>=0.5.0"
 	(venv) $ pip install django-dbbackup
 
 Generate PGP keys
@@ -346,6 +345,14 @@ Reload services and enable them:
 
 Note: If you have difficulties to start the service, check if directory ``/var/log/celery`` is present. If not, create it with ``sudo mkdir /var/log/celery/``
 
+Create the initial database
+***************************
+To create an empty database, run the following command:
+
+.. code-block:: sh
+
+	(venv) $ ./manage.py migrate
+
 Install initial data
 ********************
 DeepHunter is shipped with some data (fixtures). To install them, use the ``load_initial_data.sh`` script:
@@ -353,6 +360,16 @@ DeepHunter is shipped with some data (fixtures). To install them, use the ``load
 .. code-block:: sh
 
 	$ /data/deephunter/install/scripts/load_initial_data.sh
+
+Create a local superuser
+************************
+To create a local superuser, run the following command:
+
+.. code-block:: sh
+
+	(venv) $ ./manage.py createsuperuser
+
+Follow the prompts to create the superuser account.
 
 Upgrading DeepHunter
 ********************
