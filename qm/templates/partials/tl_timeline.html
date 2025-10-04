@@ -122,7 +122,16 @@
 				group: {{ item.group }},
 				start: new Date({{ item.start|date:"Y" }},{{ item.start|date:"n-1" }},{{ item.start|date:"j" }}),
 				end: new Date({{ item.end|date:"Y" }},{{ item.end|date:"n-1" }},{{ item.end|date:"j" }}),
-				title: "DATE: {{ item.start|date:"Y-n-j" }}<br />{{ item.description }}<br />{{ item.connector }}<br />{{ item.storylineid }}"
+				title: 'DATE: {{ item.start|date:"Y-n-j" }}<br />'
+					+ '{{ item.description }}<br />'
+					+ '{{ item.connector }}<br />'
+					+ '{{ item.storylineid }}<br />'
+					{% if item.group != 500 and item.group != 1000 %}
+						+ '-----<br />'
+						+ 'Threats: {{ item.threat_names }}<br />'
+						+ 'Actors: {{ item.threat_actors }}<br />'
+						+ 'Vulns: {{ item.vulnerabilities }}<br />'
+					{% endif %}
 			},
 		{% endfor %}
 		]);
@@ -165,7 +174,7 @@
 			{
 				x: new Date({{ item2.snapshot__date|date:"Y" }},{{ item2.snapshot__date|date:"n-1" }},{{ item2.snapshot__date|date:"j" }}),
 				y: {{ item2.cumulative_score }},
-				label: "DATE: {{ item2.snapshot__date|date:"Y-n-j" }}<br />{{ item2.cumulative_score }}"
+				title: 'DATE: {{ item2.snapshot__date|date:"Y-n-j" }}<br />{{ item2.cumulative_score }}'
 			},
 		{% endfor %}
 		]);

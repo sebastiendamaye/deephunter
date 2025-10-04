@@ -475,7 +475,10 @@ def tl_timeline(request, hostname):
             'end': e.snapshot.date+timedelta(days=1),
             'description': 'Signature: {}'.format(e.snapshot.analytic.name),
             'connector': 'Connector: {}'.format(e.snapshot.analytic.connector.name),
-            'storylineid': 'StorylineID: {}'.format(e.storylineid.replace('#', ', '))
+            'storylineid': 'StorylineID: {}'.format(e.storylineid.replace('#', ', ')),
+            'threat_names': ', '.join([t.name for t in e.snapshot.analytic.threats.all()]),
+            'threat_actors': ', '.join([t.name for t in e.snapshot.analytic.actors.all()]),
+            'vulnerabilities': ', '.join([v.name for v in e.snapshot.analytic.vulnerabilities.all()]),
             })
         storylineid_json[iid] = e.storylineid.split('#')
         connectors_json[iid] = e.snapshot.analytic.connector.name
