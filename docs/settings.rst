@@ -6,7 +6,17 @@ This is the settings page. Only relevant settings for DeepHunter are reported. F
 SECRET_KEY
 **********
 - **Type**: String
-- **Description**: A secret key for a particular Django installation. This is used to provide cryptographic signing, and should be set to a unique, unpredictable value.
+- **Description**: A secret key for a particular Django installation. This is used to provide cryptographic signing, and should be set to a unique, unpredictable value. You can generate a new secret key using the following Python code:
+
+.. code-block:: bash
+
+	$ python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+
+- **Example**:
+
+.. code-block:: python
+
+	SECRET_KEY = 'i#nu(#b41!&62x4bv9zo)zz5c+!q13mm#b-qs@z=k)kdu%qgkj'
 
 DEBUG
 *****
