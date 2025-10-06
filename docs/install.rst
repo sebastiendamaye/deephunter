@@ -328,7 +328,6 @@ Create the directories and fix permissions:
 	$ sudo chown celery:celery /var/log/celery/
 	$ chmod -R 755 /data
 	$ chmod 666 /data/deephunter/static/mitre.json 
-	$ chmod 666 /data/deephunter/static/tokendate.txt
 	$ sudo chown :www-data /data/deephunter/deephunter/wsgi.py
 	$ chmod 775 /data/deephunter/deephunter/wsgi.py
 

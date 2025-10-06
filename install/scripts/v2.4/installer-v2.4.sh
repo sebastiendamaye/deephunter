@@ -201,9 +201,7 @@ echo "FIX PERMISSIONS ...................................................... "
 # Fix permissions
 chmod -R 755 $APP_PATH
 touch $APP_PATH/static/mitre.json
-touch $APP_PATH/static/tokendate.txt
 chmod 666 $APP_PATH/static/mitre.json
-chmod 666 $APP_PATH/static/tokendate.txt
 
 #############
 # Configure Apache
