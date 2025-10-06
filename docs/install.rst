@@ -11,7 +11,8 @@ The recommended way to install DeepHunter is to use the installer script. It wil
 
 .. warning::
 
-   The installer script does a basic installation, which allows you to test and confirm that DeepHunter is working correctly. However, it may not be suitable for production use without further configuration.
+	- The installer script is to install DeepHunter from scratch. If you already have an existing installation, please refer to the `upgrading section <#upgrading-deephunter>`_.
+   	- The installer script does a basic installation, which allows you to test and confirm that DeepHunter is working correctly. However, it may not be suitable for production use without further configuration.
 
 For example, to install version 2.4:
 
