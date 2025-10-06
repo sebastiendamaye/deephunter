@@ -341,7 +341,7 @@ def get_applications(agent_id):
         )
     return r.json()['data'] if r.status_code == 200 and r.json()['data'] else None
 
-def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
+def get_redirect_analytic_link(analytic, filter_date=None, endpoint_name=None):
     """
     Get the redirect link to run the analytic in SentinelOne.    
     :param analytic: Analytic object containing the query string and columns.
@@ -350,8 +350,8 @@ def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
     :return: String containing the redirect link for the analytic.
     """
     init_globals()
-    if not date:
-        date = (datetime.today()-timedelta(days=1)).strftime('%Y-%m-%d')
+    if not filter_date:
+        filter_date = (datetime.today()-timedelta(days=1)).strftime('%Y-%m-%d')
     
     if endpoint_name:
         customized_query = f"{analytic.query} \n| filter endpoint.name='{endpoint_name}'"
@@ -363,7 +363,7 @@ def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
     else:
         q = quote(customized_query)
     
-    return '{}/query?filter={}&startTime={}&endTime=%2B1+day&{}'.format(XDR_URL, q.replace('%0D', ''), date, XDR_PARAMS)
+    return '{}/query?filter={}&startTime={}&endTime=%2B1+day&{}'.format(XDR_URL, q.replace('%0D', ''), filter_date, XDR_PARAMS)
 
 def get_redirect_storyline_link(storyline_ids, date):
     """

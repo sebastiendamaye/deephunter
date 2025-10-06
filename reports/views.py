@@ -248,7 +248,7 @@ def endpoints(request):
         a = analytic.snapshot.analytic
         startdate = analytic.snapshot.date.strftime('%Y-%m-%d')
         connector_name = a.connector.name
-        xdrlink = all_connectors.get(connector_name).get_redirect_analytic_link(a, date=startdate, endpoint_name=analytic.hostname)
+        xdrlink = all_connectors.get(connector_name).get_redirect_analytic_link(a, filter_date=startdate, endpoint_name=analytic.hostname)
         analytics_by_hostname[analytic.hostname].append({
             "analyticid": a.id,
             "name": a.name,

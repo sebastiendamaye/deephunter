@@ -69,7 +69,7 @@ Methods are listed below (M/O = Mandatory / Optional).
      - Get the redirect link to run the analytic in the remote data lake.
      - M
      - * ``analytic``: Analytic object containing the query string and columns.
-       * ``date``: Date to filter the analytic by, in ISO format (range will be date-date+1day).
+       * ``filter_date``: Date to filter the analytic by, in ISO format (range will be date-date+1day).
        * ``endpoint_name``: Name of the endpoint to filter the analytic by.
      - String containing the redirect link for the analytic.
    * - ``get_threats``
@@ -172,7 +172,7 @@ You can use the following template to create your own plugin:
         init_globals()
         return False
 
-    def get_redirect_analytic_link(analytic, date=None, endpoint_name=None):
+    def get_redirect_analytic_link(analytic, filter_date=None, endpoint_name=None):
         """
         Generate a URL to pre-fill the query in the remote data lake.
         """
