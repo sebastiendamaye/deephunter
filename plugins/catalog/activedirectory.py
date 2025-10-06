@@ -66,7 +66,7 @@ def ldap_search(username):
         if conn.entries:
             results = conn.entries[0]
         else:
-            add_error_notification(f"Active Directory connector: No LDAP entry found for user {username}")
+            # add_error_notification(f"Active Directory connector: No LDAP entry found for user {username}")
             results = None
         
         # close connection
