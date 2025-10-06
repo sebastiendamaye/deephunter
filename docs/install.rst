@@ -5,8 +5,29 @@ Compatibility
 *************
 DeepHunter has been designed to run on a Linux environment. Ubuntu Server or Debian are the recommended OS to install DeepHunter.
 
+Automated installation (stable release)
+***************************************
+The recommended way to install DeepHunter is to use the installer script. It will install all necessary dependencies, create a Python virtual environment, download DeepHunter, initialize the database, and configure Apache2 with mod-wsgi.
+
+.. warning::
+
+   The installer script does a basic installation, which allows you to test and confirm that DeepHunter is working correctly. However, it may not be suitable for production use without further configuration.
+
+For example, to install version 2.4:
+
+.. code-block:: sh
+      
+   $ wget https://raw.githubusercontent.com/sebastiendamaye/deephunter/refs/heads/main/install/scripts/v2.4/installer-v2.4.sh
+   $ chmod +x installer-v2.4.sh
+   $ ./installer-v2.4.sh
+
+Manual Installation (dev or advanced)
+*************************************
+
+If you want to install the development version of DeepHunter or if you have an environment that does not fit with the automated installation script, you can install DeepHunter manually by following the steps below.
+
 Build the python virtual environment
-************************************
+====================================
 
 It is highly recommended that you install DeepHunter in a Python virtual environment. There are several tools to do that (Conda, Poetry, etc). We'll use ``venv``.
 
@@ -23,7 +44,7 @@ We'll install DeepHunter in ``/data/deephunter/`` and the Python virtual environ
    $ python3 -m venv venv
 
 Install the database
-********************
+====================
 
 .. code-block:: sh
 
@@ -36,7 +57,7 @@ Install the database
 	mysql> \q
 
 Download DeepHunter
-*******************
+===================
 
 To download DeepHunter, use the following git command:
 
@@ -49,7 +70,7 @@ To download DeepHunter, use the following git command:
 While cloning the repo as explained above will give you access to the latest features, you may prefer to install the `latest stable release <https://github.com/sebastiendamaye/deephunter/releases/latest>`_.
 
 Install the python dependencies
-*******************************
+===============================
 
 Enter the virtual environment and install dependencies from the ``requirements.txt`` file:
 
@@ -59,16 +80,18 @@ Enter the virtual environment and install dependencies from the ``requirements.t
 	$ cd /data/deephunter/
 	(venv) $ pip install -r requirements.txt
 
-NOTE: To manage the session timeout, DeepHunter relies on the `django-auto-logout <https://pypi.org/project/django-auto-logout/>`_ package, that is not `CSP <https://content-security-policy.com/>`_ compliant. If you care about CSP compliance, use the following patch (notice that you will need to patch the file each time the package will be updated). Also make sure you use the same ID in your `/etc/apache2/conf-available/security.conf` file.
+.. note::
 
-.. code-block:: sh
-        
-        $ VENV_PATH="/data/venv"
-        $ LIB_PATH=$(find $VENV_PATH -type d -name django_auto_logout 2>/dev/null)
-        $ sed -i "s/<script>/<script nonce=\"kj5fcv07a2\">/" $LIB_PATH/context_processors.py
+	To manage the session timeout, DeepHunter relies on the `django-auto-logout <https://pypi.org/project/django-auto-logout/>`_ package, that is not `CSP <https://content-security-policy.com/>`_ compliant. If you care about CSP compliance, use the following patch (notice that you will need to patch the file each time the package will be updated). Also make sure you use the same ID in your `/etc/apache2/conf-available/security.conf` file.
+
+	.. code-block:: sh
+			
+			$ VENV_PATH="/data/venv"
+			$ LIB_PATH=$(find $VENV_PATH -type d -name django_auto_logout 2>/dev/null)
+			$ sed -i "s/<script>/<script nonce=\"kj5fcv07a2\">/" $LIB_PATH/context_processors.py
 
 Initialization
-**************
+==============
 
 Rename ``settings.example.py`` to ``settings.py``:
 
@@ -91,14 +114,14 @@ Once done, initialize the database:
 Try to run ``./manage.py runserver`` on default port 8000 and confirm that there is no error
 
 Apache2 mod-wsgi
-****************
+================
 
 There are several ways of `running Django applications in production <https://docs.djangoproject.com/en/5.1/howto/deployment/>`_. We'll use ``Apache2`` and ``mod-wsgi`` here.
 
 Note: you'll find some configuration file examples in the ``install`` directory. Make sure you have all these files before running the below commands. You may need to customize them to fit with your environment.
 
 Install Apache2 and necessary modules
-=====================================
+-------------------------------------
 
 Let's start by install Apache2 server and some necessary modules.
 
@@ -113,7 +136,7 @@ Enable mod headers
 	$ sudo a2enmod headers
 
 Certificate
-===========
+-----------
 
 You first need to generate a certificate for Apache2.
 
@@ -132,7 +155,7 @@ This will generate the SSL certificate and key files for the specified domain.
 Note: ``localtest.me`` is a public domain that resolves to ``127.0.0.1`` (IPv4) and ``::1`` (IPv6).
 
 SSL and enforcement
-===================
+-------------------
 
 Now, we'll make sure DeepHunter is served on port 443 via HTTPS.
 
@@ -149,7 +172,7 @@ Now, we'll make sure DeepHunter is served on port 443 via HTTPS.
 	$ sudo a2enconf ssl-params
 
 Enable HTTPS
-============
+------------
 
 Now, run the following commands to enable DeepHunter in HTTPS:
 
@@ -159,7 +182,7 @@ Now, run the following commands to enable DeepHunter in HTTPS:
 	$ sudo a2ensite deephunter-ssl
 
 Restart Apache2
-===============
+---------------
 
 Now, restart Apache2:
 
@@ -168,7 +191,7 @@ Now, restart Apache2:
 	$ sudo systemctl restart apache2
 
 Crontab (standard user)
-***********************
+=======================
 
 You can use the crontab in ``install/scripts/crontab``.
 
@@ -182,10 +205,10 @@ You can use the crontab in ``install/scripts/crontab``.
 For details about the scripts, see the `scripts page <scripts.html>`_.
 
 Encrypted backups
-*****************
+=================
 
 Install django-dbbackup
-=======================
+-----------------------
 
 To backup your database, it is recommended to use ``django-dbbackup`` and run the job via crontab. It is also recommended to encrypt database backups (encryption works with PGP/GPG).
 
@@ -195,7 +218,7 @@ To backup your database, it is recommended to use ``django-dbbackup`` and run th
 	(venv) $ pip install django-dbbackup
 
 Generate PGP keys
-=================
+-----------------
 
 Generating a PGP key on Linux is a straightforward process. Here's a step-by-step guide to help you get started:
 
@@ -226,12 +249,12 @@ Generating a PGP key on Linux is a straightforward process. Here's a step-by-ste
 	gpg --list-keys
 
 Configure dbbackup
-==================
+------------------
 
 Make sure you set `DBBACKUP_GPG_RECIPIENT <settings.html#dbbackup>`_ to the correct recipient (email address) in ``settings.py``.
 
 Backup and restore commands
-===========================
+---------------------------
 - Make sure both your private and public keys are listed by running the below command:
 
 .. code-block:: sh
@@ -253,7 +276,7 @@ To restore the database from an encrypted backup, run the following command:
 	Are you sure you want to continue? [Y/n] Y
 
 Async tasks: Celery / Redis (message broker)
-********************************************
+============================================
 DeepHnter has a special feature to run commands in the background (i.e., regeneration of statistics). This relies on Celery and Redis. To install these services, run the following commands:
 
 Install the message broker:
@@ -305,6 +328,8 @@ Create the directories and fix permissions:
 	$ chmod -R 755 /data
 	$ chmod 666 /data/deephunter/static/mitre.json 
 	$ chmod 666 /data/deephunter/static/tokendate.txt
+	$ sudo chown :www-data /data/deephunter/deephunter/wsgi.py
+	$ chmod 775 /data/deephunter/deephunter/wsgi.py
 
 To start the Celery service automatically, you may want to create a file in ``/etc/systemd/system/celery.service`` as follows:
 
@@ -346,15 +371,39 @@ Reload services and enable them:
 Note: If you have difficulties to start the service, check if directory ``/var/log/celery`` is present. If not, create it with ``sudo mkdir /var/log/celery/``
 
 Create the initial database
-***************************
-To create an empty database, run the following command:
+===========================
+
+To create an empty database, run the below command.
+
+First temporarily disable signals.
 
 .. code-block:: sh
 
+	$ sed -i 's/import qm.signals/pass #import qm.signals/' /data/deephunter/qm/apps.py
+
+Then run the following commands to create the initial database schema:
+
+.. code-block:: sh
+
+	(venv) $ ./manage.py makemigrations qm
+	(venv) $ ./manage.py makemigrations extensions
+	(venv) $ ./manage.py makemigrations reports
+	(venv) $ ./manage.py makemigrations connectors
+	(venv) $ ./manage.py makemigrations repos
+	(venv) $ ./manage.py makemigrations notifications
+	(venv) $ ./manage.py makemigrations dashboard
+	(venv) $ ./manage.py makemigrations config
+	(venv) $ ./manage.py makemigrations
 	(venv) $ ./manage.py migrate
 
+Restore signals:
+
+.. code-block:: sh
+
+	$ sed -i 's/pass #import qm.signals/import qm.signals/' /data/deephunter/qm/apps.py
+
 Install initial data
-********************
+====================
 DeepHunter is shipped with some data (fixtures). To install them, use the ``load_initial_data.sh`` script:
 
 .. code-block:: sh
@@ -362,7 +411,7 @@ DeepHunter is shipped with some data (fixtures). To install them, use the ``load
 	$ /data/deephunter/install/scripts/load_initial_data.sh
 
 Create a local superuser
-************************
+========================
 To create a local superuser, run the following command:
 
 .. code-block:: sh
@@ -373,6 +422,7 @@ Follow the prompts to create the superuser account.
 
 Upgrading DeepHunter
 ********************
+
 When an update is available, you can upgrade DeepHunter as follows:
 
 .. code-block:: sh
