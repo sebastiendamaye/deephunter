@@ -184,6 +184,8 @@ echo "LOAD INITIAL DATA ...................................................... "
 ./manage.py loaddata install/fixtures/qm_tag.json
 ./manage.py loaddata install/fixtures/qm_category.json
 ./manage.py loaddata install/fixtures/qm_targetos.json
+./manage.py loaddata install/fixtures/qm_savedsearch.json
+./manage.py loaddata install/fixtures/config.json
 
 # connector fixture has been updated (bug fix)
 sed -i 's|"visible_in_analytics": true|"domain": "analytics"|' install/fixtures/connectors.json
