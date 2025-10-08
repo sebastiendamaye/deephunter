@@ -612,7 +612,7 @@ def tl_host(request, hostname):
             if agent_id:
                 # Get username
                 username = all_connectors.get('sentinelone').get_last_logged_in_user(agent_id)
-                if is_connector_enabled('activedirectory'):
+                if is_connector_enabled('activedirectory') and username:
                     entry = all_connectors.get('activedirectory').ldap_search(username)
                     if entry:
                         user_name = entry.displayName
@@ -648,6 +648,7 @@ def tl_ad(request, hostname):
 @login_required
 @permission_required("qm.view_timeline", raise_exception=True)
 def tl_apps(request, hostname):
+    apps = []
 
     if is_connector_enabled('sentinelone'):
         # Get machine details from SentinelOne            

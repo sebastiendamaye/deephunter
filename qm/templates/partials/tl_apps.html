@@ -1,28 +1,36 @@
 {% load qm_extras %}
-{% load qm_extras %}
 <div class="alert alert-info d-flex flex-row">
     <div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
     <div class="notification-message">
         The information displayed here is sourced from SentinelOne.
     </div>
 </div>
-<ul>
-	<table>
-		<tr>
-			<th>Name</th>
-			<th>Installed date</th>
-			<th>Size</th>
-			<th>Version</th>
-			<th>Publisher</th>
-		</tr>
-		{% for app in apps %}
+{% if apps %}
+	<ul>
+		<table>
 			<tr>
-				<td>{{ app.name }}</td>
-				<td class="acenter">{{ app.installedDate|truncatechars:11 }}</td>
-				<td class="aright">{{ app.size }}</td>
-				<td class="acenter">{{ app.version }}</td>
-				<td>{{ app.publisher }}</td>
+				<th>Name</th>
+				<th>Installed date</th>
+				<th>Size</th>
+				<th>Version</th>
+				<th>Publisher</th>
 			</tr>
-		{% endfor %}
-	</table>
-</ul>
+			{% for app in apps %}
+				<tr>
+					<td>{{ app.name }}</td>
+					<td class="acenter">{{ app.installedDate|truncatechars:11 }}</td>
+					<td class="aright">{{ app.size }}</td>
+					<td class="acenter">{{ app.version }}</td>
+					<td>{{ app.publisher }}</td>
+				</tr>
+			{% endfor %}
+		</table>
+	</ul>
+{% else %}
+	<div class="alert alert-info d-flex flex-row">
+		<div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+		<div class="notification-message">
+			No application found.
+		</div>
+	</div>
+{% endif %}
