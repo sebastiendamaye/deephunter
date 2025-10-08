@@ -1,0 +1,1 @@
+[{"model": "qm.threatname", "pk": 1, "fields": {"name": "3PROXY", "aka_name": "", "references": "https://3proxy.ru/"}}, {"model": "qm.threatname", "pk": 2, "fields": {"name": "ROGUEEYE", "aka_name": "", "references": ""}}, {"model": "qm.threatname", "pk": 3, "fields": {"name": "Black Basta", "aka_name": "", "references": "https://attack.mitre.org/software/S1070/"}}]

@@ -1,0 +1,29 @@
+[
+    {
+        "model": "qm.category",
+        "pk": 1,
+        "fields": {
+            "name": "Detect",
+            "short_name": "DET",
+            "description": "Queries designed to produce high-fidelity results that strongly suggest or provide evidence of an active attack. Findings from these queries should typically trigger immediate investigation and response actions."
+        }
+    },
+    {
+        "model": "qm.category",
+        "pk": 2,
+        "fields": {
+            "name": "Triage",
+            "short_name": "TRG",
+            "description": "The initial result alone is not definitive proof of malicious activity. Results may require further context and correlation with other data or alerts to determine their relevance and the likelihood of an actual attack."
+        }
+    },
+    {
+        "model": "qm.category",
+        "pk": 3,
+        "fields": {
+            "name": "Threat Hunting",
+            "short_name": "TH",
+            "description": "Proactive investigation using analytical queries, often statistical in nature, requiring analyst expertise to interpret results and identify potential, previously unknown threats. The outcome necessitates further analysis to validate any suspicions."
+        }
+    }
+]

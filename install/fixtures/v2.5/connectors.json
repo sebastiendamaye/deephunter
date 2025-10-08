@@ -1,0 +1,673 @@
+[
+    {
+        "model": "connectors.connector",
+        "pk": 1,
+        "fields": {
+            "name": "sentinelone",
+            "description": "SentinelOne EDR",
+            "installed": true,
+            "enabled": true,
+            "domain": "analytics"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 2,
+        "fields": {
+            "name": "activedirectory",
+            "description": "The Active Directory connector is used in the timeline view to get additional information about the owner of an endpoint.",
+            "installed": true,
+            "enabled": true,
+            "domain": "extensions"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 3,
+        "fields": {
+            "name": "virustotal",
+            "description": "Used to consolidate IP reputation in the netview module, and used by the VT hash checker and VT IP checker tools.",
+            "installed": true,
+            "enabled": true,
+            "domain": "extensions"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 4,
+        "fields": {
+            "name": "malwarebazaar",
+            "description": "MalwareBazaar is a platform from abuse.ch and Spamhaus, dedicated to sharing malware samples with the infosec community, antivirus vendors, and threat intelligence providers.",
+            "installed": true,
+            "enabled": true,
+            "domain": "extensions"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 5,
+        "fields": {
+            "name": "microsoftsentinel",
+            "description": "Microsoft Sentinel data lake",
+            "installed": false,
+            "enabled": false,
+            "domain": "analytics"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 6,
+        "fields": {
+            "name": "loldrivers",
+            "description": "Living Off The Land Drivers is a curated list of Windows drivers used by adversaries to bypass security controls and carry out attacks. The project helps security professionals stay informed and mitigate potential threats.",
+            "installed": true,
+            "enabled": true,
+            "domain": "extensions"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 7,
+        "fields": {
+            "name": "whois",
+            "description": "WHOIS information from the https://www.whois.com website",
+            "installed": true,
+            "enabled": true,
+            "domain": "extensions"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 8,
+        "fields": {
+            "name": "github",
+            "description": "Github repo sync",
+            "installed": true,
+            "enabled": true,
+            "domain": "repos"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 9,
+        "fields": {
+            "name": "bitbucket",
+            "description": "Bitbucket repo sync",
+            "installed": false,
+            "enabled": false,
+            "domain": "repos"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 10,
+        "fields": {
+            "name": "microsoftdefender",
+            "description": "This connector replaces the \"microsoftsentinel\" connector (legacy). Notice that it requires the \"AdvancedHunting.Read.All\" permission.\n\nMicrosoft Defender provides a unified cybersecurity solution that integrates endpoint protection, cloud security, identity protection, email security, threat intelligence, exposure management, and SIEM into a centralized platform powered by a modern data lake.",
+            "installed": true,
+            "enabled": true,
+            "domain": "analytics"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 11,
+        "fields": {
+            "name": "gemini",
+            "description": "google-genai (https://github.com/googleapis/python-genai) is an initial Python client library for interacting with Google’s Generative AI APIs.\n\nGoogle Gen AI Python SDK provides an interface for developers to integrate Google’s generative models into their Python applications. It supports the Gemini Developer API and Vertex AI APIs.",
+            "installed": true,
+            "enabled": true,
+            "domain": "ai"
+        }
+    },
+    {
+        "model": "connectors.connector",
+        "pk": 12,
+        "fields": {
+            "name": "openai",
+            "description": "ChatGPT is a generative artificial intelligence chatbot developed by OpenAI and released in 2022. It currently uses GPT-5, a generative pre-trained transformer (GPT), to generate text, speech, and images in response to user prompts.\r\n        \r\nThis plugin integrates OpenAI's ChatGPT to suggest MITRE techniques based on a given query.",
+            "installed": false,
+            "enabled": false,
+            "domain": "ai"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 1,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_SERVER",
+            "value": "gc.company.com",
+            "fieldtype": "char",
+            "description": "Address of your LDAP server (e.g. \"ldap.domain.com\")"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 2,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_PORT",
+            "value": "636",
+            "fieldtype": "int",
+            "description": "LDAP port number"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 3,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_SSL",
+            "value": "True",
+            "fieldtype": "bool",
+            "description": "Should the LDAP connection be forced via SSL? Possible values: \"True\" or \"False\""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 4,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_USER",
+            "value": "user@ad.company.com",
+            "fieldtype": "char",
+            "description": "Username used to query your LDAP."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 5,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_PWD",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "password",
+            "description": "Password associated to the user mentionned in LDAP_USER."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 6,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_SEARCH_BASE",
+            "value": "DC=ad,DC=company,DC=com",
+            "fieldtype": "char",
+            "description": "The search base DN. This specifies the base of the subtree in which the search is to be constrained. It is denoted as the distinguished name of the search base directory object. Example: CN=Users,DC=domain,DC=com."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 7,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_USER_NAME",
+            "value": "displayName",
+            "fieldtype": "char",
+            "description": "Corresponding value of your Active Directory attribute for the User Name."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 8,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_JOB_TITLE",
+            "value": "title",
+            "fieldtype": "char",
+            "description": "Corresponding value of your Active Directory attribute for the Job Title."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 9,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_BUSINESS_UNIT",
+            "value": "division",
+            "fieldtype": "char",
+            "description": "Corresponding value of your Active Directory attribute for the Business Unit."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 10,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_OFFICE",
+            "value": "physicalDeliveryOfficeName",
+            "fieldtype": "char",
+            "description": "Corresponding value of your Active Directory attribute for the Office."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 11,
+        "fields": {
+            "connector": 2,
+            "key": "LDAP_ATTRIBUTES_COUNTRY",
+            "value": "co",
+            "fieldtype": "char",
+            "description": "Corresponding value of your Active Directory attribute for the Country."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 35,
+        "fields": {
+            "connector": 1,
+            "key": "S1_URL",
+            "value": "https://companytenant.sentinelone.net",
+            "fieldtype": "url",
+            "description": "S1_URL is the SentinelOne URL for your tenant and is used for any API call to SentinelOne."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 37,
+        "fields": {
+            "connector": 1,
+            "key": "S1_TOKEN",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "password",
+            "description": "S1_TOKEN is the token associated to your API."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 38,
+        "fields": {
+            "connector": 1,
+            "key": "XDR_URL",
+            "value": "https://xdr.eu1.sentinelone.net",
+            "fieldtype": "url",
+            "description": "URL address to use to point to SentinelOne frontend from the timeline view. For the legacy UI, you can use \"https://xdr.eu1.sentinelone.net\". For the new UI, use the same URL as for the \"S1_URL\" parameter."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 39,
+        "fields": {
+            "connector": 1,
+            "key": "XDR_PARAMS",
+            "value": "view=edr",
+            "fieldtype": "char",
+            "description": "Parameters associated to the URL address used to point to SentinelOne frontend from the timeline view. For the legacy UI, you can use \"view=edr\" parameters. For the new UI, use \"_categoryId=eventSearch\"."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 40,
+        "fields": {
+            "connector": 1,
+            "key": "S1_THREATS_URL",
+            "value": "https://companytenant.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS",
+            "fieldtype": "url",
+            "description": "URL address used to point to the threats page in SentinelOne. Notice that S1_THREATS_URL is dnyamically rendered by the Django view using format to evaluate the correct hostname. This is why the {} string appears in the URL. For legacy UI, use the following URL:  'https://tenant.sentinelone.net/incidents/threats?filter={\"computerName__contains\":\"{}\",\"timeTitle\":\"Last%203%20Months\"}'. For the new UI, use 'https://tenant.sentinelone.net/incidents/unified-alerts?_categoryId=threatsAndAlerts&_scopeLevel=global&alertsTable.filters=assetName__FULLTEXT%3D{}&alertsTable.timeRange=LAST_3_MONTHS'"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 41,
+        "fields": {
+            "connector": 1,
+            "key": "SYNC_STAR_RULES",
+            "value": "True",
+            "fieldtype": "bool",
+            "description": "If set to True, DeepHunter will automatically synchronize your threat hunting analytics (create, modify or delete) with corresponding STAR rules in SentinelOne. Possible values: True|False"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 42,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_PREFIX",
+            "value": "TH_",
+            "fieldtype": "char",
+            "description": "STAR rules created from DeepHunter to SentinelOne can have a prefix in their name (e.g. \"TH_\") for an easier identification. Beware if you change this value while some STAR rules have already been synchronized, as you will need to manually change the name of existing rules in S1 to match the new prefix."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 43,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_SEVERITY",
+            "value": "High",
+            "fieldtype": "char",
+            "description": "The rule severity in your environment. Possible values: Low|Medium|High|Critical"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 44,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_STATUS",
+            "value": "Active",
+            "fieldtype": "char",
+            "description": "Defines the rule is Enabled (Activated and sends alerts if triggered) or Disabled. Possible values: Active|Draft"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 45,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_EXPIRATION",
+            "value": "",
+            "fieldtype": "int",
+            "description": "If the rule is Temporary, enter the expiration delay (in days) for the rule. If set, it will automatically consider expirationMode is \"Temporary\". Empty string to ignore"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 46,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_COOLOFFPERIOD",
+            "value": "",
+            "fieldtype": "int",
+            "description": "Receive only one alert and suppress additional alerts when a rule is triggered multiple times during the cool-off period. Mitigation actions set in the rule will not be applied to suppressed alerts. Leave empty to ignore."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 47,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_TREATASTHREAT",
+            "value": "False",
+            "fieldtype": "bool",
+            "description": "Defines the Treat as a threat auto response. Possible values: Undefined(or empty)|Suspicious|Malicious"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 48,
+        "fields": {
+            "connector": 1,
+            "key": "STAR_RULES_DEFAULT_NETWORKQUARANTINE",
+            "value": "False",
+            "fieldtype": "bool",
+            "description": "Set to True to automatically quarantine the alerted endpoints. Possible values: true|false"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 58,
+        "fields": {
+            "connector": 3,
+            "key": "API_KEY",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "password",
+            "description": "VirusTotal API key"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 59,
+        "fields": {
+            "connector": 4,
+            "key": "API_KEY",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "password",
+            "description": "MalwareBazaar API key"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 64,
+        "fields": {
+            "connector": 5,
+            "key": "TENANT_ID",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 65,
+        "fields": {
+            "connector": 5,
+            "key": "CLIENT_ID",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 66,
+        "fields": {
+            "connector": 5,
+            "key": "CLIENT_SECRET",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "password",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 67,
+        "fields": {
+            "connector": 5,
+            "key": "WORKSPACE_ID",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "char",
+            "description": "Log Analytics Workspace ID"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 68,
+        "fields": {
+            "connector": 5,
+            "key": "SYNC_RULES",
+            "value": "False",
+            "fieldtype": "bool",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 69,
+        "fields": {
+            "connector": 5,
+            "key": "SUBSCRIPTION_ID",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 70,
+        "fields": {
+            "connector": 5,
+            "key": "RESOURCE_GROUP",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 71,
+        "fields": {
+            "connector": 5,
+            "key": "WORKSPACE_NAME",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "char",
+            "description": ""
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 72,
+        "fields": {
+            "connector": 1,
+            "key": "QUERY_ERROR_INFO",
+            "value": "status['\"]:\\s?['\"]FINISHED['\"]",
+            "fieldtype": "char",
+            "description": "Regular expression to filter what should be considered INFO instead of ERROR in query error message"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 73,
+        "fields": {
+            "connector": 5,
+            "key": "QUERY_ERROR_INFO",
+            "value": "",
+            "fieldtype": "char",
+            "description": "Regular expression to filter what should be considered INFO instead of ERROR in query error message"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 74,
+        "fields": {
+            "connector": 10,
+            "key": "TENANT_ID",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "char",
+            "description": "MS Defender Tenant ID / Directory ID"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 75,
+        "fields": {
+            "connector": 10,
+            "key": "CLIENT_ID",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "char",
+            "description": "MS Defender APP ID / CLIENT ID"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 76,
+        "fields": {
+            "connector": 10,
+            "key": "CLIENT_SECRET",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "password",
+            "description": "Password associated to the APP ID"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 77,
+        "fields": {
+            "connector": 10,
+            "key": "SYNC_RULES",
+            "value": "False",
+            "fieldtype": "bool",
+            "description": "If set to True, DeepHunter will automatically synchronize your threat hunting analytics (create, modify or delete) with corresponding rules in MS Defender XDR. Possible values: True|False"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 78,
+        "fields": {
+            "connector": 10,
+            "key": "QUERY_ERROR_INFO",
+            "value": "",
+            "fieldtype": "char",
+            "description": "Regular expression to filter what should be considered INFO instead of ERROR in query error message"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 79,
+        "fields": {
+            "connector": 11,
+            "key": "API_KEY",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "password",
+            "description": "Get an API key: https://aistudio.google.com/app/apikey"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 80,
+        "fields": {
+            "connector": 11,
+            "key": "MODEL",
+            "value": "gemini-2.0-flash",
+            "fieldtype": "char",
+            "description": "\"gemini-1.5-flash\" (~128K tokens, good for basic tasks) or \"gemini-2.5-flash\" (1M+ tokens, Higher quality, better reasoning)"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 81,
+        "fields": {
+            "connector": 11,
+            "key": "TEMPERATURE",
+            "value": "0.0",
+            "fieldtype": "float",
+            "description": "Controls randomness / creativity of the model.\n0.0 = deterministic → same input always gives same output.\nHigher values (e.g. 0.7) allow more variety or creative phrasing.\nBest for: consistent, factual, extractive outputs."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 82,
+        "fields": {
+            "connector": 11,
+            "key": "TOP_P",
+            "value": "1.0",
+            "fieldtype": "float",
+            "description": "Also known as nucleus sampling.\nThe model picks from the smallest set of words whose total probability adds up to top_p.\n1.0 means use the entire probability distribution (no filtering).\nLower values (e.g. 0.8) force more focused outputs but can reduce variety."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 83,
+        "fields": {
+            "connector": 11,
+            "key": "TOP_K",
+            "value": "0",
+            "fieldtype": "int",
+            "description": "Limits the model to selecting from the top K most likely next tokens.\n0 means no limit — let top_p fully control the sampling.\nIf set to e.g. top_k=40, the model only chooses from the top 40 likely options.\nBest left at 0 when using top_p=1.0."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 84,
+        "fields": {
+            "connector": 11,
+            "key": "MAX_OUTPUT_TOKENS",
+            "value": "128",
+            "fieldtype": "int",
+            "description": "Caps the length of the model's response (number of tokens).\n128 tokens ≈ ~90–100 words (depending on the language and structure).\nSet higher if you expect longer responses."
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 85,
+        "fields": {
+            "connector": 12,
+            "key": "API_KEY",
+            "value": "xxxxxxxxxx",
+            "fieldtype": "password",
+            "description": "Get an API key: https://platform.openai.com/account/api-keys"
+        }
+    },
+    {
+        "model": "connectors.connectorconf",
+        "pk": 86,
+        "fields": {
+            "connector": 12,
+            "key": "MODEL",
+            "value": "gpt-5",
+            "fieldtype": "char",
+            "description": "\"gpt-5 by default."
+        }
+    }
+]
