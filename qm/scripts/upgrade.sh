@@ -157,6 +157,7 @@ SERVER_USER=$(grep -oP 'SERVER_USER\s?=\s?"\K[^"]+' /tmp/settings.py)
 check_empty "SERVER_USER" "$SERVER_USER"
 GITHUB_URL=$(grep -oP 'GITHUB_URL\s?=\s?"\K[^"]+' /tmp/settings.py)
 check_empty "GITHUB_URL" "$GITHUB_URL"
+DBBACKUP_GPG_RECIPIENT=$(grep -oP "DBBACKUP_GPG_RECIPIENT\s?=\s?'\K[^']+" /tmp/settings.py)
 # List of django apps for migrations
 APPS=(qm extensions reports connectors repos notifications dashboard config)
 
@@ -226,7 +227,12 @@ echo -e "[\033[32mdone\033[0m]"
 echo -n -e "[\033[90mINFO\033[0m] STARTING DB BACKUP .............................. "
 source $VENV_PATH/bin/activate
 cd $APP_PATH
-$VENV_PATH/bin/python3 manage.py dbbackup --encrypt
+# If a GPG recipient is defined and the key is available, encrypt the backup, otherwise do not encrypt
+if gpg --list-keys "$DBBACKUP_GPG_RECIPIENT" >/dev/null 2>&1; then
+	$VENV_PATH/bin/python3 manage.py dbbackup --encrypt
+else
+	$VENV_PATH/bin/python3 manage.py dbbackup
+fi
 #leave virtual env
 deactivate
 echo -e "[\033[32mdone\033[0m]"
