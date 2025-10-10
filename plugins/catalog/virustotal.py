@@ -45,7 +45,7 @@ def check_hash(hash):
             return file
         
         except Exception as e:
-            add_error_notification(f"VirusTotal connector: Error checking hash {hash}: {e}")
+            #add_error_notification(f"VirusTotal connector: Error checking hash {hash}: {e}")
             if DEBUG:
                 raise e
             return None
