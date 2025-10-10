@@ -1,6 +1,6 @@
 azure-identity==1.25.0
 azure-monitor-query==2.0.0
-Authlib==1.6.4
+Authlib==1.6.5
 beautifulsoup4==4.14.2
 bleach==6.2.0
 celery==5.5.3
