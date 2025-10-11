@@ -5,8 +5,8 @@
         "fields": {
             "name": "sentinelone",
             "description": "SentinelOne EDR",
-            "installed": true,
-            "enabled": true,
+            "installed": false,
+            "enabled": false,
             "domain": "analytics"
         }
     },
@@ -16,8 +16,8 @@
         "fields": {
             "name": "activedirectory",
             "description": "The Active Directory connector is used in the timeline view to get additional information about the owner of an endpoint.",
-            "installed": true,
-            "enabled": true,
+            "installed": false,
+            "enabled": false,
             "domain": "extensions"
         }
     },
@@ -27,8 +27,8 @@
         "fields": {
             "name": "virustotal",
             "description": "Used to consolidate IP reputation in the netview module, and used by the VT hash checker and VT IP checker tools.",
-            "installed": true,
-            "enabled": true,
+            "installed": false,
+            "enabled": false,
             "domain": "extensions"
         }
     },
@@ -38,8 +38,8 @@
         "fields": {
             "name": "malwarebazaar",
             "description": "MalwareBazaar is a platform from abuse.ch and Spamhaus, dedicated to sharing malware samples with the infosec community, antivirus vendors, and threat intelligence providers.",
-            "installed": true,
-            "enabled": true,
+            "installed": false,
+            "enabled": false,
             "domain": "extensions"
         }
     },
@@ -60,8 +60,8 @@
         "fields": {
             "name": "loldrivers",
             "description": "Living Off The Land Drivers is a curated list of Windows drivers used by adversaries to bypass security controls and carry out attacks. The project helps security professionals stay informed and mitigate potential threats.",
-            "installed": true,
-            "enabled": true,
+            "installed": false,
+            "enabled": false,
             "domain": "extensions"
         }
     },
@@ -71,8 +71,8 @@
         "fields": {
             "name": "whois",
             "description": "WHOIS information from the https://www.whois.com website",
-            "installed": true,
-            "enabled": true,
+            "installed": false,
+            "enabled": false,
             "domain": "extensions"
         }
     },
@@ -82,8 +82,8 @@
         "fields": {
             "name": "github",
             "description": "Github repo sync",
-            "installed": true,
-            "enabled": true,
+            "installed": false,
+            "enabled": false,
             "domain": "repos"
         }
     },
@@ -104,8 +104,8 @@
         "fields": {
             "name": "microsoftdefender",
             "description": "This connector replaces the \"microsoftsentinel\" connector (legacy). Notice that it requires the \"AdvancedHunting.Read.All\" permission.\n\nMicrosoft Defender provides a unified cybersecurity solution that integrates endpoint protection, cloud security, identity protection, email security, threat intelligence, exposure management, and SIEM into a centralized platform powered by a modern data lake.",
-            "installed": true,
-            "enabled": true,
+            "installed": false,
+            "enabled": false,
             "domain": "analytics"
         }
     },
@@ -115,8 +115,8 @@
         "fields": {
             "name": "gemini",
             "description": "google-genai (https://github.com/googleapis/python-genai) is an initial Python client library for interacting with Google’s Generative AI APIs.\n\nGoogle Gen AI Python SDK provides an interface for developers to integrate Google’s generative models into their Python applications. It supports the Gemini Developer API and Vertex AI APIs.",
-            "installed": true,
-            "enabled": true,
+            "installed": false,
+            "enabled": false,
             "domain": "ai"
         }
     },
