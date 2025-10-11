@@ -439,7 +439,7 @@ echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
 
 # Search for debug = true in the codebase
 echo "Search for debug = true in the codebase" >> /tmp/upgrade.log
-matches=$(find "$APP_PATH" -type f -name '*.py' -exec grep -EniI 'debug[[:space:]]*=[[:space:]]*true' {} + 2>/dev/null)
+matches=$(find "$APP_PATH" -type f -name '*.py' -exec grep -EniI 'debug[[:space:]]*=[[:space:]]*true' {} + 2>/dev/null || true)
 # Check if matches were found
 if [[ -n "$matches" ]]; then
 	echo ""
