@@ -1,29 +1,38 @@
-<div id="tabs_connectors">
-    <ul>
+{% if connectors %}
+    <div id="tabs_connectors">
+        <ul>
+            {% for connector in connectors %}
+                <li>
+                    <a href="#connector_{{ connector.id }}"
+                        hx-get="/connectors/selected-connector-settings/{{ connector.id }}/"
+                        hx-target="#connector_{{ connector.id }}"
+                        {% if forloop.first %}hx-trigger="load"{% endif %}>
+                        <span>{{ connector.name }}</span>
+                        {% if connector.domain %}
+                            <span class="button">{{ connector.domain }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+
         {% for connector in connectors %}
-            <li>
-                <a href="#connector_{{ connector.id }}"
-                    hx-get="/connectors/selected-connector-settings/{{ connector.id }}/"
-                    hx-target="#connector_{{ connector.id }}"
-                    {% if forloop.first %}hx-trigger="load"{% endif %}>
-                    <span>{{ connector.name }}</span>
-                    {% if connector.domain %}
-                        <span class="button">{{ connector.domain }}</span>
-                    {% endif %}
-                </a>
-            </li>
+            <div id="connector_{{ connector.id }}"></div>
         {% endfor %}
-    </ul>
 
-    {% for connector in connectors %}
-        <div id="connector_{{ connector.id }}"></div>
-    {% endfor %}
+    </div>
 
-</div>
-
-<script type="text/javascript" nonce="jg6kl5z3v2">
-    document.body.addEventListener('htmx:afterOnLoad', function(evt) {
-        $( "#tabs_connectors" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
-        $( "#tabs_connectors li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
-	});
-</script>
+    <script type="text/javascript" nonce="jg6kl5z3v2">
+        document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+            $( "#tabs_connectors" ).tabs().addClass( "ui-tabs-vertical ui-helper-clearfix" );
+            $( "#tabs_connectors li" ).removeClass( "ui-corner-top" ).addClass( "ui-corner-left" );
+        });
+    </script>
+{% else %}
+    <div class="alert alert-info d-flex flex-row">
+        <div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+        <div class="notification-message">
+            There are no connectors installed.
+        </div>
+    </div>
+{% endif %}
