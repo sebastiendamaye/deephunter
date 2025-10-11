@@ -14,6 +14,8 @@ export TEMP_FOLDER="/data/tmp"
 ### Don't modify anything below this line unless you know what you're doing
 #
 #
+export USER_GROUP="$(id -nu):$(id -ng)"
+export SERVER_USER="www-data"
 echo ""
 echo "   ____                  _   _             _            "
 echo "  |  _ \  ___  ___ _ __ | | | |_   _ _ __ | |_ ___ _ __ "
@@ -116,7 +118,7 @@ echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/install.log
 echo -n -e "[\033[90mINFO\033[0m] INSTALLING PYTHON DEPENDENCIES .................. " | tee -a /tmp/install.log
 source $VENV_PATH/bin/activate
 cd ${APP_PATH}
-pip install -r requirements.txt -q >> /tmp/install.log 2>&1
+pip install -r requirements.txt >> /tmp/install.log 2>&1
 deactivate
 chmod -R 755 $VENV_PATH
 echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/install.log
@@ -227,10 +229,18 @@ echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/install.log
 
 echo -n -e "[\033[90mINFO\033[0m] FIXING PERMISSIONS .............................. " | tee -a /tmp/install.log
 # Fix permissions
-chmod -R 755 ${APP_PATH}
-touch ${APP_PATH}/static/mitre.json
-chmod 666 ${APP_PATH}/static/mitre.json
+chmod -R 775 ${APP_PATH} >> /tmp/install.log 2>&1
+touch ${APP_PATH}/static/mitre.json >> /tmp/install.log 2>&1
+chmod 666 ${APP_PATH}/static/mitre.json >> /tmp/install.log 2>&1
+chmod 664 $APP_PATH/static/VERSION* >> /tmp/install.log 2>&1
+chmod 664 $APP_PATH/static/commit_id.txt >> /tmp/install.log 2>&1
+chown -R $USER_GROUP $VENV_PATH >> /tmp/install.log 2>&1
+chmod -R 755 $VENV_PATH >> /tmp/install.log 2>&1
+sudo chown :$SERVER_USER $APP_PATH/deephunter/wsgi.py >> /tmp/install.log 2>&1
+sudo chown -R :$SERVER_USER $APP_PATH/plugins/ >> /tmp/install.log 2>&1
+sudo chmod g+s $APP_PATH/plugins/ >> /tmp/install.log 2>&1
 echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/install.log
+
 
 #############
 # Configure Apache
@@ -266,7 +276,7 @@ sudo cp ${APP_PATH}/install/etc/default/celery /etc/default/celery
 
 # On Ubuntu Server, it seems that the /var/run/ directory is purged at each reboot.
 # To make sure the celery subdirectory is recreated at each boot, you can create the following file
-echo 'd /var/run/celery 0755 celery celery' | sudo tee /etc/tmpfiles.d/celery.conf > /tmp/install.log 2>&1
+echo 'd /var/run/celery 0755 celery celery' | sudo tee /etc/tmpfiles.d/celery.conf >> /tmp/install.log 2>&1
 
 # create the celery user and group.
 sudo groupadd celery

@@ -421,6 +421,7 @@ chown -R $USER_GROUP $VENV_PATH >> /tmp/upgrade.log 2>&1
 chmod -R 775 $VENV_PATH >> /tmp/upgrade.log 2>&1
 sudo chown :$SERVER_USER $APP_PATH/deephunter/wsgi.py >> /tmp/upgrade.log 2>&1
 sudo chown -R :$SERVER_USER $APP_PATH/plugins/ >> /tmp/upgrade.log 2>&1
+sudo chmod g+s $APP_PATH/plugins/ >> /tmp/upgrade.log 2>&1
 echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
 
 # Restart apache2
