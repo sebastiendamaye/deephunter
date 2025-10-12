@@ -857,8 +857,22 @@ def about(request):
 @login_required
 @permission_required("qm.view_campaign", raise_exception=True)
 def managecampaigns(request):
+    results = []
     campaigns = Campaign.objects.filter(name__startswith='daily_cron_').order_by('-name')
-    context = {'campaigns': campaigns}
+    for campaign in campaigns:
+        analytics_target = campaign.nb_queries
+        analytics_run = Snapshot.objects.filter(campaign=campaign).count()
+        completion = round(analytics_run * 100 / analytics_target, 1) if analytics_target > 0 else 0
+        results.append({
+            'name': campaign.name,
+            'date_start': campaign.date_start,
+            'date_end': campaign.date_end,
+            'nb_queries_target': analytics_target,
+            'nb_queries_run': analytics_run,
+            'completion': completion,
+        })
+
+    context = {'campaigns': results}
     return render(request, 'managecampaigns.html', context)
 
 @login_required

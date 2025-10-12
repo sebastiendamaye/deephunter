@@ -12,9 +12,15 @@
         <div class="padright20"><i class="fas fa-fw fa-exclamation-triangle mr-3 mt-1"></i></div>
         <div class="notification-message">
             <li>Regenerating a campaign will destroy existing data for the selected campaign.</li>
-            <li>The regenerated campaign will run threat analytics with the "run_daily" flag set as of today. You may see differences in the results compared to the previous campaign, as the "run_daily" flag may have been updated for some analytics, and newer analytics may have been created since.</li>
+            <li>The regenerated campaign will run threat analytics with the 'run daily' flag set as of today. You may see differences in the results compared to the previous campaign, as the "run_daily" flag may have been updated for some analytics, and newer analytics may have been created since.</li>
         </div>
     </div>
+	<div class="alert alert-info d-flex flex-row">
+		<div class="padright20"><i class="fas fa-fw fa-info-circle mr-3 mt-1"></i></div>
+        <div class="notification-message">
+            The number of analytics in target is based on the 'run daily' flag. The completion indicates potential errors while running analytics.
+        </div>
+	</div>
 
 
     {% if campaigns %}
@@ -25,7 +31,9 @@
                     <th>Campaign</th>
                     <th>Start</th>
                     <th>End</th>
-                    <th># queries</th>
+                    <th># queries<br />(target)</th>
+                    <th># queries<br />(run)</th>
+                    <th>Completion</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,7 +43,9 @@
                         <td>{{ campaign.name }}</td>
                         <td>{{ campaign.date_start }}</td>
                         <td>{{ campaign.date_end }}</td>
-                        <td>{{ campaign.nb_queries }}</td>
+                        <td class="aright">{{ campaign.nb_queries_target }}</td>
+                        <td class="aright">{{ campaign.nb_queries_run }}</td>
+                        <td class="aright">{{ campaign.completion }}%</td>
                     </tr>
                 {% endfor %}
             </tbody>
