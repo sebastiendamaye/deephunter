@@ -45,50 +45,28 @@ div.widget_chart h3{
     font-weight: 700;
 }
 
-/*
-p.num {
-
+div.num, div.num_green, div.num_red {
     font-family: "Roboto", sans-serif;
     font-optical-sizing: auto;
     font-weight: 900;
     font-size: 2.5em;
     text-align: center;
-    color: #303030;
-}
-
-p.num a {
-    text-decoration: none;
-    color: #303030;
-}
-
-p.compare_plus {
-    font-size: 0.9em;
-    color: rgba(10, 156, 10, 0.801);
-    text-align: center;
-    font-weight: bold;
-}
-
-p.compare_minus {
-    font-size: 0.9em;
-    color: rgba(209, 49, 0, 0.801);
-    text-align: center;
-    font-weight: bold;
-}
-*/
-
-div.num {
-
-    font-family: "Roboto", sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 900;
-    font-size: 2.5em;
-    text-align: center;
-    color: #303030;
+    /*color: #303030;*/
 }
 
 div.num a {
     text-decoration: none;
     color: #303030;
+}
+
+div.num_green a {
+    text-decoration: none;
+    color: rgba(10, 156, 10, 0.801);
+}
+
+div.num_red a {
+    text-decoration: none;
+    color: rgba(209, 49, 0, 0.801);
 }
 
 div.compare_plus {

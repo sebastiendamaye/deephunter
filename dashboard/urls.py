@@ -19,4 +19,5 @@ urlpatterns = [
     path('db_analyticsbyconnector/', views.db_analyticsbyconnector, name='db_analyticsbyconnector'),
     path('db_analyticsbyuser/', views.db_analyticsbyuser, name='db_analyticsbyuser'),
     path('db_analytics-reviews-workload/', views.db_analytics_reviews_workload, name='db_analytics_reviews_workload'),
+    path('db-campaign-completion/', views.db_campaign_completion, name='db_campaign_completion'),
 ]

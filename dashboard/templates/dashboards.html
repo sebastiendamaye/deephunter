@@ -32,6 +32,12 @@
     </div>
     {% endif %}
 
+    {% if perms.qm.view_analytics %}
+    <div class="widget_number" hx-get="/dashboard/db-campaign-completion/" hx-trigger="load, every 10s">
+        <img alt="Result loading..." src="/static/images/bars.svg"/>
+    </div>
+    {% endif %}
+
     {% if perms.qm.view_endpoint %}
     <div class="widget_number" hx-get="/dashboard/db_highestweightedscoretoday/" hx-trigger="load, every 10s">
         <img alt="Result loading..." src="/static/images/bars.svg"/>

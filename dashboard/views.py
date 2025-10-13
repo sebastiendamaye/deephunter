@@ -75,6 +75,23 @@ def db_analyticsmatchingintodaycampaign(request):
     return render(request, 'db_analyticsmatchingintodaycampaign.html', context)
 
 @login_required
+@permission_required('qm.view_analytic', raise_exception=True)
+def db_campaign_completion(request):
+
+    campaign = get_object_or_404(Campaign, name='daily_cron_{}'.format(datetime.today().strftime('%Y-%m-%d')))
+    analytics_run = Analytic.objects.filter(
+        snapshot__campaign=campaign
+    ).count()
+    analytics_target = campaign.nb_queries
+
+    code = "<h3>Campaign completion<br />(run/target)</h3>"
+    if analytics_run == analytics_target:
+        code += f"""<div class="num_green"><a href="/qm/managecampaigns">{analytics_run}/{analytics_target}</a></div>"""
+    else:
+        code += f"""<div class="num_red"><a href="/qm/managecampaigns">{analytics_run}/{analytics_target}</a></div>"""
+    return HttpResponse(code)
+
+@login_required
 @permission_required('qm.view_endpoint', raise_exception=True)
 def db_highestweightedscoretoday(request):
 
