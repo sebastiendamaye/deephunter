@@ -141,6 +141,10 @@ def pre_save_handler(sender, instance, **kwargs):
     # When analytic is archived or pending, automatically remove the run_daily flag
     if instance.status == 'ARCH' or instance.status == 'PENDING':
         instance.run_daily = False
+    
+    # When analytic is archived, set the next_review_date to None
+    if instance.status == 'ARCH':
+        instance.next_review_date = None
 
     # If run_daily_lock is set, run_daily should automatically be set
     if instance.run_daily_lock and not instance.run_daily:
