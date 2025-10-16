@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Q, Sum, Count, F
 from datetime import datetime, timedelta, timezone
-from qm.models import Analytic, Campaign, Endpoint, TasksStatus
+from qm.models import Analytic, Campaign, CampaignCompletion, Endpoint, TasksStatus
 from django.http import HttpResponse
 
 
@@ -42,7 +42,10 @@ def db_analyticsrunintodaycampaign(request):
     for i in range(30, 0, -1):
         try:
             campaign = get_object_or_404(Campaign, name=f"daily_cron_{(datetime.now() - timedelta(days=i-1)).strftime('%Y-%m-%d')}")
-            sparkline.append(campaign.nb_queries)
+            analytics_run = CampaignCompletion.objects.filter(campaign=campaign).aggregate(
+                total_queries=Sum('nb_queries_complete')
+                )['total_queries']
+            sparkline.append(analytics_run)
         except:
             sparkline.append(0)
 
@@ -79,9 +82,9 @@ def db_analyticsmatchingintodaycampaign(request):
 def db_campaign_completion(request):
 
     campaign = get_object_or_404(Campaign, name='daily_cron_{}'.format(datetime.today().strftime('%Y-%m-%d')))
-    analytics_run = Analytic.objects.filter(
-        snapshot__campaign=campaign
-    ).count()
+    analytics_run = CampaignCompletion.objects.filter(campaign=campaign).aggregate(
+        total_queries=Sum('nb_queries_complete')
+        )['total_queries']
     analytics_target = campaign.nb_queries
 
     code = "<h3>Campaign completion<br />(run/target)</h3>"

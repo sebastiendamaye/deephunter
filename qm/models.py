@@ -219,12 +219,23 @@ class Campaign(models.Model):
     description = models.TextField(blank=True)
     date_start = models.DateTimeField()
     date_end = models.DateTimeField(blank=True, null=True)
-    nb_queries = models.IntegerField(default=0, help_text="Number of TH analytics run in this campaign")
+    nb_queries = models.IntegerField(default=0, help_text="Number of TH analytics targeted in this campaign")
     nb_analytics = models.IntegerField(default=0, help_text="Total number of TH analytics (even if not run in this campaign)")
+    nb_endpoints = models.IntegerField(default=0, help_text="Total number of unique endpoints detected in this campaign")
     
     def __str__(self):
         return self.name
-   
+
+class CampaignCompletion(models.Model):
+    campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
+    connector = models.ForeignKey(Connector, on_delete=models.CASCADE)
+    nb_queries_complete = models.IntegerField(default=0, help_text="Number of TH analytics completed in this campaign for this connector")
+    
+    class Meta:
+        unique_together = ('campaign', 'connector')
+    def __str__(self):
+        return f'{self.campaign.name} - {self.connector.name}'
+
 class Snapshot(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE)
     analytic = models.ForeignKey(Analytic, on_delete=models.CASCADE)

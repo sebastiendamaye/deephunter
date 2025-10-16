@@ -1,6 +1,7 @@
 from django.conf import settings
 from datetime import datetime, timedelta
-from qm.models import Campaign, Analytic, Snapshot, Endpoint, TasksStatus
+from qm.models import Campaign, Analytic, Snapshot, Endpoint, TasksStatus, CampaignCompletion
+from connectors.models import Connector
 from django.shortcuts import get_object_or_404
 import numpy as np
 from scipy import stats
@@ -306,7 +307,15 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
     campaign.date_end = datetime.now()
     campaign.nb_queries = Analytic.objects.exclude(status='ARCH').filter(run_daily=True).count()
     campaign.nb_analytics = Analytic.objects.exclude(status='ARCH').count()
+    campaign.nb_endpoints = Endpoint.objects.filter(snapshot__campaign=campaign).values('hostname').distinct().count()
     campaign.save()
+
+    for connector in Connector.objects.filter(domain="analytics", enabled=True):
+        CampaignCompletion(
+            campaign=campaign,
+            connector=connector,
+            nb_queries_complete=Snapshot.objects.filter(campaign=campaign, analytic__connector=connector).count()
+        ).save()
 
     # Delete Celery task in DB if celery is used
     task_status.delete()

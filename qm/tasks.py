@@ -4,6 +4,7 @@ import numpy as np
 from scipy import stats
 from math import isnan
 from qm.models import Analytic, Snapshot, Campaign, Endpoint, TasksStatus
+from connectors.models import Connector
 from qm.utils import run_campaign, get_campaign_date
 import requests
 from celery import shared_task

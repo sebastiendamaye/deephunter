@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import (Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName,  
-    ThreatActor, Analytic, Snapshot, Campaign, Endpoint, Tag, TasksStatus, Category, Review, SavedSearch)
+    ThreatActor, Analytic, Snapshot, Campaign, Endpoint, Tag, TasksStatus, Category, Review,
+    SavedSearch, CampaignCompletion)
 from connectors.models import Connector
 from django.contrib.admin.models import LogEntry
 from simple_history.admin import SimpleHistoryAdmin
@@ -226,7 +227,7 @@ class SnapshotAdmin(admin.ModelAdmin):
         return obj.campaign
     
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'date_start', 'date_end', 'nb_queries', 'nb_analytics')
+    list_display = ('name', 'description', 'date_start', 'date_end', 'nb_queries', 'nb_analytics', 'nb_endpoints')
     list_filter = ['date_start', 'date_end']
     search_fields = ['name', 'description']
 
@@ -298,6 +299,10 @@ class SavedSearchAdmin(admin.ModelAdmin):
             obj.created_by = request.user
         obj.save()
 
+class CampaignCompletionAdmin(admin.ModelAdmin):
+    list_display = ('campaign', 'connector', 'nb_queries_complete')
+    list_filter = ['campaign__name', 'connector__name']
+
 admin.site.register(LogEntry, LogEntryAdmin)
 admin.site.register(Tag)
 admin.site.register(Country)
@@ -315,3 +320,4 @@ admin.site.register(Endpoint, EndpointAdmin)
 admin.site.register(TasksStatus, TasksStatusAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(SavedSearch, SavedSearchAdmin)
+admin.site.register(CampaignCompletion, CampaignCompletionAdmin)

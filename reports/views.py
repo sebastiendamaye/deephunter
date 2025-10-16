@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta
-from qm.models import Analytic, Snapshot, Campaign, MitreTactic, MitreTechnique, Endpoint, Connector
+from qm.models import Analytic, Snapshot, Campaign, MitreTactic, MitreTechnique, Endpoint, Connector, CampaignCompletion
 from notifications.utils import add_debug_notification
 from collections import defaultdict
 import time
@@ -55,23 +55,19 @@ def campaigns_stats(request):
             difference = campaign.date_end - campaign.date_start
             dur = divmod(difference.days * seconds_in_day + difference.seconds, 60)
             duration = round(dur[0]+dur[1]*5/3/100, 1)
-            count_endpoints_total = Endpoint.objects.filter(snapshot__campaign=campaign).count()
             
             # Recursily count endpoints per connector
             for connector in connectors:
                 connector_stats[connector.name].append({
                     'date': d,
-                    'count': Snapshot.objects.filter(
-                        campaign=campaign,
-                        analytic__connector=connector
-                        ).count()
+                    'count': CampaignCompletion.objects.get(campaign=campaign, connector=connector).nb_queries_complete
                     })
 
             stats.append({
                 'date':d,
                 'count_analytics':campaign.nb_queries,
                 'duration':duration,
-                'count_endpoints_total':count_endpoints_total,
+                'count_endpoints_total':campaign.nb_endpoints,
                 })
         except:
             stats.append({

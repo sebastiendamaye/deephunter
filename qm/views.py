@@ -13,7 +13,7 @@ from scipy import stats
 from math import isnan
 from .models import (Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerability, ThreatActor,
     ThreatName, MitreTactic, MitreTechnique, Endpoint, Tag, TasksStatus, Category, Review,
-    SavedSearch, Repo)
+    SavedSearch, Repo, CampaignCompletion)
 from notifications.models import UserNotification
 from connectors.models import Connector
 from .tasks import regenerate_stats, regenerate_campaign
@@ -861,7 +861,9 @@ def managecampaigns(request):
     campaigns = Campaign.objects.filter(name__startswith='daily_cron_').order_by('-name')
     for campaign in campaigns:
         analytics_target = campaign.nb_queries
-        analytics_run = Snapshot.objects.filter(campaign=campaign).count()
+        analytics_run = CampaignCompletion.objects.filter(campaign=campaign).aggregate(
+            total_queries=Sum('nb_queries_complete')
+        )['total_queries']
         completion = round(analytics_run * 100 / analytics_target, 1) if analytics_target > 0 else 0
         results.append({
             'name': campaign.name,
