@@ -42,15 +42,26 @@ self_update() {
 			# Check the response
 			if [[ "$response" == "Y" || "$response" == "YES" ]]; then
 				tmpfile=$(mktemp)
-				curl -s -o "$tmpfile" "$REMOTE_SCRIPT" >> /tmp/upgrade.log 2>&1
+				if [[ $VERBOSE -eq 1 ]]; then
+					curl -s -o "$tmpfile" "$REMOTE_SCRIPT" | tee -a /tmp/upgrade.log
+				else
+					curl -s -o "$tmpfile" "$REMOTE_SCRIPT" >> /tmp/upgrade.log 2>&1
+				fi
 				if [ $? -ne 0 ]; then
 					echo -e "[\033[31mERROR\033[0m] Failed to download new version." | tee -a /tmp/upgrade.log
 					exit 1
 				fi
-				chmod +x "$tmpfile" >> /tmp/upgrade.log 2>&1
-				dos2unix "$tmpfile" >> /tmp/upgrade.log 2>&1
+
 				SCRIPT_PATH="$(realpath "$0")"
-				mv "$tmpfile" "$SCRIPT_PATH" >> /tmp/upgrade.log 2>&1
+				if [[ $VERBOSE -eq 1 ]]; then
+					chmod +x "$tmpfile" | tee -a /tmp/upgrade.log
+					dos2unix "$tmpfile" | tee -a /tmp/upgrade.log
+					mv "$tmpfile" "$SCRIPT_PATH" | tee -a /tmp/upgrade.log
+				else
+					chmod +x "$tmpfile" >> /tmp/upgrade.log 2>&1
+					dos2unix "$tmpfile" >> /tmp/upgrade.log 2>&1
+					mv "$tmpfile" "$SCRIPT_PATH" >> /tmp/upgrade.log 2>&1
+				fi
 				clear
 				echo "Restarting script..." | tee -a /tmp/upgrade.log
 				exec "$SCRIPT_PATH" "$@"
@@ -65,6 +76,25 @@ self_update() {
 		echo -e "[\033[32mup-to-date\033[0m]" | tee -a /tmp/upgrade.log
     fi
 }
+
+###
+# Is verbose mode enabled? (script called with -v)
+VERBOSE=0
+for arg in "$@"; do
+    if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
+		echo "DeepHunter upgrade script"
+		echo
+		echo "Options:"
+		echo "--help or -h : display this help message"
+		echo "-v : verbose mode"
+        exit 0
+    fi
+    if [[ "$arg" == "-v" ]]; then
+        VERBOSE=1
+		echo "Verbose mode enabled"
+        break
+    fi
+done
 
 # Banner
 echo ""
@@ -217,17 +247,28 @@ if [ $UPDATE_ON = "release" ]; then
 	fi
 
 	url=$(echo $response | grep -oP '(?<="tarball_url": ")[^"]+')
-	wget -q -O deephunter.tar.gz $url >> /tmp/upgrade.log 2>&1
-	mkdir deephunter >> /tmp/upgrade.log 2>&1
-	tar xzf deephunter.tar.gz -C deephunter --strip-components=1 >> /tmp/upgrade.log 2>&1
+	if [[ $VERBOSE -eq 1 ]]; then
+		echo
+		wget -O deephunter.tar.gz $url | tee -a /tmp/upgrade.log
+		mkdir deephunter
+		tar xzvf deephunter.tar.gz -C deephunter --strip-components=1 | tee -a /tmp/upgrade.log
+	else
+		wget -q -O deephunter.tar.gz $url >> /tmp/upgrade.log 2>&1
+		mkdir deephunter >> /tmp/upgrade.log 2>&1
+		tar xzf deephunter.tar.gz -C deephunter --strip-components=1 >> /tmp/upgrade.log 2>&1
+	fi
 else
-	rm -fR d >> /tmp/upgrade.log 2>&1
-	mkdir d >> /tmp/upgrade.log 2>&1
-	cd d >> /tmp/upgrade.log 2>&1
-	git clone -q $GITHUB_URL >> /tmp/upgrade.log 2>&1
-	cd /tmp >> /tmp/upgrade.log 2>&1
-	mv d/deephunter . >> /tmp/upgrade.log 2>&1
-	rm -fR d >> /tmp/upgrade.log 2>&1
+	rm -fR d
+	mkdir d
+	cd d
+	if [[ $VERBOSE -eq 1 ]]; then
+		git clone $GITHUB_URL | tee -a /tmp/upgrade.log
+	else
+		git clone -q $GITHUB_URL >> /tmp/upgrade.log 2>&1
+	fi
+	cd /tmp
+	mv d/deephunter .
+	rm -fR d
 fi
 
 echo -e "[\033[32mcomplete\033[0m]" | tee -a /tmp/upgrade.log
@@ -262,20 +303,34 @@ fi
 
 # Stop services
 echo -n -e "[\033[90mINFO\033[0m] STOPPING SERVICES ............................... " | tee -a /tmp/upgrade.log
-sudo systemctl stop apache2 >> /tmp/upgrade.log 2>&1
-sudo systemctl stop celery >> /tmp/upgrade.log 2>&1
-sudo systemctl stop redis-server >> /tmp/upgrade.log 2>&1
+if [[ $VERBOSE -eq 1 ]]; then
+	sudo systemctl stop apache2 | tee -a /tmp/upgrade.log
+	sudo systemctl stop celery | tee -a /tmp/upgrade.log
+	sudo systemctl stop redis-server | tee -a /tmp/upgrade.log
+else
+	sudo systemctl stop apache2 >> /tmp/upgrade.log 2>&1
+	sudo systemctl stop celery >> /tmp/upgrade.log 2>&1
+	sudo systemctl stop redis-server >> /tmp/upgrade.log 2>&1
+fi
 echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
 
 # Backup DB (encrypted. Use the same as DB backup in crontab. Backup will be located in the same folder)
 echo -n -e "[\033[90mINFO\033[0m] STARTING DB BACKUP .............................. " | tee -a /tmp/upgrade.log
 source $VENV_PATH/bin/activate >> /tmp/upgrade.log 2>&1
-cd $APP_PATH >> /tmp/upgrade.log 2>&1
+cd $APP_PATH
 # If a GPG recipient is defined and the key is available, encrypt the backup, otherwise do not encrypt
 if gpg --list-keys "$DBBACKUP_GPG_RECIPIENT" >/dev/null 2>&1; then
-	$VENV_PATH/bin/python3 manage.py dbbackup --encrypt >> /tmp/upgrade.log 2>&1
+	if [[ $VERBOSE -eq 1 ]]; then
+		$VENV_PATH/bin/python3 manage.py dbbackup --encrypt | tee -a /tmp/upgrade.log
+	else
+		$VENV_PATH/bin/python3 manage.py dbbackup --encrypt >> /tmp/upgrade.log 2>&1
+	fi
 else
-	$VENV_PATH/bin/python3 manage.py dbbackup >> /tmp/upgrade.log 2>&1
+	if [[ $VERBOSE -eq 1 ]]; then
+		$VENV_PATH/bin/python3 manage.py dbbackup | tee -a /tmp/upgrade.log
+	else
+		$VENV_PATH/bin/python3 manage.py dbbackup >> /tmp/upgrade.log 2>&1
+	fi
 fi
 #leave virtual env
 deactivate
@@ -297,6 +352,7 @@ for file in $APP_PATH/plugins/*.py; do
         installed_plugins+=("$(basename "$file")")
     fi
 done
+echo "[DEBUG] Installed plugins: ${installed_plugins[@]}" >> /tmp/upgrade.log 2>&1
 echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
 
 ######################################
@@ -306,8 +362,14 @@ echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
 # Installing pip dependencies in the virtual env
 echo -n -e "[\033[90mINFO\033[0m] INSTALLING PIP DEPENDENCIES ..................... " | tee -a /tmp/upgrade.log
 source $VENV_PATH/bin/activate >> /tmp/upgrade.log 2>&1
-pip install -q -q --upgrade pip >> /tmp/upgrade.log 2>&1
-pip install -q -q --upgrade -r /tmp/deephunter/requirements.txt >> /tmp/upgrade.log 2>&1
+if [[ $VERBOSE -eq 1 ]]; then
+	echo
+	pip install --upgrade pip | tee -a /tmp/upgrade.log
+	pip install --upgrade -r /tmp/deephunter/requirements.txt | tee -a /tmp/upgrade.log
+else
+	pip install -q -q --upgrade pip >> /tmp/upgrade.log 2>&1
+	pip install -q -q --upgrade -r /tmp/deephunter/requirements.txt >> /tmp/upgrade.log 2>&1
+fi
 #leave virtual env
 deactivate >> /tmp/upgrade.log 2>&1
 echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
@@ -367,13 +429,22 @@ done
 
 echo -n -e "[\033[90mINFO\033[0m] PERFORMING DB MIGRATIONS ........................ " | tee -a /tmp/upgrade.log
 source $VENV_PATH/bin/activate >> /tmp/upgrade.log 2>&1
-cd $APP_PATH/ >> /tmp/upgrade.log 2>&1
+cd $APP_PATH/
 for app in ${APPS[@]}
 do
-	./manage.py makemigrations $app >> /tmp/upgrade.log 2>&1
+	if [[ $VERBOSE -eq 1 ]]; then
+		echo
+		./manage.py makemigrations $app | tee -a /tmp/upgrade.log
+	else
+		./manage.py makemigrations $app >> /tmp/upgrade.log 2>&1
+	fi
 done
 
-./manage.py migrate >> /tmp/upgrade.log 2>&1
+if [[ $VERBOSE -eq 1 ]]; then
+	./manage.py migrate | tee -a /tmp/upgrade.log
+else
+	./manage.py migrate >> /tmp/upgrade.log 2>&1
+fi
 # Leave python virtual env
 deactivate >> /tmp/upgrade.log 2>&1
 echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
@@ -391,7 +462,11 @@ echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
 echo -e "[\033[90mINFO\033[0m] RUNNING UPGRADE SCRIPTS ......................... " | tee -a /tmp/upgrade.log
 source $VENV_PATH/bin/activate >> /tmp/upgrade.log 2>&1
 
-echo "[DEBUG] Current commit: $CURRENT_COMMIT" >> /tmp/upgrade.log
+if [[ $VERBOSE -eq 1 ]]; then
+	echo "[DEBUG] Current commit: $CURRENT_COMMIT" | tee -a /tmp/upgrade.log
+else
+	echo "[DEBUG] Current commit: $CURRENT_COMMIT" >> /tmp/upgrade.log
+fi
 git rev-list --reverse "${CURRENT_COMMIT}..HEAD" | while read COMMIT; do
     # For each commit, list added files in that commit
     git diff-tree --no-commit-id --name-status -r "$COMMIT" | while read STATUS FILE_PATH; do
@@ -403,7 +478,11 @@ git rev-list --reverse "${CURRENT_COMMIT}..HEAD" | while read COMMIT; do
             filename="${FILE_PATH##*/}"
             basename="${filename%.*}"
 			echo -e "[\033[90mINFO\033[0m] Running upgrade script: $basename" | tee -a /tmp/upgrade.log
-            python manage.py runscript "upgrade.$basename" >> /tmp/upgrade.log 2>&1
+            if [[ $VERBOSE -eq 1 ]]; then
+				python manage.py runscript "upgrade.$basename" | tee -a /tmp/upgrade.log
+			else
+				python manage.py runscript "upgrade.$basename" >> /tmp/upgrade.log 2>&1
+			fi
         fi
     done
 done
@@ -426,10 +505,17 @@ echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
 
 # Restart apache2
 echo -n -e "[\033[90mINFO\033[0m] RESTARTING SERVICES ............................. " | tee -a /tmp/upgrade.log
-sudo systemctl start apache2 >> /tmp/upgrade.log 2>&1
-sudo systemctl restart redis-server >> /tmp/upgrade.log 2>&1
-sudo systemctl restart celery >> /tmp/upgrade.log 2>&1
-sudo systemctl restart cron >> /tmp/upgrade.log 2>&1
+if [[ $VERBOSE -eq 1 ]]; then
+	sudo systemctl start apache2 | tee -a /tmp/upgrade.log | tee -a /tmp/upgrade.log
+	sudo systemctl restart redis-server | tee -a /tmp/upgrade.log
+	sudo systemctl restart celery | tee -a /tmp/upgrade.log
+	sudo systemctl restart cron | tee -a /tmp/upgrade.log
+else
+	sudo systemctl start apache2 >> /tmp/upgrade.log 2>&1
+	sudo systemctl restart redis-server >> /tmp/upgrade.log 2>&1
+	sudo systemctl restart celery >> /tmp/upgrade.log 2>&1
+	sudo systemctl restart cron >> /tmp/upgrade.log 2>&1
+fi
 echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
 
 # cleaning /tmp
@@ -438,7 +524,11 @@ rm -fR /tmp/deephunter* /tmp/settings.py >> /tmp/upgrade.log 2>&1
 echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
 
 # Search for debug = true in the codebase
-echo "Search for debug = true in the codebase" >> /tmp/upgrade.log
+if [[ $VERBOSE -eq 1 ]]; then
+	echo "Search for debug = true in the codebase" | tee -a /tmp/upgrade.log
+else
+	echo "Search for debug = true in the codebase" >> /tmp/upgrade.log
+fi
 matches=$(find "$APP_PATH" -type f -name '*.py' -exec grep -EniI 'debug[[:space:]]*=[[:space:]]*true' {} + 2>/dev/null || true)
 # Check if matches were found
 if [[ -n "$matches" ]]; then
