@@ -52,8 +52,17 @@ def user_logout(request):
     logout(request)
     return redirect('/')
 
+def check_groups():
+    """
+    Ensure that all groups defined in settings exist in the local DB, or create them.
+    """
+    for group_name in USER_GROUPS_MEMBERSHIP.keys():
+        group, created = Group.objects.get_or_create(name=group_name)
+
 def authorize(request):
     
+    check_groups()
+
     usergroups = []
     
     if AUTH_PROVIDER == 'pingid':
