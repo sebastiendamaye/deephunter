@@ -284,17 +284,19 @@ echo -n -e "[\033[90mINFO\033[0m] CHECKING SETTINGS FILE CONSISTENCY ...........
 # Extract keys from the local and remote settings.py files
 LOCAL_KEYS=$(extract_keys /tmp/settings.py)
 NEW_KEYS=$(extract_keys "/tmp/deephunter/deephunter/settings.example.py")
+missing_variables=$(comm -23 <(echo "$NEW_KEYS" | sort) <(echo "$LOCAL_KEYS" | sort))
 
 # Compare the sets of keys (sorted to handle order) and check consistency
-if diff <(echo "$LOCAL_KEYS" | sort) <(echo "$NEW_KEYS" | sort) > /dev/null; then
-    echo -e "[\033[32mOK\033[0m]" | tee -a /tmp/upgrade.log
-else
+#if diff <(echo "$LOCAL_KEYS" | sort) <(echo "$NEW_KEYS" | sort) > /dev/null; then
+if [[ -n "$missing_variables" ]]; then
     echo -e "[\033[31mfailed\033[0m]" | tee -a /tmp/upgrade.log
     echo -e "[\033[31mERROR\033[0m] There are likely missing variables in your current settings.py file." | tee -a /tmp/upgrade.log
     # Show the differences between the local and new settings
-    diff <(echo "$LOCAL_KEYS" | sort) <(echo "$NEW_KEYS" | sort) | grep '^[<>]' || true | tee -a /tmp/upgrade.log
-    echo -e "[\033[90mINFO\033[0m] Please use a text editor to add the missing element(s). You can for example use 'nano -c $APP_PATH/deephunter/settings.py' to edit it." | tee -a /tmp/upgrade.log
+    echo -e "[\033[90mINFO\033[0m] Add these missing variables to $APP_PATH/deephunter/settings.py." | tee -a /tmp/upgrade.log
+    echo "$missing_variables" | tee -a /tmp/upgrade.log
     exit 1
+else
+    echo -e "[\033[32mOK\033[0m]" | tee -a /tmp/upgrade.log
 fi
 
 ######################################
