@@ -71,69 +71,16 @@ ALLOWED_HOSTS
 - **Type**: List of strings
 - **Description**: A list of strings representing the host/domain names that this Django site can serve. This is a security measure to prevent HTTP Host header attacks, which are possible even under many seemingly-safe web server configurations.
 
-AUTHLIB_OAUTH_CLIENTS
-*********************
-- **Type**: Dictionary
-- **Description**: Used to provide the PingID or Entra ID settings, for the authentication based on PingID or Entra ID. ``client_kwargs`` is used to specify information about the user, in case of successful authentication, in order to populate the local database.
-- **Example**:
-
-.. code-block:: python
-
-	AUTHLIB_OAUTH_CLIENTS = {
-		'pingid': {
-			'client_id': 'deephunterdev',
-			'client_secret': 'aB9cD3eF7gH1iJ2kL0mN4pQ6rS8tU5vWzYxZ3A7bC9dE2fG1hI0jsUQK3lM6nP9q',
-			'server_metadata_url': 'https://ping-sso.domains.com/.well-known/openid-configuration',
-			'client_kwargs': {'scope': 'openid groups profile email'},
-		},
-		'entra_id': {
-			'client_id': 'deephunterdev',
-			'client_secret': 'Ji0AA8tXKn6wnC9Vf7a211ykaMor5s',
-			'server_metadata_url': 'https://login.microsoftonline.com/lmgh5678-12j4-97s2-n5b4-85f53h902k31/.well-known/openid-configuration',
-			'client_kwargs': {'scope': 'openid profile email'}
-		}
-	}
-
 AUTH_PROVIDER
 *************
 - **Type**: String
 - **Description**: Authentication provider (in case you rely on an external authentication provider)
-- **Possible values**: ``pingid`` or ``entra_id`` (if external authentication provider), or empty string (if local authentication).
+- **Possible values**: ``pingid`` or ``entraid`` (if external authentication provider), or empty string (if local authentication).
 - **Example**:
 
 .. code-block:: python
 
 	AUTH_PROVIDER = 'pingid'
-
-AUTH_TOKEN_MAPPING
-******************
-- **Type**: Dictionary
-- **Description**: Mapping of expected keys (left) vs token fields (right). It is recommended to use the debug return function of  ``./deephunter/views.py`` on line 64 to check the token values. Only modify values (right side), not the keys (left).
-- **Example**: 
-
-.. code-block:: python
-
-	AUTH_TOKEN_MAPPING = {
-		'username': 'unique_name',
-		'first_name': 'given_name',
-		'last_name': 'family_name',
-		'email': 'upn',
-		'groups': 'roles'
-	}
-
-USER_GROUPS_MEMBERSHIP
-**********************
-- **Type**: Dictionary
-- **Description**: If you are relying on an external authentication provider (i.e., PingID or Entra ID), you'll need to assign your users to AD groups or Entra ID roles. This variable is used to map local groups with AD groups or Entra ID roles.
-
-- **Example**: 
-
-.. code-block:: python
-
-	USER_GROUPS_MEMBERSHIP = {
-		'viewer': 'deephunter_read',
-		'manager': 'deephunter_write'
-	}
 
 USER_GROUP
 **********

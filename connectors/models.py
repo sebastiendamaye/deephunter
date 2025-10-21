@@ -6,6 +6,7 @@ class Connector(models.Model):
         ('repos', 'Repositories'),
         ('ai', 'Artificial Intelligence'),
         ('extensions', 'Extensions'),
+        ('authentication', 'Authentication'),
     ]
 
     name = models.CharField(max_length=20, unique=True)
@@ -41,3 +42,8 @@ class ConnectorConf(models.Model):
 
     def __str__(self):
         return f"{self.connector.name}:{self.key}"
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['connector', 'key'], name='unique_connector_key')
+        ]

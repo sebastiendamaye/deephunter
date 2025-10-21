@@ -17,6 +17,13 @@
                 hx-trigger="change" />
         </div>
         <div>
+            <label for="authentication">Authentication</label>
+            <input type="checkbox" id="authentication" name="domain" value="authentication" 
+                hx-post="/connectors/filter-catalog/" 
+                hx-target="#connectors-list" 
+                hx-trigger="change" />
+        </div>
+        <div>
             <label for="extensions">Extensions</label>
             <input type="checkbox" id="extensions" name="domain" value="extensions" 
                 hx-post="/connectors/filter-catalog/" 

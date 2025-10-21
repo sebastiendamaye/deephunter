@@ -232,7 +232,9 @@ class CampaignCompletion(models.Model):
     nb_queries_complete = models.IntegerField(default=0, help_text="Number of TH analytics completed in this campaign for this connector")
     
     class Meta:
-        unique_together = ('campaign', 'connector')
+        constraints = [
+            models.UniqueConstraint(fields=['campaign', 'connector'], name='unique_campaign_connector')
+        ]
     def __str__(self):
         return f'{self.campaign.name} - {self.connector.name}'
 

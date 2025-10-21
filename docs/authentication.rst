@@ -31,11 +31,9 @@ PingID
 
 To use PingID:
 
-- modify the necessary settings (check the `settings <settings.html#authlib-oauth-clients>`_ page) related to PingID configuration.
-- set ``AUTH_PROVIDER`` to ``pingid``.
-- Create 2 Active Directory (AD) groups: for example ``deephunter_usr`` (standard user, with read-only access) and ``deephunter_pr`` (privileged users, i.e., administrators) and assign users to these groups.
-- In the settings, do the correct mapping for the ``USER_GROUPS_MEMBERSHIP`` variable.
-- You'll need to assign correct values for the ``AUTH_TOKEN_MAPPING`` variable. You can use the debug return function of ``./deephunter/views.py`` on line 64 to check the token values to do this mapping.
+- Create Active Directory (AD) groups: for example ``deephunter_usr`` (standard user, with read-only access) and ``deephunter_pr`` (privileged users, i.e., administrators) and assign users to these groups.
+- install the `PingID plugin <plugins/pingid.html>`_ and configure it.
+- set ``AUTH_PROVIDER`` to ``pingid`` in the ``settings.py`` file.
 - Optionnaly disable the login form (set ``LOGIN_FORM`` to ``False`` in the settings)
 - When a user logs in, if the authentication is successful, information from AD will be gathered to update the user in the local database.
 
@@ -44,11 +42,9 @@ Entra ID
 
 To use Entra ID:
 
-- modify the necessary settings (check the `settings <settings.html#authlib-oauth-clients>`_ page) related to Entra ID configuration.
-- set ``AUTH_PROVIDER`` to ``entra_id``.
 - Create roles in Entra ID, for example ``deephunter_usr`` (standard user, with read-only access) and ``deephunter_pr`` (privileged users, i.e., administrators) and assign users one of these roles.
-- In the settings, do the correct mapping for the ``USER_GROUPS_MEMBERSHIP`` variable.
-- You'll need to assign correct values for the ``AUTH_TOKEN_MAPPING`` variable. You can use the debug return function of ``./deephunter/views.py`` on line 64 to check the token values to do this mapping.
+- install the `Entra ID plugin <plugins/entraid.html>`_ and configure it.
+- set ``AUTH_PROVIDER`` to ``entraid`` in the ``settings.py`` file.
 - Optionnaly disable the login form (set ``LOGIN_FORM`` to ``False`` in the settings)
 - When a user logs in, if the authentication is successful, information from the session token will be gathered to update the user in the local database.
 
@@ -58,9 +54,9 @@ Groups and Privileges
 Local and AD Groups
 ===================
 
-If you are relying on local authentication, you can create groups and assign privileges using the backend of DeepHunter.
+If you are relying on local authentication, you can create groups and assign privileges using the `admin interface <admin/admin_interface.html>`_.
 
-If you are relying on PingID or Entra ID, you need to create groups in the local database that will be mapped to the AD groups or Entra ID roles. Use the ``USER_GROUPS_MEMBERSHIP`` variable in the settings to do this mapping.
+If you are relying on PingID or Entra ID, map local groups (they will be created automatically) to the AD groups or Entra ID roles. Use the ``USER_GROUPS_MEMBERSHIP`` variable in the connector settings to do this mapping.
 
 In the example below, the AD groups or Entra ID roles ``deephunterdev_usr``, ``deephunterdev_pr`` and ``deephunterdev_th`` are mapped to the local groups ``viewer``, ``manager`` and ``threathunter`` respectively.
 

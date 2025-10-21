@@ -23,5 +23,7 @@ class ModulePermission(models.Model):
         return f"{self.module.name}:{self.action}"
     
     class Meta:
-        unique_together = ('module', 'action')
+        constraints = [
+            models.UniqueConstraint(fields=['module', 'action'], name='unique_module_action')
+        ]
         ordering = ['module__name', 'action']

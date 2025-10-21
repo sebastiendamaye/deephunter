@@ -20,44 +20,9 @@ SHOW_LOGIN_FORM = True
 
 ALLOWED_HOSTS = ['deephunter.domain.com']
 
-# PingID / MS Entra ID
-AUTHLIB_OAUTH_CLIENTS = {
-    'pingid': {
-        'client_id': 'YOUR_PINGID_CLIENT_ID',
-        'client_secret': 'YOUR_PINGID_CLIENT_SECRET',
-        'server_metadata_url': 'https://ping-sso.domain.com/.well-known/openid-configuration',
-        'client_kwargs': {'scope': 'openid groups profile email'},
-    },
-    'entra_id': {
-        'client_id': 'YOUR_ENTRA_ID_APP_ID',
-        'client_secret': 'YOUR_ENTRA_ID_CLIENT_SECRET',
-        'server_metadata_url': 'https://login.microsoftonline.com/<TENANT_ID>/.well-known/openid-configuration',
-        'client_kwargs': {'scope': 'openid profile email'}
-    }
-}
-
-# Which auth provider are you using (pingid|entra_id).
+# Which auth provider are you using (pingid|entraid).
 # Set to an empty string for local authentication
-AUTH_PROVIDER = 'entra_id'
-
-# Mapping of expected fields (left) vs token fields (right)
-# You can use the debug return function of ./deephunter/views.py on line 64
-# to check the token values
-AUTH_TOKEN_MAPPING = {
-    'username': 'unique_name',
-    'first_name': 'given_name',
-    'last_name': 'family_name',
-    'email': 'upn',
-    'groups': 'roles'
-}
-
-# Mapping between DeepHunter groups (viewer, manager, threathunter, etc.) and your AD groups, or Entra ID roles (deephunterdev_usr, deephunterdev_pr, etc.)
-# To be granted access, users must be in one of these groups (you will need to manually create these groups in DeepHunter)
-USER_GROUPS_MEMBERSHIP = {
-    'viewer': 'deephunterdev_usr',
-    'manager': 'deephunterdev_pr',
-    'threathunter': 'deephunterdev_th',
-}
+AUTH_PROVIDER = 'entraid'
 
 # USER and GROUP. Used by deployment script to apply correct permissions
 USER_GROUP = "user:group"
