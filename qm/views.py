@@ -622,6 +622,7 @@ def tl_host(request, hostname):
     
     context = {
         'machinedetails': machinedetails,
+        'username': username,
         'user_name': user_name,
         'job_title': job_title,
         'business_unit': business_unit,
