@@ -432,21 +432,15 @@ done
 echo -n -e "[\033[90mINFO\033[0m] PERFORMING DB MIGRATIONS ........................ " | tee -a /tmp/upgrade.log
 source $VENV_PATH/bin/activate >> /tmp/upgrade.log 2>&1
 cd $APP_PATH/
-for app in ${APPS[@]}
-do
-	if [[ $VERBOSE -eq 1 ]]; then
-		echo
-		./manage.py makemigrations $app | tee -a /tmp/upgrade.log
-	else
-		./manage.py makemigrations $app >> /tmp/upgrade.log 2>&1
-	fi
-done
-
 if [[ $VERBOSE -eq 1 ]]; then
+	echo
+	./manage.py makemigrations | tee -a /tmp/upgrade.log
 	./manage.py migrate | tee -a /tmp/upgrade.log
 else
+	./manage.py makemigrations >> /tmp/upgrade.log 2>&1
 	./manage.py migrate >> /tmp/upgrade.log 2>&1
 fi
+
 # Leave python virtual env
 deactivate >> /tmp/upgrade.log 2>&1
 echo -e "[\033[32mdone\033[0m]" | tee -a /tmp/upgrade.log
