@@ -38,7 +38,6 @@
 		<div class="ml40">
 			<b>Created by: </b>{% if analytic.created_by %}<span title="{{ analytic.created_by.first_name }} {{ analytic.created_by.last_name }}">{{ analytic.created_by }}</span>{% else %}-{% endif %}
 			&nbsp;|&nbsp;<b>Created on: </b>{{ analytic.pub_date }}
-			&nbsp;|&nbsp;<b>Last modified: </b>{{ analytic.update_date }}
 			&nbsp;|&nbsp;<b>Last time seen: </b>{% if analytic.last_time_seen %}{{ analytic.last_time_seen }}{% else %}-{% endif %}
 		</div>
 		<div class="ml40">

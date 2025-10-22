@@ -1339,7 +1339,7 @@ def clone_analytic(request, analytic_id):
     # Prepare initial data from the analytic instance
     initial = {field.name: getattr(analytic, field.name)
                for field in Analytic._meta.fields
-               if field.name not in ['id', 'name', 'status', 'repo', 'created_by', 'pub_date', 'update_date', 'maxhosts_count', 'query_error', 'query_error_message', 'query_error_date', 'next_review_date', 'last_time_seen']}
+               if field.name not in ['id', 'name', 'status', 'repo', 'created_by', 'pub_date', 'maxhosts_count', 'query_error', 'query_error_message', 'query_error_date', 'next_review_date', 'last_time_seen']}
     initial['name'] = ''  # Set name to empty
 
     # For ManyToMany fields, you need to set initial as a list of IDs

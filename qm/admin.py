@@ -166,7 +166,7 @@ class CategoryFilter(admin.SimpleListFilter):
 
 
 class AnalyticAdmin(SimpleHistoryAdmin):
-    list_display = ('name', 'update_date', 'created_by', 'status', 'category', 'confidence', 'relevance', 'run_daily',
+    list_display = ('name', 'created_by', 'status', 'category', 'confidence', 'relevance', 'run_daily',
                     'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'query_error_date', 'maxhosts_count',
                     'connector', 'query', 'last_time_seen', 'repo')
     list_filter = ['repo', 'status', NotStatusFilter, CreatedByFilter, CategoryFilter, 'confidence', 'relevance', 'run_daily',

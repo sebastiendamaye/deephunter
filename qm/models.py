@@ -135,7 +135,6 @@ class Analytic(models.Model):
     notes = models.TextField(blank=True, help_text="Threat hunting notes, Markdown syntax")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
     pub_date = models.DateTimeField(auto_now_add=True)
-    update_date = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='DRAFT')
     confidence = models.IntegerField(choices=CONFIDENCE_CHOICES, default=1)
     relevance = models.IntegerField(choices=RELEVANCE_CHOICES, default=1)
@@ -169,7 +168,7 @@ class Analytic(models.Model):
     next_review_date = models.DateField(blank=True, null=True, editable=False)
     last_time_seen = models.DateField(blank=True, null=True, editable=False)
     history = HistoricalRecords(
-        excluded_fields=['query_error', 'query_error_message', 'query_error_date', 'last_time_seen', 'next_review_date'],
+        excluded_fields=['query_error', 'query_error_message', 'query_error_date', 'last_time_seen', 'next_review_date', 'maxhosts_count'],
         m2m_fields=[tags, mitre_techniques, threats, actors, target_os, vulnerabilities]
         )
     
