@@ -133,10 +133,18 @@ def pre_save_handler(sender, instance, **kwargs):
 
     # Workflow. Set the next review date if the analytic is published
     if instance.status == 'PUB':
-        if not instance.run_daily_lock:
-            instance.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
-        else:
+        # if the analytic is locked, we do not set the next review date
+        if instance.run_daily_lock:
             instance.next_review_date = None
+        else:
+            # if this is an update
+            if instance.pk:
+                # we only set the next review date if the query was changed
+                if original_instance.query != instance.query:
+                    instance.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
+            # if this is a new analytic, we always set the next review date
+            else:
+                instance.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
 
     # When analytic is archived or pending, automatically remove the run_daily flag
     if instance.status == 'ARCH' or instance.status == 'PENDING':
