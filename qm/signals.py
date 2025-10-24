@@ -139,8 +139,8 @@ def pre_save_handler(sender, instance, **kwargs):
         else:
             # if this is an update
             if instance.pk:
-                # we only set the next review date if the query was changed
-                if original_instance.query != instance.query:
+                # we only set the next review date if the query was changed or if the status was not PUB before
+                if original_instance.query != instance.query or original_instance.status != 'PUB':
                     instance.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
             # if this is a new analytic, we always set the next review date
             else:
