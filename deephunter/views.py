@@ -88,7 +88,7 @@ def authorize(request):
                 first_name = ''
             
             if AUTH_TOKEN_MAPPING['last_name'] in token['userinfo']:
-                last_name = token['userinfo'][AUTH_TOKEN_MAPPING['first_name']]
+                last_name = token['userinfo'][AUTH_TOKEN_MAPPING['last_name']]
             else:
                 last_name = ''
             
