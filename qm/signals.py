@@ -158,6 +158,10 @@ def pre_save_handler(sender, instance, **kwargs):
     if instance.run_daily_lock and not instance.run_daily:
         instance.run_daily = True
 
+    # Bug #316 - Remove next review date from analytics that are no longer in PUB status
+    if original_instance.status == 'PUB' and instance.status != 'PUB':
+        instance.analyticmeta.next_review_date = None
+
     # Save changes to AnalyticMeta
     instance.analyticmeta.save()
 
