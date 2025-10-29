@@ -161,15 +161,7 @@ class Analytic(models.Model):
     dynamic_query = models.BooleanField(default=False)
     anomaly_threshold_count = models.IntegerField(default=2, help_text="Value range from 0 to 3. The higher the less sensitive")
     anomaly_threshold_endpoints = models.IntegerField(default=2, help_text="Value range from 0 to 3. The higher the less sensitive")
-
-    # these fields will be removed in future versions, kept for migration purposes
-    maxhosts_count = models.IntegerField(default=0, editable=False, help_text="Counts how many times max hosts threshold is reached")
-    query_error = models.BooleanField(default=False, editable=False)
-    query_error_message = models.TextField(blank=True, editable=False)
-    query_error_date = models.DateTimeField(blank=True, null=True, editable=False)
-    next_review_date = models.DateField(blank=True, null=True, editable=False)
-    last_time_seen = models.DateField(blank=True, null=True, editable=False)
-
+    
     history = HistoricalRecords(
         # to be removed in next commit
         excluded_fields=['query_error', 'query_error_message', 'query_error_date', 'last_time_seen', 'next_review_date', 'maxhosts_count'],
