@@ -73,7 +73,7 @@ class SavedSearchForm(forms.ModelForm):
 class AnalyticForm(forms.ModelForm):
     class Meta:
         model = Analytic
-        exclude = ['repo', 'created_by', 'pub_date', 'maxhosts_count', 'query_error', 'query_error_message', 'query_error_date', 'next_review_date', 'last_time_seen']
+        exclude = ['repo', 'created_by', 'pub_date']
         widgets = {
             'name': forms.TextInput(attrs={'size': 100}),
             'description': forms.Textarea(attrs={'rows': 5, 'cols': 100}),

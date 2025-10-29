@@ -585,7 +585,7 @@
 		</td>
 		<td class="acenter">{% if analytic.create_rule %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
 		<td class="acenter">{% if analytic.dynamic_query %}<img src="/static/admin/img/icon-yes.svg" />{% else %}<img src="/static/admin/img/icon-no.svg" />{% endif %}</td>
-		<td class="acenter">{{ analytic.maxhosts_count }}</td>
+		<td class="acenter">{{ analytic.analyticmeta.maxhosts_count }}</td>
 		<td class="acenter"><span id="sparkline_{{ analytic.id }}"></span></td>		
         <td class="aright"><div{% if analytic.anomaly_alert_count %} class="alert_orange"{% endif %}>{{ analytic.hits_count }}</div></td>
 		<td class="aright"><div{% if analytic.anomaly_alert_endpoints %} class="alert_orange"{% endif %}>{{ analytic.hits_endpoints }}</div></td>

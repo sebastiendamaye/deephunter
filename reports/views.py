@@ -322,12 +322,12 @@ def query_error(request):
 @permission_required('qm.view_analytic', raise_exception=True)
 def query_error_table(request):
     start_time = time.time()
-    analytics_with_errors = Analytic.objects.filter(query_error = True).exclude(status='ARCH').order_by('-query_error_date')
+    analytics_with_errors = Analytic.objects.filter(analyticmeta__query_error = True).exclude(status='ARCH').order_by('-analyticmeta__query_error_date')
     include_info = request.GET.get('include_info', 'off') == 'on'  # Get checkbox value
     
     analytics = []
     for analytic in analytics_with_errors:
-        error_is_info = all_connectors.get(analytic.connector.name).error_is_info(analytic.query_error_message)
+        error_is_info = all_connectors.get(analytic.connector.name).error_is_info(analytic.analyticmeta.query_error_message)
         if (not error_is_info) or (error_is_info and include_info):
             analytics.append({
                 'id': analytic.id,
@@ -335,13 +335,13 @@ def query_error_table(request):
                 'description': analytic.description,
                 'query': analytic.query,
                 'status': analytic.status,
-                'maxhosts_count': analytic.maxhosts_count,
+                'maxhosts_count': analytic.analyticmeta.maxhosts_count,
                 'connector_name': analytic.connector.name,
                 'run_daily': analytic.run_daily,
-                'error': analytic.query_error,
+                'error': analytic.analyticmeta.query_error,
                 'error_is_info': error_is_info,
-                'query_error_message': analytic.query_error_message,
-                'query_error_date': analytic.query_error_date,
+                'query_error_message': analytic.analyticmeta.query_error_message,
+                'query_error_date': analytic.analyticmeta.query_error_date,
             })
 
     paginator = Paginator(analytics, ANALYTICS_PER_PAGE)
@@ -472,11 +472,11 @@ def upcoming_analytic_reviews(request):
     start_time = time.time()
     analytics = (
         Analytic.objects
-        .filter(next_review_date__isnull=False)
+        .filter(analyticmeta__next_review_date__isnull=False)
         .exclude(status='ARCH')
-        .values('next_review_date')
+        .values('analyticmeta__next_review_date')
         .annotate(count=Count('id'))
-        .order_by('next_review_date')
+        .order_by('analyticmeta__next_review_date')
     )
     elapsed_time = time.time() - start_time
     context = {

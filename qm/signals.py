@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
-from .models import Analytic, TasksStatus
+from .models import Analytic, TasksStatus, AnalyticMeta
 from qm.utils import is_update_available, is_mitre_update_available
 from connectors.utils import is_connector_enabled
 from qm.tasks import regenerate_stats
@@ -93,11 +93,11 @@ def pre_save_handler(sender, instance, **kwargs):
         or original_instance.anomaly_threshold_count != instance.anomaly_threshold_count
         or original_instance.anomaly_threshold_endpoints != instance.anomaly_threshold_endpoints):
             # reset query flag
-            instance.maxhosts_count = 0
-            instance.query_error = False
-            instance.query_error_message = ''
-            instance.query_error_date = None
-            instance.last_time_seen = None
+            instance.analyticmeta.maxhosts_count = 0
+            instance.analyticmeta.query_error = False
+            instance.analyticmeta.query_error_message = ''
+            instance.analyticmeta.query_error_date = None
+            instance.analyticmeta.last_time_seen = None
             # we save a flag for the post_save handler to know if the query was changed (used for stats regeneration in post_save handler)
             instance._query_changed = True
             # Workflow automation: if status is PENDING and query is changed, analytic status automatically set to DRAFT
@@ -135,16 +135,16 @@ def pre_save_handler(sender, instance, **kwargs):
     if instance.status == 'PUB':
         # if the analytic is locked, we do not set the next review date
         if instance.run_daily_lock:
-            instance.next_review_date = None
+            instance.analyticmeta.next_review_date = None
         else:
             # if this is an update
             if instance.pk:
                 # we only set the next review date if the query was changed or if the status was not PUB before
                 if original_instance.query != instance.query or original_instance.status != 'PUB':
-                    instance.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
+                    instance.analyticmeta.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
             # if this is a new analytic, we always set the next review date
             else:
-                instance.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
+                instance.analyticmeta.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
 
     # When analytic is archived or pending, automatically remove the run_daily flag
     if instance.status == 'ARCH' or instance.status == 'PENDING':
@@ -152,11 +152,14 @@ def pre_save_handler(sender, instance, **kwargs):
     
     # When analytic is archived, set the next_review_date to None
     if instance.status == 'ARCH':
-        instance.next_review_date = None
+        instance.analyticmeta.next_review_date = None
 
     # If run_daily_lock is set, run_daily should automatically be set
     if instance.run_daily_lock and not instance.run_daily:
         instance.run_daily = True
+
+    # Save changes to AnalyticMeta
+    instance.analyticmeta.save()
 
 # This handler is triggered after an "Analytic" object is saved
 @receiver(post_save, sender=Analytic)
@@ -166,6 +169,10 @@ def post_save_handler(sender, instance, created, **kwargs):
         # New analytics
         if AUTO_STATS_REGENERATION:
             regenerate_analytic_stats(instance)
+
+        # for new analytics, we create the AnalyticMeta object associated with the analytic
+        AnalyticMeta.objects.create(analytic=instance)
+
     else:
         # for updated analytics, we check the flag set by the pre_save handler
         if getattr(instance, '_query_changed', False):

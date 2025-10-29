@@ -10,6 +10,6 @@
             <button type="submit">Submit</button>
         </form>
     {% else %}
-        <p>This analytic is not pending review. Next review date: {% if analytic.next_review_date %}{{ analytic.next_review_date }}{% else %}-{% endif %}</p>
+        <p>This analytic is not pending review. Next review date: {% if analytic.analyticmeta.next_review_date %}{{ analytic.analyticmeta.next_review_date }}{% else %}-{% endif %}</p>
     {% endif %}
 </div>

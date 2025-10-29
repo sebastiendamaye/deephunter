@@ -99,7 +99,7 @@ def manage_analytic_error(analytic, error_message):
     """
     
     # if error, we set the query_error flag and save the error message
-    analytic.query_error = True
+    analytic.analyticmeta.query_error = True
     if len(error_message) > 500:
         error_message = "{} [...] {}".format(error_message[:250], error_message[-250:])
 
@@ -109,9 +109,9 @@ def manage_analytic_error(analytic, error_message):
 
     # Analytic query error date is always set to today, even if the campaign is regenerated retroactively
     # this is because we want to know when the error occurred exactly to investigate potential issues with the data lake
-    analytic.query_error_date = datetime.today()
+    analytic.analyticmeta.query_error_date = datetime.today()
 
-    analytic.query_error_message = error_message
+    analytic.analyticmeta.query_error_message = error_message
     # if "error" message, we remove the run_daily flag and set status to PENDING
     if "error" in error_message.lower():
         if analytic.run_daily:
@@ -120,5 +120,6 @@ def manage_analytic_error(analytic, error_message):
             analytic.run_daily_lock = False
         analytic.status = "PENDING"
     # we save analytic
+    analytic.analyticmeta.save()
     analytic.save()
 

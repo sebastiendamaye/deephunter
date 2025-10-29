@@ -32,11 +32,13 @@ def regenerate_stats(analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
     add_info_notification(f'Regenerate stats task started for analytic "{analytic.name}"')
 
-    # we assume that analytic won't fail (flag will be set later if analytic fails)
-    analytic.query_error = False
-    analytic.query_error_message = ''
-    analytic.query_error_date = None
-    analytic.save()
+    # we assume that analytic won't fail (flag will be set later if analytic fails). We also reset the counter and last time seen
+    analytic.analyticmeta.maxhosts_count = 0
+    analytic.analyticmeta.last_time_seen = None
+    analytic.analyticmeta.query_error = False
+    analytic.analyticmeta.query_error_message = ''
+    analytic.analyticmeta.query_error_date = None
+    analytic.analyticmeta.save()
     
     # Create Campaign
     # Date of campaign is when the script runs (today) while snapshot date is the day before (detection date)
@@ -88,8 +90,8 @@ def regenerate_stats(analytic_id):
         if len(data) != 0:
 
             # there are results, we can update the last_time_seen field of the analytic
-            analytic.last_time_seen = snapshot.date
-            analytic.save()
+            analytic.analyticmeta.last_time_seen = snapshot.date
+            analytic.analyticmeta.save()
 
             hits_endpoints = len(data)
             hits_count = 0
@@ -127,9 +129,9 @@ def regenerate_stats(analytic_id):
             del_notification_by_uid(f"max_number_hosts_reached_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
             add_info_notification(f"Max number of hosts reached for analytic {analytic.name}", uid=f"max_number_hosts_reached_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
             # Update the maxhost counter if reached
-            analytic.maxhosts_count += 1
+            analytic.analyticmeta.maxhosts_count += 1
             # if threshold is reached
-            if analytic.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
+            if analytic.analyticmeta.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
                 # notification
                 add_warning_notification(f"Max hosts threshold reached for analytic {analytic.name}")
                 # If DISABLE_RUN_DAILY is set and run_daily_lock is not set, we disable the run_daily flag for the analytic
@@ -140,9 +142,10 @@ def regenerate_stats(analytic_id):
                 if ON_MAXHOSTS_REACHED['DELETE_STATS'] and not analytic.run_daily_lock:
                     Snapshot.objects.filter(analytic=analytic).delete()
             # we update the analytic (counter updated, and flags updated)
+            analytic.analyticmeta.save()
             analytic.save()
             # if threshold is reached, we exit the for loop
-            if analytic.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
+            if analytic.analyticmeta.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
                 break
 
         # Anomaly detection for hits_count (compute zscore against all snapshots available in DB)

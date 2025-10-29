@@ -40,7 +40,7 @@ $(document).ready(function() {
 			yValueFormatString: "#,##0",
 			dataPoints: [
 				{% for analytic in analytics %}
-					{ x: new Date("{{ analytic.next_review_date|date:"Y-m-d" }}"), y: {{ analytic.count }} },
+					{ x: new Date("{{ analytic.analyticmeta__next_review_date|date:"Y-m-d" }}"), y: {{ analytic.count }} },
 				{% endfor %}
 			]
 		}

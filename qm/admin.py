@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (Country, TargetOs, Vulnerability, MitreTactic, MitreTechnique, ThreatName,  
-    ThreatActor, Analytic, Snapshot, Campaign, Endpoint, Tag, TasksStatus, Category, Review,
-    SavedSearch, CampaignCompletion)
+    ThreatActor, Analytic, AnalyticMeta, Snapshot, Campaign, Endpoint, Tag, TasksStatus, Category,
+    Review, SavedSearch, CampaignCompletion)
 from connectors.models import Connector
 from django.contrib.admin.models import LogEntry
 from simple_history.admin import SimpleHistoryAdmin
@@ -17,7 +17,7 @@ admin.site.index_title = 'DeepHunter_'
 
 class MaxHostsCountFilter(admin.SimpleListFilter):
     title = 'Max Hosts Count'
-    parameter_name = 'maxhosts_count'
+    parameter_name = 'analyticmeta__maxhosts_count'
 
     def lookups(self, request, model_admin):
         return [
@@ -28,9 +28,9 @@ class MaxHostsCountFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         value = self.value()
         if value == 'zero':
-            return queryset.filter(maxhosts_count=0)
+            return queryset.filter(analyticmeta__maxhosts_count=0)
         if value == 'greater_than_zero':
-            return queryset.filter(maxhosts_count__gt=0)
+            return queryset.filter(analyticmeta__maxhosts_count__gt=0)
         return queryset
 
 class HitsLastCampaignFilter(admin.SimpleListFilter):
@@ -75,9 +75,9 @@ class AlreadySeenFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         value = self.value()
         if value == '1':
-            return queryset.filter(last_time_seen__isnull=False)
+            return queryset.filter(analyticmeta__last_time_seen__isnull=False)
         if value == '0':
-            return queryset.filter(last_time_seen__isnull=True)
+            return queryset.filter(analyticmeta__last_time_seen__isnull=True)
         return queryset
 
 class NotStatusFilter(admin.SimpleListFilter):
@@ -167,11 +167,11 @@ class CategoryFilter(admin.SimpleListFilter):
 
 class AnalyticAdmin(SimpleHistoryAdmin):
     list_display = ('name', 'created_by', 'status', 'category', 'confidence', 'relevance', 'run_daily',
-                    'run_daily_lock', 'create_rule', 'dynamic_query', 'query_error', 'query_error_date', 'maxhosts_count',
-                    'connector', 'query', 'last_time_seen', 'repo')
+                    'run_daily_lock', 'create_rule', 'dynamic_query', 'analyticmeta__query_error', 'analyticmeta__query_error_date', 'analyticmeta__maxhosts_count',
+                    'connector', 'query', 'analyticmeta__last_time_seen', 'repo')
     list_filter = ['repo', 'status', NotStatusFilter, CreatedByFilter, CategoryFilter, 'confidence', 'relevance', 'run_daily',
-                   'run_daily_lock', 'create_rule', MaxHostsCountFilter, 'dynamic_query', 'query_error', 'query_error_date',
-                   'last_time_seen', MitreTechniquesFilter, 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name',
+                   'run_daily_lock', 'create_rule', MaxHostsCountFilter, 'dynamic_query', 'analyticmeta__query_error', 'analyticmeta__query_error_date',
+                   'analyticmeta__last_time_seen', MitreTechniquesFilter, 'mitre_techniques__mitre_tactic', 'threats__name', 'actors__name',
                    'actors__source_country', 'target_os', 'tags__name', 'connector', 'vulnerabilities',
                    HitsLastCampaignFilter, AlreadySeenFilter]
     search_fields = ['name', 'description', 'notes', 'emulation_validation']
@@ -217,6 +217,10 @@ class AnalyticAdmin(SimpleHistoryAdmin):
         self.message_user(request, f"{updated_count} analytics updated to PENDING status.", messages.SUCCESS)
     update_status_pending.short_description = "Mark selected entries as PENDING"
 
+class AnalyticMetaAdmin(admin.ModelAdmin):
+    list_display = ('analytic', 'last_time_seen', 'query_error', 'query_error_message', 'query_error_date', 'maxhosts_count', 'next_review_date')
+    search_fields = ['analytic__name']
+    list_filter = ['last_time_seen', 'query_error', 'query_error_date', 'maxhosts_count', 'next_review_date']
 
 class SnapshotAdmin(admin.ModelAdmin):
     list_display = ('get_campaign', 'analytic__name', 'analytic__connector__name', 'date', 'runtime', 'hits_count', 'hits_endpoints','zscore_count', 'zscore_endpoints', 'anomaly_alert_count', 'anomaly_alert_endpoints',)
@@ -313,6 +317,7 @@ admin.site.register(MitreTechnique, MitreTechniqueAdmin)
 admin.site.register(ThreatName, ThreatNameAdmin)
 admin.site.register(ThreatActor, ThreatActorAdmin)
 admin.site.register(Analytic, AnalyticAdmin)
+admin.site.register(AnalyticMeta, AnalyticMetaAdmin)
 admin.site.register(Review)
 admin.site.register(Snapshot, SnapshotAdmin)
 admin.site.register(Campaign, CampaignAdmin)

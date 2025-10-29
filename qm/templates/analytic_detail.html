@@ -38,7 +38,7 @@
 		<div class="ml40">
 			<b>Created by: </b>{% if analytic.created_by %}<span title="{{ analytic.created_by.first_name }} {{ analytic.created_by.last_name }}">{{ analytic.created_by }}</span>{% else %}-{% endif %}
 			&nbsp;|&nbsp;<b>Created on: </b>{{ analytic.pub_date }}
-			&nbsp;|&nbsp;<b>Last time seen: </b>{% if analytic.last_time_seen %}{{ analytic.last_time_seen }}{% else %}-{% endif %}
+			&nbsp;|&nbsp;<b>Last time seen: </b>{% if analytic.analyticmeta.last_time_seen %}{{ analytic.analyticmeta.last_time_seen }}{% else %}-{% endif %}
 		</div>
 		<div class="ml40">
 			<b>Tags: </b>{% if analytic.tags %}{% for tag in analytic.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
@@ -54,8 +54,8 @@
 		<div class="description" hx-get="/qm/edit_notes_initial/{{ analytic.id }}/" hx-trigger="load"></div>
 
 		<h1>QUERY</h1>
-		{% if analytic.query_error %}<div class="{% if 'errors' in analytic.query_error_message %}errormsg{% else %}warningmsg{% endif %}">{{ analytic.query_error_message }}</div>{% endif %}
-		<div class="w1000 ml40{% if analytic.query_error %}{% if 'errors' in analytic.query_error_message %} errorquery{% else %} warningquery{% endif %}{% endif %}"
+		{% if analytic.analyticmeta.query_error %}<div class="{% if 'errors' in analytic.analyticmeta.query_error_message %}errormsg{% else %}warningmsg{% endif %}">{{ analytic.analyticmeta.query_error_message }}</div>{% endif %}
+		<div class="w1000 ml40{% if analytic.analyticmeta.query_error %}{% if 'errors' in analytic.analyticmeta.query_error_message %} errorquery{% else %} warningquery{% endif %}{% endif %}"
 			hx-get="/qm/edit_query_initial/{{ analytic.id }}/" hx-trigger="load"></div>
 
 		<h1>THREAT COVERAGE</h1>

@@ -233,26 +233,26 @@ def list_analytics(request):
 
         if 'alreadyseen' in request.GET:
             if request.GET['alreadyseen'] == '1':
-                analytics = analytics.filter(last_time_seen__isnull=False)
+                analytics = analytics.filter(analyticmeta__last_time_seen__isnull=False)
                 posted_filters['alreadyseen'] = 1
             else:
-                analytics = analytics.filter(last_time_seen__isnull=True)
+                analytics = analytics.filter(analyticmeta__last_time_seen__isnull=True)
                 posted_filters['alreadyseen'] = 0
 
         if 'maxhosts' in request.GET:
             if request.GET['maxhosts'] == '1':
-                analytics = analytics.filter(maxhosts_count__gt=0)
+                analytics = analytics.filter(analyticmeta__maxhosts_count__gt=0)
                 posted_filters['maxhosts'] = 1
             else:
-                analytics = analytics.filter(maxhosts_count=0)
+                analytics = analytics.filter(analyticmeta__maxhosts_count=0)
                 posted_filters['maxhosts'] = 0
 
         if 'queryerror' in request.GET:
             if request.GET['queryerror'] == '1':
-                analytics = analytics.filter(query_error=True)
+                analytics = analytics.filter(analyticmeta__query_error=True)
                 posted_filters['queryerror'] = 1
             else:
-                analytics = analytics.filter(query_error=False)
+                analytics = analytics.filter(analyticmeta__query_error=False)
                 posted_filters['queryerror'] = 0
 
         if 'created_by' in request.GET:
@@ -998,8 +998,8 @@ def search_in_admin(request):
     search = search.replace('mitre_tactics=', 'mitre_techniques__mitre_tactic=')
     search = search.replace('mitre_techniques=0', 'mitre_techniques=null')
     search = search.replace('statuses=', 'status=')
-    search = search.replace('maxhosts=1', 'maxhosts_count=greater_than_zero')
-    search = search.replace('queryerror=', 'query_error=')
+    search = search.replace('maxhosts=1', 'analyticmeta__maxhosts_count=greater_than_zero')
+    search = search.replace('queryerror=', 'analyticmeta__query_error=')
     search = search.replace('created_by=0', 'created_by=null')
     return HttpResponseRedirect(f'/admin/qm/analytic/?not_status=ARCH&{search}')
 
@@ -1252,9 +1252,10 @@ def submit_review(request, analytic_id):
 
         if form.cleaned_data['decision'] == 'PENDING':
             analytic.status = 'PENDING'
-            # run_daily flag will be set to False automatically (signals)
-            analytic.next_review_date = None
             analytic.save()
+            # run_daily flag will be set to False automatically (signals)
+            analytic.analyticmeta.next_review_date = None
+            analytic.analyticmeta.save()
         elif form.cleaned_data['decision'] == 'KEEP':
             analytic.status = 'PUB'
             # Bug #186 - "Keep it running" option during review should automatically enable "run_daily" flag if unset
@@ -1265,13 +1266,15 @@ def submit_review(request, analytic_id):
         elif form.cleaned_data['decision'] == 'LOCK':
             analytic.status = 'PUB'
             analytic.run_daily_lock = True
-            analytic.next_review_date = None
             analytic.save()
+            analytic.analyticmeta.next_review_date = None
+            analytic.analyticmeta.save()
         elif form.cleaned_data['decision'] == 'ARCH':
             analytic.status = 'ARCH'
-            analytic.next_review_date = None
-            # run_daily flag will be set to False automatically (signals)
             analytic.save()
+            analytic.analyticmeta.next_review_date = None
+            # run_daily flag will be set to False automatically (signals)
+            analytic.analyticmeta.save()
         elif form.cleaned_data['decision'] == 'DEL':
             analytic.delete()
 
@@ -1339,7 +1342,7 @@ def clone_analytic(request, analytic_id):
     # Prepare initial data from the analytic instance
     initial = {field.name: getattr(analytic, field.name)
                for field in Analytic._meta.fields
-               if field.name not in ['id', 'name', 'status', 'repo', 'created_by', 'pub_date', 'maxhosts_count', 'query_error', 'query_error_message', 'query_error_date', 'next_review_date', 'last_time_seen']}
+               if field.name not in ['id', 'name', 'status', 'repo', 'created_by', 'pub_date']}
     initial['name'] = ''  # Set name to empty
 
     # For ManyToMany fields, you need to set initial as a list of IDs

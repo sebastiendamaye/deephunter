@@ -161,9 +161,9 @@ def db_analyticspending(request):
 @login_required
 @permission_required('qm.view_analytic', raise_exception=True)
 def db_analyticswitherrors(request):
-    analytics = Analytic.objects.filter(query_error=True).exclude(
-        query_error_message__contains='"status":"FINISHED"').exclude(
-        query_error_message__contains="'status': 'FINISHED'"
+    analytics = Analytic.objects.filter(analyticmeta__query_error=True).exclude(
+        analyticmeta__query_error_message__contains='"status":"FINISHED"').exclude(
+        analyticmeta__query_error_message__contains="'status': 'FINISHED'"
         ).exclude(status='ARCH')
     
     code = f"""<h3>Analytics with errors</h3>
@@ -209,7 +209,7 @@ def db_top_endpoint_distinct_analytics(request):
 @login_required
 @permission_required('qm.view_analytic', raise_exception=True)
 def db_auto_disabled_analytics(request):
-    analytics = Analytic.objects.filter(run_daily=0, maxhosts_count__gt=1).exclude(status='ARCH')
+    analytics = Analytic.objects.filter(run_daily=0, analyticmeta__maxhosts_count__gt=1).exclude(status='ARCH')
     
     code = f"""<h3>Auto-disabled analytics</h3>
         <div class="num"><a href="/qm/listanalytics/?run_daily=0&maxhosts=1">{analytics.count()}</a></div>
@@ -242,11 +242,11 @@ def db_analyticsbyuser(request):
 def db_analytics_reviews_workload(request):
     analytics = (
         Analytic.objects
-        .filter(next_review_date__isnull=False, next_review_date__lt=datetime.now()+timedelta(weeks=2))
+        .filter(analyticmeta__next_review_date__isnull=False, analyticmeta__next_review_date__lt=datetime.now()+timedelta(weeks=2))
         .exclude(status='ARCH')
-        .values('next_review_date')
+        .values('analyticmeta__next_review_date')
         .annotate(count=Count('id'))
-        .order_by('next_review_date')
+        .order_by('analyticmeta__next_review_date')
     )
     context = {'analytics': analytics}
     return render(request, 'db_analytics_reviews_workload.html', context)

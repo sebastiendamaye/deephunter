@@ -137,11 +137,13 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
     # Filter analytic with the "run_daily" flag set
     for progress, analytic in enumerate(analytics, start=1):
         
-        # we assume that analytic won't fail (flag will be set later if analytic fails)
-        analytic.query_error = False
-        analytic.query_error_message = ''
-        analytic.query_error_date = None
-        analytic.save()
+        # we assume that analytic won't fail (flag will be set later if analytic fails). We also reset the counter and last time seen
+        analytic.analyticmeta.maxhosts_count = 0
+        analytic.analyticmeta.last_time_seen = None
+        analytic.analyticmeta.query_error = False
+        analytic.analyticmeta.query_error_message = ''
+        analytic.analyticmeta.query_error_date = None
+        analytic.analyticmeta.save()
                 
         # store current time (used to update snapshot runtime)
         start_runtime = datetime.now()
@@ -183,8 +185,8 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
         if len(data) != 0:
             
             # there are results, we can update the last_time_seen field of the analytic
-            analytic.last_time_seen = snapshot.date
-            analytic.save()
+            analytic.analyticmeta.last_time_seen = snapshot.date
+            analytic.analyticmeta.save()
 
             hits_endpoints = len(data)
             hits_count = 0
@@ -230,9 +232,9 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
             del_notification_by_uid(f"max_number_hosts_reached_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
             add_info_notification(f"Max number of hosts reached for analytic {analytic.name}", uid=f"max_number_hosts_reached_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
             # Update the maxhost counter if reached
-            analytic.maxhosts_count += 1
+            analytic.analyticmeta.maxhosts_count += 1
             # if threshold is reached
-            if analytic.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
+            if analytic.analyticmeta.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
                 # notification
                 add_warning_notification(f"Max hosts threshold reached for analytic {analytic.name}")
                 # If DISABLE_RUN_DAILY is set and run_daily_lock is not set, we disable the run_daily flag for the analytic
@@ -244,6 +246,7 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
                     Snapshot.objects.filter(analytic=analytic).delete()
             # we update the analytic (counter updated, and flags updated)
             analytic.save()
+            analytic.analyticmeta.save()
             if debug:
                 print("Max hosts threshold reached. Counter updated")            
         

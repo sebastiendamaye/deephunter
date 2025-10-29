@@ -161,16 +161,20 @@ class Analytic(models.Model):
     dynamic_query = models.BooleanField(default=False)
     anomaly_threshold_count = models.IntegerField(default=2, help_text="Value range from 0 to 3. The higher the less sensitive")
     anomaly_threshold_endpoints = models.IntegerField(default=2, help_text="Value range from 0 to 3. The higher the less sensitive")
+
+    # these fields will be removed in future versions, kept for migration purposes
     maxhosts_count = models.IntegerField(default=0, editable=False, help_text="Counts how many times max hosts threshold is reached")
     query_error = models.BooleanField(default=False, editable=False)
     query_error_message = models.TextField(blank=True, editable=False)
     query_error_date = models.DateTimeField(blank=True, null=True, editable=False)
     next_review_date = models.DateField(blank=True, null=True, editable=False)
     last_time_seen = models.DateField(blank=True, null=True, editable=False)
+
     history = HistoricalRecords(
+        # to be removed in next commit
         excluded_fields=['query_error', 'query_error_message', 'query_error_date', 'last_time_seen', 'next_review_date', 'maxhosts_count'],
         m2m_fields=[tags, mitre_techniques, threats, actors, target_os, vulnerabilities]
-        )
+    )
     
     def __str__(self):
         return self.name
@@ -196,7 +200,7 @@ class Analytic(models.Model):
             raise ValidationError({'query': 'Query cannot be empty.'})
         
     def save(self, *args, **kwargs):
-        # force check query is not an empty string
+        # make sure query is not an empty string
         self.full_clean()
         # To prevent simple-history from logging useless entries (when no change)
         # we only call save method if there is a real change
@@ -212,6 +216,18 @@ class Analytic(models.Model):
             ("view_netview", "Can view netview"),
             ("view_reports", "Can view reports"),
         ]
+
+class AnalyticMeta(models.Model):
+    analytic = models.OneToOneField(Analytic, on_delete=models.CASCADE, primary_key=True)
+    maxhosts_count = models.IntegerField(default=0, help_text="Counts how many times max hosts threshold is reached")
+    query_error = models.BooleanField(default=False)
+    query_error_message = models.TextField(blank=True)
+    query_error_date = models.DateTimeField(blank=True, null=True)
+    next_review_date = models.DateField(blank=True, null=True)
+    last_time_seen = models.DateField(blank=True, null=True)
+    
+    def __str__(self):
+        return self.analytic.name
 
 class Campaign(models.Model):
     name = models.CharField(max_length=250, unique=True)

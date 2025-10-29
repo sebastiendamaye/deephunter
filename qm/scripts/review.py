@@ -14,7 +14,7 @@ def run():
     analytics = Analytic.objects.filter(
         run_daily_lock=False,
         status='PUB',
-        next_review_date__lte=datetime.now()
+        analyticmeta__next_review_date__lte=datetime.now()
         )
     
     for analytic in analytics:
