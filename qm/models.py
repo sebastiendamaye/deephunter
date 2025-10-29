@@ -163,8 +163,6 @@ class Analytic(models.Model):
     anomaly_threshold_endpoints = models.IntegerField(default=2, help_text="Value range from 0 to 3. The higher the less sensitive")
     
     history = HistoricalRecords(
-        # to be removed in next commit
-        excluded_fields=['query_error', 'query_error_message', 'query_error_date', 'last_time_seen', 'next_review_date', 'maxhosts_count'],
         m2m_fields=[tags, mitre_techniques, threats, actors, target_os, vulnerabilities]
     )
     
