@@ -101,7 +101,7 @@ def pre_save_handler(sender, instance, **kwargs):
             # we save a flag for the post_save handler to know if the query was changed (used for stats regeneration in post_save handler)
             instance._query_changed = True
             # Workflow automation: if status is PENDING and query is changed, analytic status automatically set to DRAFT
-            if instance.status == 'PENDING':
+            if original_instance.query != instance.query and instance.status == 'PENDING':
                 instance.status = 'DRAFT'
 
         # Only apply if "need_to_sync_rule" function returns True (defined in the connector settings)
@@ -121,6 +121,22 @@ def pre_save_handler(sender, instance, **kwargs):
                 if instance.create_rule:
                     all_connectors.get(instance.connector.name).create_rule(instance)
 
+        # Set the next review date if the analytic is published and no next review date is set
+        if instance.status == 'PUB' and instance.analyticmeta.next_review_date == None:
+            # if the analytic is locked, we remove the next review date
+            if instance.run_daily_lock:
+                instance.analyticmeta.next_review_date = None
+            else:
+                # we only set the next review date if the query was changed or if the status was not PUB before
+                if original_instance.query != instance.query or original_instance.status != 'PUB':
+                    instance.analyticmeta.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
+
+        # Bug #316 - Remove next review date from analytics that are no longer in PUB status
+        if original_instance.status == 'PUB' and instance.status != 'PUB':
+            instance.analyticmeta.next_review_date = None
+
+        # Save changes to AnalyticMeta
+        instance.analyticmeta.save()
 
     # For "newly" created analytic
     else:
@@ -131,52 +147,41 @@ def pre_save_handler(sender, instance, **kwargs):
             if instance.create_rule:
                 all_connectors.get(instance.connector.name).create_rule(instance)
 
-    # Workflow. Set the next review date if the analytic is published
-    if instance.status == 'PUB':
-        # if the analytic is locked, we do not set the next review date
-        if instance.run_daily_lock:
-            instance.analyticmeta.next_review_date = None
-        else:
-            # if this is an update
-            if instance.pk:
-                # we only set the next review date if the query was changed or if the status was not PUB before
-                if original_instance.query != instance.query or original_instance.status != 'PUB':
-                    instance.analyticmeta.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
-            # if this is a new analytic, we always set the next review date
-            else:
-                instance.analyticmeta.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
-
     # When analytic is archived or pending, automatically remove the run_daily flag
     if instance.status == 'ARCH' or instance.status == 'PENDING':
         instance.run_daily = False
     
-    # When analytic is archived, set the next_review_date to None
-    if instance.status == 'ARCH':
-        instance.analyticmeta.next_review_date = None
-
     # If run_daily_lock is set, run_daily should automatically be set
     if instance.run_daily_lock and not instance.run_daily:
         instance.run_daily = True
-
-    # Bug #316 - Remove next review date from analytics that are no longer in PUB status
-    if original_instance.status == 'PUB' and instance.status != 'PUB':
-        instance.analyticmeta.next_review_date = None
-
-    # Save changes to AnalyticMeta
-    instance.analyticmeta.save()
 
 # This handler is triggered after an "Analytic" object is saved
 @receiver(post_save, sender=Analytic)
 def post_save_handler(sender, instance, created, **kwargs):
 
     if created:
-        # New analytics
-        if AUTO_STATS_REGENERATION:
-            regenerate_analytic_stats(instance)
-
         # for new analytics, we create the AnalyticMeta object associated with the analytic
         AnalyticMeta.objects.create(analytic=instance)
 
+        # Workflow. Set the next review date if the analytic is published
+        if instance.status == 'PUB':
+            # if the analytic is locked, we do not set the next review date
+            if instance.run_daily_lock:
+                instance.analyticmeta.next_review_date = None
+            else:
+                instance.analyticmeta.next_review_date = datetime.now().date() + timedelta(days=DAYS_BEFORE_REVIEW)
+
+    # When analytic is archived, set the next_review_date to None
+    if instance.status == 'ARCH':
+        instance.analyticmeta.next_review_date = None
+
+    # Save changes to AnalyticMeta
+    instance.analyticmeta.save()
+
+    if created:
+        # New analytics
+        if AUTO_STATS_REGENERATION:
+            regenerate_analytic_stats(instance)
     else:
         # for updated analytics, we check the flag set by the pre_save handler
         if getattr(instance, '_query_changed', False):
