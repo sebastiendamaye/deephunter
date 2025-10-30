@@ -121,8 +121,8 @@ def pre_save_handler(sender, instance, **kwargs):
                 if instance.create_rule:
                     all_connectors.get(instance.connector.name).create_rule(instance)
 
-        # Set the next review date if the analytic is published and no next review date is set
-        if instance.status == 'PUB' and instance.analyticmeta.next_review_date == None:
+        # Set the next review date if the analytic is published
+        if instance.status == 'PUB':
             # if the analytic is locked, we remove the next review date
             if instance.run_daily_lock:
                 instance.analyticmeta.next_review_date = None
