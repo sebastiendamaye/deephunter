@@ -4,7 +4,7 @@ Authlib==1.6.5
 beautifulsoup4==4.14.2
 bleach==6.3.0
 celery==5.5.3
-Django==5.2.8
+Django==5.2.9
 django-auto-logout==0.5.1
 django-dbbackup==5.0.0
 django-extensions==4.1
