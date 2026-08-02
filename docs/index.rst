@@ -9,9 +9,13 @@ DeepHunter's documentation
    authentication
    scripts/index
    settings
-   modules/index
+   dashboard
+   analytics/index
+   timeline
+   netview
    reports/index
    tools/index
+   admin/index
    plugins/index
    repos/index
    admin

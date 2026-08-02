@@ -20,6 +20,7 @@ List of scripts
   
    backup
    campaign
+   delete_notifications
    mitre_consistency_check
    optimize_db
    orchestrator

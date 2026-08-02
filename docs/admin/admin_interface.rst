@@ -1,5 +1,5 @@
-Admin
-#####
+Admin interface
+###############
 
 The database model
 ******************
@@ -48,7 +48,7 @@ Create/modify threat hunting analytics
 **************************************
 To create a new threat hunting analytic, go to the Django backend (``/admin`` URL) and click on the ``+ Add`` link on the right side of the ``Analytics`` table.
 
-.. image:: img/admin_create_analytic_button.png
+.. image:: ../img/admin_create_analytic_button.png
   :width: 800
   :alt: img
 
@@ -77,7 +77,7 @@ It is possible to perform bulk actions on multiple threat hunting analytics at o
 
 After selecting an action, click the **Go** button to apply the action to all selected analytics.
 
-.. image:: img/admin_bulk_actions.png
+.. image:: ../img/admin_bulk_actions.png
   :alt: admin bulk actions
 
 Advanced actions (Django shell)

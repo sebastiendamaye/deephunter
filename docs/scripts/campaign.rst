@@ -9,7 +9,7 @@ The ``campaign.py`` script runs the analytics daily to create `campaigns <../int
 Parameters
 **********
 
-You can set the ``DEBUG`` flag to `True` to see more detailed output during execution. This is useful for debugging purposes.
+You can set the ``DEBUG`` flag to ``True`` to see more detailed output during execution. This is useful for debugging purposes.
 
 Execution
 *********

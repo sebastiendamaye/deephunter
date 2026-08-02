@@ -64,6 +64,7 @@ self_update() {
 				fi
 				clear
 				echo "Restarting script..." | tee -a /tmp/upgrade.log
+				echo "Re-executing: $0 $*" | tee -a /tmp/upgrade.log
 				exec "$SCRIPT_PATH" "$@"
 				exit 0
 			elif [[ "$response" == "N" || "$response" == "NO" ]]; then
@@ -262,6 +263,7 @@ else
 	mkdir d
 	cd d
 	if [[ $VERBOSE -eq 1 ]]; then
+		echo
 		git clone $GITHUB_URL | tee -a /tmp/upgrade.log
 	else
 		git clone -q $GITHUB_URL >> /tmp/upgrade.log 2>&1

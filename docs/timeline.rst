@@ -5,7 +5,7 @@ Description
 ***********
 The timeline shows the distribution of threat hunting analytics available in DeepHunter on a timeline graph, accross campaigns, for a given endpoint. It highlights possible correlations between events, based on their sequence in the timeline, and their storylineID (by clicking on nodes).
 
-.. image:: ../img/timeline.png
+.. image:: img/timeline.png
   :width: 1500
   :alt: Timeline Analyzer
 
