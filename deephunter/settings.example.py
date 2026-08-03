@@ -225,8 +225,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/admin/login/'
 
 ### dbbackup settings (encrypted backups)
-DBBACKUP_STORAGE_OPTIONS = {'location': '/data/backups/'}
-DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+# django-dbbackup >= 4.1 configures storage via Django's STORAGES setting
+# (the old DBBACKUP_STORAGE / DBBACKUP_STORAGE_OPTIONS were removed in 5.x).
+# Defining STORAGES replaces Django's defaults wholesale (they are NOT merged),
+# so the "default" and "staticfiles" backends must be redeclared alongside
+# "dbbackup", otherwise Django raises staticfiles.E005.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+    "dbbackup": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "OPTIONS": {"location": "/data/backups/"},
+    },
+}
 DBBACKUP_GPG_RECIPIENT = 'email@domain.com'
 
 # Logout automatically after 1 hour
