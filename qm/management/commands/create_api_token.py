@@ -123,6 +123,6 @@ class Command(BaseCommand):
         self.stdout.write(f'    Authorization: Token {token}\n')
         self.stdout.write("Example:")
         self.stdout.write(
-            '    curl https://deephunterdev.se.com/api/analytics/ \\\n'
+            '    curl https://deephunter.domain.tld/api/analytics/ \\\n'
             f'         -H "Authorization: Token {token}"\n'
         )
