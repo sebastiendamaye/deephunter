@@ -11,6 +11,8 @@ DeepHunter's documentation
    settings
    dashboard
    analytics/index
+   api
+   mcp
    timeline
    netview
    reports/index

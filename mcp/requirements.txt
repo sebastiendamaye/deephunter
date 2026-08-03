@@ -1,0 +1,11 @@
+# Dependencies for the DeepHunter MCP server (mcp/deephunter_mcp.py).
+#
+# These are CLIENT-SIDE only: with the local stdio design the MCP server runs
+# on each user's machine, not on the DeepHunter/WSGI host. They are kept out of
+# the project's top-level requirements.txt on purpose so the Django server does
+# not install packages it never uses.
+#
+# Install (ideally in a dedicated virtualenv on the user's machine):
+#     pip install -r mcp/requirements.txt
+mcp>=1.2.0
+httpx>=0.27.0

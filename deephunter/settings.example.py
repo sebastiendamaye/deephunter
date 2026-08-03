@@ -119,7 +119,9 @@ INSTALLED_APPS = [
     'dbbackup',
     'django_markup',
     'simple_history',
-    
+    'rest_framework',
+    'knox',
+
     # DeepHunter apps
     'qm',
     'extensions',
@@ -235,3 +237,23 @@ AUTO_LOGOUT = {
 
 CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_RESULT_BACKEND = "redis://localhost:6379"
+
+### REST API settings (Django REST Framework + django-rest-knox)
+REST_FRAMEWORK = {
+    # Knox token auth is the default for the API. SessionAuthentication is kept
+    # so the browsable API works for logged-in users during development.
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'knox.auth.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+REST_KNOX = {
+    # Tokens expire after 12 hours of issuance. Set to None to disable expiry.
+    'TOKEN_TTL': timedelta(hours=12),
+    'TOKEN_LIMIT_PER_USER': None,
+    'AUTO_REFRESH': False,
+}

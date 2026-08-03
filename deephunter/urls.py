@@ -13,6 +13,7 @@ urlpatterns = [
     path('authorize/', views.authorize, name='authorize'),
     re_path(r'^favicon\.ico$', favicon_view),
     path('', include('dashboard.urls')),
+    path('api/', include('qm.api_urls')),
     path('qm/', include('qm.urls')),
     path('extensions/', include('extensions.urls')),
     path('reports/', include('reports.urls')),
