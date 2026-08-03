@@ -9,3 +9,6 @@ static/tokendate.txt
 static/html
 docs/_build
 plugins/*.py
+CLAUDE.local.md
+CLAUDE.md
+AGENTS.md
