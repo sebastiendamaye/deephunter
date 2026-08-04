@@ -57,6 +57,8 @@ Install the database
 	mysql> grant all privileges on deephunter.* to deephunter@localhost;
 	mysql> \q
 
+**Note**: If you are facing error ``mysql_secure_installation command not found``, probably because you are using MariaDB version 10.5+, please execute ``sudo mysql-secure-installation`` instead of ``sudo mysql_secure_installation``.
+
 Download DeepHunter
 ===================
 

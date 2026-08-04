@@ -212,7 +212,7 @@ echo "CONFIGURING APACHE2 ......................................................
 sudo a2enmod headers
 
 # Create a self-signed certificate
-cd $APP_PATH/install/scripts/
+cd $APP_PATH/install/scripts/common/
 chmod +x ./generate_deephunter_self_cert.sh
 ./generate_deephunter_self_cert.sh deephunter.localtest.me
 sudo a2enmod ssl
