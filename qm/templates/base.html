@@ -7,20 +7,21 @@
 	<link rel="stylesheet" href="/static/fontawesome/all.min.css" />
 	<link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css" />
 	<link rel="stylesheet" href="/static/css/base.css" />
-	<link rel="stylesheet" href="/static/toastr/toastr.min.css" />
 	{% block style %}{% endblock %}
 
     <script src="/static/jquery/jquery.min.js"></script>
 	<script src="/static/js/htmx.min.js"></script>
-	<script src="/static/toastr/toastr.js"></script>
 	{% block js %}{% endblock %}
 	
 	{{ redirect_to_login_immediately }}
 </head>
 <body>
 
+<!-- Toast container (Bootstrap toasts, replaces toastr) -->
+<div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3" aria-live="polite" aria-atomic="true"></div>
+
 <!-- Notifications container -->
-<div id="notifications" 
+<div id="notifications"
 		hx-get="/notifications/get_notifications/" 
 		hx-trigger="load, every 10s" 
 		hx-target="#notifications" 
@@ -129,42 +130,80 @@
 
 
 <script nonce="k0bc3z4fg1">
-	document.addEventListener('DOMContentLoaded', function() {
-		// Initialize Toastr with default options (optional)
-		toastr.options = {
-			"closeButton": true,
-			"debug": false,
-			"newestOnTop": true,
-			"progressBar": true,
-			"positionClass": "toast-top-right", // Top right corner
-			"preventDuplicates": true,
-			"showDuration": "300", // Duration for showing the toast
-			"hideDuration": "1000", // Duration for hiding the toast
-			"timeOut": "5000", // Time before the toast disappears (5 seconds)
-			"extendedTimeOut": "1000"
+	// Live notifications rendered as Bootstrap toasts (replaces toastr).
+	// Self-contained: builds the toast markup and handles auto-dismiss and
+	// stacking with vanilla JS, so it does not require bootstrap.bundle.js.
+	(function () {
+		var TOAST_TIMEOUT = 5000; // ms before a toast auto-dismisses
+		// Map notification levels to Bootstrap contextual background classes.
+		var LEVEL_CLASSES = {
+			success: "text-bg-success",
+			info: "text-bg-info",
+			warning: "text-bg-warning",
+			error: "text-bg-danger"
 		};
-	});
 
-	let shownNotifications = new Set();
+		function showToast(level, message) {
+			var container = document.getElementById("toast-container");
+			if (!container) return;
 
-	document.body.addEventListener('htmx:afterRequest', function(evt) {
-		if (evt.detail.target.id === "notifications") {
-			try {
-				let data = JSON.parse(evt.detail.xhr.responseText);
-				if (data.notifications) {
-					data.notifications.forEach(function(n) {
-						if (!shownNotifications.has(n.id)) {
-							toastr[n.level](n.message);
-							shownNotifications.add(n.id);
-						}
-					});
-				}
-			} catch (e) {
-				// Not JSON, ignore
-				//console.log(e);
+			var toast = document.createElement("div");
+			toast.className = "toast align-items-center border-0 fade show " + (LEVEL_CLASSES[level] || "text-bg-secondary");
+			toast.setAttribute("role", "alert");
+			toast.setAttribute("aria-live", "assertive");
+			toast.setAttribute("aria-atomic", "true");
+
+			var flex = document.createElement("div");
+			flex.className = "d-flex";
+
+			var body = document.createElement("div");
+			body.className = "toast-body";
+			// textContent (not innerHTML): message is server-supplied, so this
+			// avoids the HTML/XSS injection toastr was prone to.
+			body.textContent = message;
+
+			var closeBtn = document.createElement("button");
+			closeBtn.type = "button";
+			closeBtn.className = "btn-close btn-close-white me-2 m-auto";
+			closeBtn.setAttribute("aria-label", "Close");
+
+			function dismiss() {
+				toast.classList.remove("show");
+				// Allow the fade transition to finish before removing.
+				setTimeout(function () { toast.remove(); }, 300);
 			}
+			closeBtn.addEventListener("click", dismiss);
+
+			flex.appendChild(body);
+			flex.appendChild(closeBtn);
+			toast.appendChild(flex);
+			// newestOnTop: prepend so the most recent toast shows first.
+			container.prepend(toast);
+
+			setTimeout(dismiss, TOAST_TIMEOUT);
 		}
-	});
+
+		var shownNotifications = new Set();
+
+		document.body.addEventListener('htmx:afterRequest', function (evt) {
+			if (evt.detail.target.id === "notifications") {
+				try {
+					var data = JSON.parse(evt.detail.xhr.responseText);
+					if (data.notifications) {
+						data.notifications.forEach(function (n) {
+							if (!shownNotifications.has(n.id)) {
+								showToast(n.level, n.message);
+								shownNotifications.add(n.id);
+							}
+						});
+					}
+				} catch (e) {
+					// Not JSON, ignore
+					//console.log(e);
+				}
+			}
+		});
+	})();
 
 </script>
 
