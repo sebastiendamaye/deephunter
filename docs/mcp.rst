@@ -35,9 +35,10 @@ On the DeepHunter server, generate a Knox token for the user (see the
     source /data/venv/bin/activate
     python manage.py create_api_token <username> --grant-perms
 
-``--grant-perms`` grants ``qm.view_analytic`` (needed by the read tools) and
-``qm.add_analytic`` (needed by ``create_analytic``). The plaintext token is
-printed once -- copy it.
+``--grant-perms`` grants ``qm.view_analytic`` (needed by the read tools),
+``qm.add_analytic`` (needed by ``create_analytic``) and ``qm.view_tag`` /
+``qm.add_tag`` (needed by ``create_tag``). The plaintext token is printed once
+-- copy it.
 
 2. Create a Python environment
 =============================
@@ -139,8 +140,14 @@ Read-only (require ``qm.view_analytic``):
   ``list_target_os``, ``list_vulnerabilities``
 - ``list_analytics``, ``get_analytic``
 
-Write (requires ``qm.add_analytic``):
+Write:
 
-- ``create_analytic`` -- ``name``, ``connector`` and ``query`` are required;
-  relations are natural keys and must already exist (discover valid values with
-  the ``list_*`` tools).
+- ``create_analytic`` (requires ``qm.add_analytic``) -- ``name``, ``connector``
+  and ``query`` are required; relations are natural keys and must already exist
+  (discover valid values with the ``list_*`` tools). **Exception:** any ``tags``
+  that do not yet exist are created automatically before the analytic is saved
+  (this needs ``qm.add_tag``), so an unknown tag never fails the call. All other
+  relations must already exist.
+- ``create_tag`` (requires ``qm.add_tag``) -- explicitly create a tag by name.
+  Usually not needed, since ``create_analytic`` auto-creates missing tags; use
+  it to create a tag on its own.

@@ -36,7 +36,12 @@ from knox.models import AuthToken
 
 # Permissions the REST API enforces via DjangoModelPermissions.
 # See qm/api.py / docs/api.rst.
-API_PERMISSIONS = ('qm.view_analytic', 'qm.add_analytic')
+API_PERMISSIONS = (
+    'qm.view_analytic', 'qm.add_analytic',
+    # Tag list/create endpoint (/api/tags/), used to create a missing tag
+    # before referencing it from a new analytic.
+    'qm.view_tag', 'qm.add_tag',
+)
 
 
 class Command(BaseCommand):

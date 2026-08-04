@@ -14,6 +14,10 @@ Analytics:
   POST /api/analytics/           Create an analytic
   GET  /api/analytics/<id>/      Retrieve an analytic
 
+Tags:
+  GET  /api/tags/                List tags
+  POST /api/tags/                Create a tag
+
 Reference data (read-only, for discovering valid natural-key values):
   /api/ref/connectors/  /api/ref/categories/  /api/ref/tags/
   /api/ref/mitre-techniques/  /api/ref/threats/  /api/ref/actors/
@@ -45,6 +49,10 @@ urlpatterns = [
     # Analytics
     path('analytics/', api.AnalyticListCreateView.as_view(), name='api_analytic_list_create'),
     path('analytics/<int:pk>/', api.AnalyticRetrieveView.as_view(), name='api_analytic_detail'),
+
+    # Tags (list + create). Reference-only listing also lives at /api/ref/tags/;
+    # this endpoint additionally supports POST to create a missing tag.
+    path('tags/', api.TagListCreateView.as_view(), name='api_tag_list_create'),
 
     # Reference data
     path('', include(router.urls)),

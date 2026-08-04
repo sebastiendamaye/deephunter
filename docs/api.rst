@@ -81,7 +81,7 @@ Options:
 * ``--no-expiry`` — mint a non-expiring token (rotate/revoke manually); suited
   to headless service accounts.
 * ``--grant-perms`` — also grant the model permissions the API requires
-  (``qm.view_analytic``, ``qm.add_analytic``).
+  (``qm.view_analytic``, ``qm.add_analytic``, ``qm.view_tag``, ``qm.add_tag``).
 
 Only a hash of the token is stored server-side; the plaintext value is shown
 only once, at creation, and cannot be retrieved again. If it is lost, generate
@@ -132,6 +132,8 @@ to the token must hold the relevant permissions:
 
 * ``qm.view_analytic`` — to list/retrieve analytics.
 * ``qm.add_analytic`` — to create analytics.
+* ``qm.view_tag`` — to list tags.
+* ``qm.add_tag`` — to create tags.
 
 It is recommended to create a dedicated service account for the AI assistant,
 grant it only these permissions, and use its token.
@@ -171,7 +173,35 @@ Field                         Reference value
 ============================  ===========================================
 
 Referenced objects must already exist; unknown values return a validation
-error.
+error. Tags are the exception: a missing tag can be created first via the
+``/api/tags/`` endpoint (see below), then referenced by name.
+
+Tags
+----
+
+``GET /api/tags/``
+    List all tags. Returns the same data as ``GET /api/ref/tags/``.
+
+``POST /api/tags/``
+    Create a new tag. The body is a single ``name`` field (max 20 characters,
+    must be unique). This lets a client create a missing tag before referencing
+    it from a new analytic, instead of the analytic creation failing on an
+    unknown tag.
+
+Requires ``qm.view_tag`` (list) / ``qm.add_tag`` (create).
+
+.. code-block:: bash
+
+    curl -X POST https://deephunter.domain.tld/api/tags/ \
+         -H "Authorization: Token $TOKEN" \
+         -H "Content-Type: application/json" \
+         -d '{"name": "lolbin"}'
+
+Response (``201 Created``)::
+
+    {"name": "lolbin"}
+
+Posting a name that already exists returns a ``400`` validation error.
 
 Reference data (read-only)
 --------------------------
@@ -314,8 +344,8 @@ other field falls back to its default (``status`` → ``DRAFT``, ``confidence``
 Create an analytic (full)
 -------------------------
 
-The same request with the optional descriptive, scoring, and relation fields
-populated:
+The same request with every writable field populated (descriptive, scoring,
+relation, behaviour and anomaly-threshold fields):
 
 .. code-block:: bash
 
@@ -325,17 +355,40 @@ populated:
          -d '{
                "name": "Suspicious rundll32 network activity",
                "description": "Detects rundll32.exe making network connections.",
+               "notes": "Investigate the parent process and destination host.",
                "connector": "sentinelone",
                "query": "...",
+               "columns": "endpoint.name,src.process.cmdline",
                "status": "DRAFT",
                "confidence": 2,
                "relevance": 3,
                "category": "Execution",
                "tags": ["network", "lolbin"],
                "mitre_techniques": ["T1218.011"],
-               "target_os": ["Windows"]
+               "threats": [],
+               "actors": [],
+               "target_os": ["Windows"],
+               "vulnerabilities": [],
+               "emulation_validation": "Run rundll32 with a URL argument.",
+               "references": "https://attack.mitre.org/techniques/T1218/011/",
+               "create_rule": false,
+               "run_daily": true,
+               "run_daily_lock": false,
+               "dynamic_query": false,
+               "anomaly_threshold_count": 2,
+               "anomaly_threshold_endpoints": 2
              }'
 
 In both cases the response is ``201 Created`` with the full analytic (same
 shape as the retrieve example above), including the server-assigned ``id``,
 ``created_by``, ``pub_date``, and ``weighted_relevance``.
+
+.. note::
+
+   Every field other than ``name``, ``connector`` and ``query`` is optional and
+   falls back to its default. Relations (``category``, ``tags``,
+   ``mitre_techniques``, ``threats``, ``actors``, ``target_os``,
+   ``vulnerabilities``) are referenced by natural key and — with the exception
+   of ``tags`` when created through the MCP server (see below) — must already
+   exist, otherwise the request returns a ``400`` validation error. To create a
+   missing tag through the REST API, ``POST`` it to ``/api/tags/`` first.

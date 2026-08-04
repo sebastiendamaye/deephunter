@@ -177,15 +177,21 @@ def create_analytic(
     - connector: name of an enabled 'analytics' connector (see list_connectors,
       e.g. 'sentinelone').
     - status: only 'DRAFT' or 'PUB' are accepted at creation (default 'DRAFT').
-    - Relations (category, tags, mitre_techniques, threats, actors, target_os,
+    - Relations (category, mitre_techniques, threats, actors, target_os,
       vulnerabilities) are natural keys and must already exist -- discover valid
       values with the corresponding list_* tools first.
+    - tags: any tag that does not already exist is created automatically before
+      the analytic is saved (so an unknown tag does not fail the request). Other
+      relations are NOT auto-created.
 
-    Requires the `qm.add_analytic` permission. Creating an analytic triggers
-    the same server-side behaviour as the web UI (AnalyticMeta creation,
-    optional remote rule sync, automatic stats regeneration). Returns the full
-    created analytic including its server-assigned id.
+    Requires the `qm.add_analytic` permission (and `qm.add_tag` if any new tag
+    needs to be created). Creating an analytic triggers the same server-side
+    behaviour as the web UI (AnalyticMeta creation, optional remote rule sync,
+    automatic stats regeneration). Returns the full created analytic including
+    its server-assigned id.
     """
+    if tags:
+        _ensure_tags_exist(tags)
     payload: dict[str, Any] = {
         "name": name,
         "connector": connector,
@@ -209,6 +215,38 @@ def create_analytic(
         if value is not None:
             payload[key] = value
     return _post("/analytics/", payload)
+
+
+# --- Tags ------------------------------------------------------------------
+
+def _ensure_tags_exist(tags: list[str]) -> None:
+    """Create any of `tags` that do not already exist.
+
+    Called before creating an analytic so an unknown tag does not fail the
+    request. Existing tags are left untouched; only missing ones are POSTed to
+    /tags/. Requires the `qm.add_tag` permission when a tag must be created.
+    """
+    existing = {t["name"] for t in _get("/tags/")}
+    for name in tags:
+        if name not in existing:
+            _post("/tags/", {"name": name})
+
+
+@mcp.tool()
+def create_tag(name: str) -> dict:
+    """Create a new tag.
+
+    Tags referenced from an analytic (the `tags` argument of create_analytic)
+    must already exist, otherwise creation fails with a validation error. Use
+    this tool to create a missing tag first, then reference it by name.
+
+    - name: the tag name (max 20 characters, must be unique).
+
+    Requires the `qm.add_tag` permission. Returns the created tag, e.g.
+    {"name": "lolbin"}. If a tag with the same name already exists, the API
+    returns a validation error.
+    """
+    return _post("/tags/", {"name": name})
 
 
 if __name__ == "__main__":

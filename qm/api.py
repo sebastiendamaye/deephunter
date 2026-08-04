@@ -67,6 +67,21 @@ class AnalyticRetrieveView(generics.RetrieveAPIView):
     permission_classes = [StrictDjangoModelPermissions]
 
 
+class TagListCreateView(generics.ListCreateAPIView):
+    """
+    GET  /api/tags/       List tags.
+    POST /api/tags/       Create a new tag.
+
+    Tags are otherwise expected to already exist when referenced from an
+    analytic. This endpoint lets a client (e.g. the AI assistant) create a
+    missing tag first, so analytic creation does not fail on an unknown tag.
+    Creating requires the 'qm.add_tag' permission (listing 'qm.view_tag').
+    """
+    queryset = Tag.objects.all().order_by('name')
+    serializer_class = TagSerializer
+    permission_classes = [StrictDjangoModelPermissions]
+
+
 # --- Read-only reference endpoints -----------------------------------------
 # These let a client discover the valid natural-key values (connector names,
 # category names, MITRE IDs, ...) it can reference when creating an analytic.
