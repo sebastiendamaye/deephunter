@@ -20,19 +20,53 @@ PROXY = settings.PROXY
 
 def str2tactic(s):
     """
-    Convert a string to a tactic name.
+    Resolve a MITRE tactic phase name (e.g. "defense-evasion") to its
+    MitreTactic object, matching case-insensitively and treating hyphens as
+    spaces.
+
+    Returns None if no matching tactic exists in DeepHunter. MITRE occasionally
+    adds or renames tactics (e.g. the ATT&CK v18 split of Defense Evasion into
+    Stealth + Defense Impairment); when that happens the tactic is unknown here
+    until the MitreTactic table is updated. Returning None (instead of raising)
+    lets the caller warn-and-skip that tactic rather than aborting the whole run.
     """
-    s = s.strip().lower()
-    s = s.replace('-', ' ')
-    return get_object_or_404(MitreTactic, name=s)
+    s = s.strip().lower().replace('-', ' ')
+    return MitreTactic.objects.filter(name__iexact=s).first()
+
+
+def resolve_tactics(tactics_str):
+    """
+    Resolve a comma-separated MITRE phase-name string into (tactics, unknown):
+      - tactics: list of matching MitreTactic objects (for the ones that exist)
+      - unknown: list of raw phase names with no matching MitreTactic
+
+    Unknown tactics are reported so the caller can warn about them without
+    crashing (see str2tactic).
+    """
+    tactics, unknown = [], []
+    for name in tactics_str.split(','):
+        tactic = str2tactic(name)
+        if tactic is None:
+            unknown.append(name.strip())
+        else:
+            tactics.append(tactic)
+    return tactics, unknown
 
 def find_parent_technique(mitre_id):
     """
     Find the parent technique for a given sub-technique ID.
+
+    Returns None if the ID is not a sub-technique, or if the parent technique
+    does not (yet) exist in DeepHunter. The parent can legitimately be absent
+    when both a new sub-technique and its parent are missing (MITRE added them
+    together); returning None (instead of raising) lets the caller display or
+    create the sub-technique without aborting the whole run. In interactive
+    mode, list_missing is processed in sorted ID order so a missing parent is
+    created before its sub-techniques and will resolve on that pass.
     """
     if '.' in mitre_id:
         parent_id = mitre_id.split('.')[0]
-        return get_object_or_404(MitreTechnique, mitre_id=parent_id)
+        return MitreTechnique.objects.filter(mitre_id=parent_id).first()
     return None
 
 def remove_markdown(text):
@@ -205,16 +239,27 @@ def run(*args):
             print(f"{'MITRE ID':<10} | {'Name':<50} | {'Sub.':<5} | {'Parent':<7} | {'Tactics':<30} | {'Warnings':<50}")
             print("-" * 200)
             for item in list_missing:
-                tactics = ','.join([ str2tactic(tactic).mitre_id for tactic in item['tactics'].split(',') ])
+                tactic_objs, unknown_tactics = resolve_tactics(item['tactics'])
+                tactics = ','.join(t.mitre_id for t in tactic_objs)
                 parent_technique_id = ''
+                parent_missing = False
                 if item['subtechnique']:
                     parent_technique = find_parent_technique(item['id'])
-                    parent_technique_id = parent_technique.mitre_id if item['subtechnique'] else None
+                    if parent_technique is None:
+                        # Parent not in DeepHunter yet (likely also in list_missing).
+                        parent_technique_id = item['id'].split('.')[0]
+                        parent_missing = True
+                    else:
+                        parent_technique_id = parent_technique.mitre_id
                 # Warnings: check if the name already exists in DeepHunter
                 warnings = ''
                 if MitreTechnique.objects.filter(name=item['name']).exists():
                     t = get_object_or_404(MitreTechnique, name=item['name'])
                     warnings += f"Name already exists in DeepHunter ({t.mitre_id})"
+                if parent_missing:
+                    warnings += f"{'; ' if warnings else ''}Parent {parent_technique_id} not yet in DeepHunter"
+                if unknown_tactics:
+                    warnings += f"{'; ' if warnings else ''}Unknown tactic(s), not in DeepHunter: {', '.join(unknown_tactics)}"
                 print(f"{item['id']:<10} | {item['name']:<50} | {item['subtechnique']:<5} | {parent_technique_id:<7} | {tactics:<30} | {warnings:<50}")
             print("-" * 200)
 
@@ -223,25 +268,32 @@ def run(*args):
                 if r == 'y' or r == 'yes':
                     changes_applied = True
                     for item in list_missing:
-                        tactics = ','.join([ str2tactic(tactic).mitre_id for tactic in item['tactics'].split(',') ])
-                        parent_technique_id = None
-                        if item['subtechnique']:
-                            parent_technique = find_parent_technique(item['id'])
-                            parent_technique_id = parent_technique.mitre_id if item['subtechnique'] else None
+                        tactic_objs, unknown_tactics = resolve_tactics(item['tactics'])
+                        # Resolve the parent once. list_missing is sorted by ID, so a
+                        # missing parent (e.g. T1027) is created before its
+                        # sub-techniques (e.g. T1027.018) and resolves on this same pass.
+                        parent_technique = find_parent_technique(item['id']) if item['subtechnique'] else None
 
                         # first create technique
                         technique = MitreTechnique(
                             mitre_id = item['id'],
                             name = item['name'],
                             is_subtechnique = item['subtechnique'],
-                            mitre_technique=find_parent_technique(item['id']),
+                            mitre_technique=parent_technique,
                             description=remove_markdown(item['description'])
                         )
                         technique.save()
+                        if item['subtechnique'] and parent_technique is None:
+                            print(f"  [WARN] {item['id']}: created without a parent "
+                                  f"({item['id'].split('.')[0]} not in DeepHunter)")
 
-                        # we add the tactics (have to be done after, as this is a ManyToMany field)
-                        for tactic in item['tactics'].split(','):
-                            technique.mitre_tactic.add(str2tactic(tactic))
+                        # we add the tactics (have to be done after, as this is a ManyToMany field).
+                        # Unknown tactics (not yet in DeepHunter) are skipped with a warning rather
+                        # than aborting the run; add them to the MitreTactic table and re-run to link.
+                        for tactic in tactic_objs:
+                            technique.mitre_tactic.add(tactic)
+                        if unknown_tactics:
+                            print(f"  [WARN] {item['id']}: skipped unknown tactic(s) not in DeepHunter: {', '.join(unknown_tactics)}")
 
                     print("[DONE]")
 
