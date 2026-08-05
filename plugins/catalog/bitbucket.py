@@ -53,9 +53,9 @@ def get_bitbucket_contents(repo):
         api_url = f"https://api.bitbucket.org/2.0/repositories/{repo_owner}/{repo_slug}/src/{branch}/"
 
     if repo.token:
-        response = requests.get(api_url, auth=HTTPBasicAuth(repo_owner, repo.token), proxies=PROXY)
+        response = requests.get(api_url, auth=HTTPBasicAuth(repo_owner, repo.token), proxies=PROXY, timeout=30)
     else:
-        response = requests.get(api_url, proxies=PROXY)
+        response = requests.get(api_url, proxies=PROXY, timeout=30)
     
     if response.status_code == 200:
         data = response.json()
@@ -69,10 +69,13 @@ def get_bitbucket_contents(repo):
         # Bitbucket is paginating results. The "next" key returns the URL of the next page results
         while "next" in response.json():
             api_url = response.json()["next"]
+            if not api_url.startswith("https://"):
+                add_error_notification(f"Bitbucket connector: refusing to follow non-HTTPS pagination URL")
+                break
             if repo.token:
-                response = requests.get(api_url, auth=HTTPBasicAuth(repo_owner, repo.token), proxies=PROXY)
+                response = requests.get(api_url, auth=HTTPBasicAuth(repo_owner, repo.token), proxies=PROXY, timeout=30)
             else:
-                response = requests.get(api_url, proxies=PROXY)
+                response = requests.get(api_url, proxies=PROXY, timeout=30)
             data = response.json()
             for item in data.get('values'):
                 if item['type'] == 'commit_file' and Path(item['path']).suffix == ".json":
