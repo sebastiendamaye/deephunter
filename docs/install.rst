@@ -14,13 +14,13 @@ The recommended way to install DeepHunter is to use the installer script. It wil
 	- The installer script is to install DeepHunter from scratch. If you already have an existing installation, please refer to the `upgrading section <#upgrading-deephunter>`_.
    	- The installer script does a basic installation, which allows you to test and confirm that DeepHunter is working correctly. However, it may not be suitable for production use without further configuration.
 
-For example, to install version 2.5:
+For example, to install version 2.6:
 
 .. code-block:: sh
-      
-   $ wget https://raw.githubusercontent.com/sebastiendamaye/deephunter/main/install/scripts/v2.5/installer-v2.5.sh
-   $ chmod +x installer-v2.5.sh
-   $ ./installer-v2.5.sh
+
+   $ wget https://raw.githubusercontent.com/sebastiendamaye/deephunter/main/install/scripts/v2.6/installer-v2.6.sh
+   $ chmod +x installer-v2.6.sh
+   $ ./installer-v2.6.sh
 
 Manual Installation (dev or advanced)
 *************************************
