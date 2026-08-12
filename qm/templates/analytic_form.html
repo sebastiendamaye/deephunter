@@ -4,12 +4,38 @@
 {% block style %}
     <link rel="stylesheet" href="/static/css/list_analytics.css" />
     <link rel="stylesheet" href="/static/css/analytics_form.css" />
-    <link rel="stylesheet" href="/static/select2/dist/css/select2.min.css" />
-    <link rel="stylesheet" href="/static/select2-bootstrap-5-theme/select2-bootstrap-5-theme.min.css" />
+    <link rel="stylesheet" href="/static/tom-select/tom-select.bootstrap5.min.css" />
+    <style>
+    /* Make Tom Select controls full-width and easier to read */
+    .tom-select, .tom-select .ts-control, .ts-control, .ts-wrapper {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+    /* Ensure dropdown is at least as wide as its control */
+    .tom-select .ts-dropdown, .ts-dropdown {
+        min-width: 100% !important;
+        max-width: none !important;
+    }
+    /* Larger minimum width for selects that contain verbose items */
+    #id_mitre_techniques, #id_tags, #id_threats, #id_actors, #id_target_os, #id_vulnerabilities {
+        min-width: 420px !important;
+    }
+    /* Target the Tom Select wrapper inserted after the original <select> to force a wider control */
+    select#id_mitre_techniques + .ts-wrapper,
+    select#id_tags + .ts-wrapper,
+    select#id_threats + .ts-wrapper,
+    select#id_actors + .ts-wrapper,
+    select#id_target_os + .ts-wrapper,
+    select#id_vulnerabilities + .ts-wrapper {
+        min-width: 600px !important;
+        width: auto !important;
+        box-sizing: border-box !important;
+    }
+    </style>
 {% endblock %}
 {% block js %}
     <script src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="/static/select2/dist/js/select2.min.js"></script>
+    <script src="/static/tom-select/tom-select.complete.min.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -404,48 +430,53 @@
 
 
 <script type="text/javascript" nonce="jK4hG2t713">
-$( '#id_tags' ).select2( {
-    theme: "bootstrap-5",
-    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-    placeholder: $( this ).data( 'placeholder' ),
-    closeOnSelect: false,
-    allowClear: true,
-} );
-$( '#id_mitre_techniques' ).select2( {
-    theme: "bootstrap-5",
-    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-    placeholder: $( this ).data( 'placeholder' ),
-    closeOnSelect: false,
-    allowClear: true,
-} );
-$( '#id_threats' ).select2( {
-    theme: "bootstrap-5",
-    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-    placeholder: $( this ).data( 'placeholder' ),
-    closeOnSelect: false,
-    allowClear: true,
-} );
-$( '#id_actors' ).select2( {
-    theme: "bootstrap-5",
-    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-    placeholder: $( this ).data( 'placeholder' ),
-    closeOnSelect: false,
-    allowClear: true,
-} );
-$( '#id_target_os' ).select2( {
-    theme: "bootstrap-5",
-    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-    placeholder: $( this ).data( 'placeholder' ),
-    closeOnSelect: false,
-    allowClear: true,
-} );
-$( '#id_vulnerabilities' ).select2( {
-    theme: "bootstrap-5",
-    width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-    placeholder: $( this ).data( 'placeholder' ),
-    closeOnSelect: false,
-    allowClear: true,
-} );
+var tomSelectInstances = {};
+
+function initTomSelect(selector) {
+    var element = document.querySelector(selector);
+    if (!element || tomSelectInstances[selector]) {
+        return;
+    }
+
+    tomSelectInstances[selector] = new TomSelect(element, {
+        plugins: ['remove_button'],
+        hideSelected: true,
+        closeAfterSelect: false,
+        placeholder: element.dataset.placeholder || '',
+        dropdownParent: 'body',
+    });
+}
+
+function setTomSelectValue(selector, values) {
+    var element = document.querySelector(selector);
+    if (!element) {
+        return;
+    }
+    element.value = values;
+    element.dispatchEvent(new Event('change', { bubbles: true }));
+    if (tomSelectInstances[selector] && typeof tomSelectInstances[selector].setValue === 'function') {
+        tomSelectInstances[selector].setValue(values);
+    }
+}
+
+initTomSelect('#id_tags');
+initTomSelect('#id_mitre_techniques');
+initTomSelect('#id_threats');
+initTomSelect('#id_actors');
+initTomSelect('#id_target_os');
+initTomSelect('#id_vulnerabilities');
+
+// Ensure the visible Tom Select wrapper respects a larger minimum width
+['#id_mitre_techniques', '#id_tags', '#id_threats', '#id_actors', '#id_target_os', '#id_vulnerabilities'].forEach(function(sel) {
+    // small timeout to run after Tom Select has inserted its wrapper
+    setTimeout(function() {
+        var wrapper = document.querySelector(sel + ' + .ts-wrapper');
+        if (wrapper) {
+            wrapper.style.minWidth = '600px';
+            wrapper.style.width = 'auto';
+        }
+    }, 50);
+});
 
 /* Suggest with AI (MITRE techniques) */
 
@@ -472,7 +503,7 @@ document.body.addEventListener('htmx:afterRequest', function(evt) {
         let selectedIds = JSON.parse(response);
 
         // Update select options to match selectedIds
-        $('#id_mitre_techniques').val(selectedIds).trigger('change');
+        setTomSelectValue('#id_mitre_techniques', selectedIds);
     }
 
     // Open link in new tab if response is a URL
