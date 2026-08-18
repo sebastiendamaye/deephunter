@@ -157,6 +157,11 @@ Analytics
 ``GET /api/analytics/<id>/``
     Retrieve a single analytic.
 
+``GET /api/analytics/<id>/status/``
+    Report the run/completion status of the analytic's stats regeneration and,
+    once complete, the number of distinct endpoints it matched. See
+    `Analytic run status`_ below.
+
 Related objects are referenced by their **natural keys**, not database IDs:
 
 ============================  ===========================================
@@ -322,6 +327,59 @@ Response (relations are returned as natural keys, not database IDs)::
     }
 
 A request for an unknown ``id`` returns ``404 Not Found``.
+
+Analytic run status
+-------------------
+
+When an analytic is created (or its query changes), DeepHunter runs its query
+over the retention window as a background Celery task (``regenerate_stats``).
+This endpoint lets a client poll that run to completion and, once complete,
+read how many distinct endpoints the analytic matched — a measure of the
+analytic's prevalence/noisiness.
+
+.. code-block:: bash
+
+    curl https://deephunter.domain.tld/api/analytics/42/status/ \
+         -H "Authorization: Token $TOKEN"
+
+While the run is in progress (``state`` is ``running``)::
+
+    {
+        "id": 42,
+        "name": "Suspicious rundll32 network activity",
+        "state": "running",
+        "progress": 63.3,
+        "last_run_date": null,
+        "distinct_endpoints": null
+    }
+
+Once the run has completed (``state`` is ``complete``)::
+
+    {
+        "id": 42,
+        "name": "Suspicious rundll32 network activity",
+        "state": "complete",
+        "progress": 100.0,
+        "last_run_date": "2026-08-17",
+        "distinct_endpoints": 128
+    }
+
+If the analytic has never been run, ``state`` is ``never_run`` and both
+``last_run_date`` and ``distinct_endpoints`` are ``null``.
+
+Fields:
+
+* ``state`` — ``running`` (a run is in progress), ``complete`` (a previous run
+  finished and results are available), or ``never_run`` (no snapshot exists).
+* ``progress`` — completion percentage ``0``–``100`` while ``running``,
+  ``100`` when ``complete``, ``null`` when ``never_run``.
+* ``last_run_date`` — date of the most recent snapshot, or ``null``.
+* ``distinct_endpoints`` — number of distinct endpoints (hostnames) matched
+  across all of the analytic's runs; populated **only** when ``complete``.
+
+Typical usage from a client that just created an analytic: poll this endpoint
+(e.g. every few seconds) until ``state`` is ``complete``, then read
+``distinct_endpoints``. Requires ``qm.view_analytic``.
 
 Create an analytic (minimal)
 ----------------------------

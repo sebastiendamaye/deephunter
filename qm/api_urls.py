@@ -10,9 +10,10 @@ Authentication (django-rest-knox):
   POST /api/auth/logoutall/ Invalidate all of the user's tokens
 
 Analytics:
-  GET  /api/analytics/           List analytics
-  POST /api/analytics/           Create an analytic
-  GET  /api/analytics/<id>/      Retrieve an analytic
+  GET  /api/analytics/            List analytics
+  POST /api/analytics/            Create an analytic
+  GET  /api/analytics/<id>/       Retrieve an analytic
+  GET  /api/analytics/<id>/status/ Run/completion status + distinct-endpoint count
 
 Tags:
   GET  /api/tags/                List tags
@@ -49,6 +50,9 @@ urlpatterns = [
     # Analytics
     path('analytics/', api.AnalyticListCreateView.as_view(), name='api_analytic_list_create'),
     path('analytics/<int:pk>/', api.AnalyticRetrieveView.as_view(), name='api_analytic_detail'),
+    # Run/completion status of an analytic's stats regeneration, plus its
+    # distinct-endpoint count once complete.
+    path('analytics/<int:pk>/status/', api.AnalyticRunStatusView.as_view(), name='api_analytic_status'),
 
     # Tags (list + create). Reference-only listing also lives at /api/ref/tags/;
     # this endpoint additionally supports POST to create a missing tag.

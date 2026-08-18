@@ -155,6 +155,30 @@ def get_analytic(analytic_id: int) -> dict:
 
 
 @mcp.tool()
+def get_analytic_status(analytic_id: int) -> dict:
+    """Report whether an analytic's stats run has completed and, once complete,
+    how many distinct endpoints it matched.
+
+    When an analytic is created (or its query changes), DeepHunter runs its
+    query over the retention window as a background task. Use this tool to check
+    that run's progress and, on completion, learn how prevalent the analytic is
+    (its distinct-endpoint count). Returns:
+      - state: 'running' | 'complete' | 'never_run'.
+      - progress: percentage 0-100 while running, 100 when complete, null when
+        never run.
+      - last_run_date: date of the most recent run, or null.
+      - distinct_endpoints: number of distinct endpoints (hostnames) matched
+        across all runs; populated only when state is 'complete' (null while
+        running or never run).
+
+    To wait for a freshly created analytic to finish, poll this tool until
+    `state` is 'complete', then read `distinct_endpoints`. Requires the
+    `qm.view_analytic` permission.
+    """
+    return _get(f"/analytics/{analytic_id}/status/")
+
+
+@mcp.tool()
 def create_analytic(
     name: str,
     connector: str,

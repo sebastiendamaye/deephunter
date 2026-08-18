@@ -139,6 +139,11 @@ Read-only (require ``qm.view_analytic``):
   ``list_mitre_techniques``, ``list_threats``, ``list_actors``,
   ``list_target_os``, ``list_vulnerabilities``
 - ``list_analytics``, ``get_analytic``
+- ``get_analytic_status`` -- report whether an analytic's stats run has
+  completed (``state`` is ``running`` / ``complete`` / ``never_run``, with a
+  ``progress`` percentage) and, once complete, the number of distinct endpoints
+  it matched (``distinct_endpoints``). Poll it after ``create_analytic`` to wait
+  for the run and learn how prevalent the analytic is.
 
 Write:
 
@@ -151,3 +156,42 @@ Write:
 - ``create_tag`` (requires ``qm.add_tag``) -- explicitly create a tag by name.
   Usually not needed, since ``create_analytic`` auto-creates missing tags; use
   it to create a tag on its own.
+
+Example prompts
+***************
+
+Once the server is connected, you interact with it in plain language: you do
+**not** call tools by name. Describe what you want and the LLM client selects
+the appropriate tool(s). A few examples:
+
+Discover reference values and list analytics::
+
+    "Which connectors can I use in DeepHunter?"
+    "List all analytics."
+    "Show me analytic 42."
+
+Create an analytic (the client resolves relations via the ``list_*`` tools and
+calls ``create_analytic``)::
+
+    "Create a DeepHunter analytic named 'Suspicious rundll32 network activity'
+     for the sentinelone connector that detects rundll32.exe making network
+     connections. Tag it 'lolbin' and 'network', and map it to T1218.011."
+
+Check an analytic's run status and its distinct-endpoint count
+(``get_analytic_status``)::
+
+    "Has analytic 42 finished running? If so, how many distinct endpoints did
+     it match?"
+    "What's the status of the analytic I just created?"
+
+Chain creation and status in one request (the client creates the analytic, then
+polls ``get_analytic_status`` until the run completes)::
+
+    "Create an analytic for rundll32 network connections, then wait until it
+     finishes running and tell me how many endpoints it matched."
+
+.. note::
+
+   The client polls ``get_analytic_status`` by calling it again; it does not
+   refresh on its own between your messages. If a run is still ``running``, ask
+   it to "check again" and it will re-poll.

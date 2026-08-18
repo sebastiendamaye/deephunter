@@ -16,12 +16,16 @@ Authorization reuses Django's per-model permissions: the authenticated user
 must hold 'qm.view_analytic' to read and 'qm.add_analytic' to create (see
 StrictDjangoModelPermissions below).
 """
+from django.shortcuts import get_object_or_404
+
 from rest_framework import generics, permissions, viewsets
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from connectors.models import Connector
 from .models import (
     Analytic, Category, Tag, MitreTechnique, ThreatName, ThreatActor,
-    TargetOs, Vulnerability,
+    TargetOs, Vulnerability, Snapshot, Endpoint, TasksStatus,
 )
 from .serializers import (
     AnalyticSerializer, ConnectorSerializer, CategorySerializer, TagSerializer,
@@ -65,6 +69,87 @@ class AnalyticRetrieveView(generics.RetrieveAPIView):
     queryset = Analytic.objects.all()
     serializer_class = AnalyticSerializer
     permission_classes = [StrictDjangoModelPermissions]
+
+
+class AnalyticRunStatusView(APIView):
+    """
+    GET /api/analytics/<id>/status/
+
+    Report the completion status of an analytic's stats run and, once the run
+    has completed, the number of distinct endpoints the analytic matched.
+
+    DeepHunter runs an analytic's query over the retention window as a Celery
+    task (``regenerate_stats``), which is triggered automatically when an
+    analytic is created or its query changes (including via ``POST
+    /api/analytics/``). While that task runs, a ``TasksStatus`` row exists whose
+    ``progress`` climbs from 0 to 100; the row is deleted on completion. A
+    programmatic client (e.g. the AI assistant) can therefore create an analytic
+    and poll this endpoint until it reports ``complete`` to learn how prevalent
+    the analytic is (its distinct-endpoint count).
+
+    Response fields:
+      - ``state``: one of ``running`` | ``complete`` | ``never_run``.
+      - ``progress``: percentage 0-100 while ``running``; 100 when ``complete``;
+        null when ``never_run``.
+      - ``last_run_date``: date of the most recent snapshot, or null.
+      - ``distinct_endpoints``: number of distinct endpoints (hostnames) matched
+        across all of the analytic's runs; populated only when ``complete``
+        (null while running or never run).
+
+    Read access requires the ``qm.view_analytic`` permission, like the other
+    read endpoints.
+    """
+    # DjangoModelPermissions resolves the required permission from this queryset,
+    # so a GET here maps to 'qm.view_analytic'.
+    queryset = Analytic.objects.all()
+    permission_classes = [StrictDjangoModelPermissions]
+
+    def get(self, request, pk):
+        analytic = get_object_or_404(Analytic, pk=pk)
+
+        # A TasksStatus row keyed on the analytic name means a run is in
+        # progress; it is deleted by regenerate_stats() once the run completes.
+        task = TasksStatus.objects.filter(taskname=analytic.name).first()
+        if task is not None:
+            return Response({
+                'id': analytic.id,
+                'name': analytic.name,
+                'state': 'running',
+                'progress': round(task.progress, 1),
+                'last_run_date': None,
+                'distinct_endpoints': None,
+            })
+
+        # No task row: the run is not in progress. If there is no snapshot at
+        # all, the analytic has never been run.
+        last_snapshot = Snapshot.objects.filter(analytic=analytic).order_by('-date').first()
+        if last_snapshot is None:
+            return Response({
+                'id': analytic.id,
+                'name': analytic.name,
+                'state': 'never_run',
+                'progress': None,
+                'last_run_date': None,
+                'distinct_endpoints': None,
+            })
+
+        # Completed run: count distinct endpoints (hostnames) across all of the
+        # analytic's snapshots (same computation as the web trend view).
+        distinct_endpoints = (
+            Endpoint.objects
+            .filter(snapshot__analytic=analytic)
+            .values('hostname')
+            .distinct()
+            .count()
+        )
+        return Response({
+            'id': analytic.id,
+            'name': analytic.name,
+            'state': 'complete',
+            'progress': 100.0,
+            'last_run_date': last_snapshot.date,
+            'distinct_endpoints': distinct_endpoints,
+        })
 
 
 class TagListCreateView(generics.ListCreateAPIView):
