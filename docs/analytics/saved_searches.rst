@@ -9,5 +9,7 @@ You can also lock a search (useful for public saved searches) so that no one can
 
 The checkbox acts as a toggle to switch between all saved searches or only saved searches created by the logged in user. By default, all saved searches are shown.
 
+In the **Actions** column, in addition to the **execute**, **update** and **delete** actions, an **endpoints** action opens the `Endpoints <endpoints.html>`_ page, showing the distinct endpoints identified across all analytics matching the saved search.
+
 .. image:: ../img/saved_searches.png
   :alt: saved searches

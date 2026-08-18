@@ -67,3 +67,11 @@ It is possible to perform bulk actions on multiple threat hunting analytics at o
 .. image:: ../img/analytics_search_in_admin.png
   :alt: analytics search in admin
 
+Endpoints
+*********
+Click the **Endpoints** button (next to the **Save search** and **Search in
+admin** buttons) to open the `Endpoints <endpoints.html>`_ page, which lists the
+distinct endpoints identified across all analytics matching the selected
+filters, together with the number of distinct matching analytics for each
+endpoint.
+

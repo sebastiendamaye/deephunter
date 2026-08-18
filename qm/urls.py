@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('listanalytics/', views.list_analytics, name='list_analytics'),
+    path('endpoints/', views.endpoints_from_analytics, name='endpoints_from_analytics'),
     path('<int:analytic_id>/trend/', views.trend, name='trend'),
     path('<int:analytic_id>/trend/<int:tab>/', views.trend, name='trend'),
     path('<int:analytic_id>/trend-graph/<int:tab>/', views.trend_graph, name='trend_graph'),

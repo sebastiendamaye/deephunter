@@ -14,6 +14,7 @@
         <tr>
             <td>
                 <a href="/qm/listanalytics?{{ search.search }}" class="button">execute</a>
+                {% if perms.qm.view_endpoint %}<a href="/qm/endpoints?{{ search.search }}" class="button" title="Show distinct endpoints matching this search">endpoints</a>{% endif %}
                 {% if not search.is_locked or search.created_by == request.user %}
                     {% if perms.qm.change_savedsearch %}<a href="/qm/saved_searches/{{ search.id }}/change/" class="button">update</a>{% endif %}
                     {% if perms.qm.delete_savedsearch %}<a href="/qm/saved_searches/{{ search.id }}/delete/" class="buttonred">delete</a>{% endif %}

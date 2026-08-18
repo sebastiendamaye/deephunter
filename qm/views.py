@@ -8,6 +8,7 @@ from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
 from django.urls import reverse
 from datetime import datetime, timedelta, timezone
+import time
 import numpy as np
 from scipy import stats
 from math import isnan
@@ -52,17 +53,26 @@ ANALYTICS_PER_PAGE = settings.ANALYTICS_PER_PAGE
 DAYS_BEFORE_REVIEW = settings.DAYS_BEFORE_REVIEW
 AI_CONNECTOR = settings.AI_CONNECTOR
 
-@login_required
-@permission_required("qm.view_analytic", raise_exception=True)
-def list_analytics(request):
+def filter_analytics(request):
+    """
+    Build the Analytic queryset matching the filters passed in ``request.GET``.
 
+    This logic is shared between the analytics list view (:func:`list_analytics`)
+    and the endpoints view (:func:`endpoints_from_analytics`) so that both pages
+    honour the exact same combination of filters.
+
+    Returns a tuple ``(analytics, posted_search, posted_filters)`` where
+    ``analytics`` is the filtered (archived excluded, distinct) queryset,
+    ``posted_search`` is the raw free-text search and ``posted_filters`` is a
+    dict describing the active filters (used to render the filter chips).
+    """
     analytics = Analytic.objects.all().order_by('id')
-    
+
     posted_search = ''
     posted_filters = {}
-    
+
     if request.GET:
-        
+
         if 'search' in request.GET:
             analytics = analytics.filter(
                 Q(name__icontains=request.GET['search'])
@@ -277,6 +287,15 @@ def list_analytics(request):
     # Exclude analytics that are archived
     analytics = analytics.exclude(status='ARCH').distinct()
 
+    return analytics, posted_search, posted_filters
+
+
+@login_required
+@permission_required("qm.view_analytic", raise_exception=True)
+def list_analytics(request):
+
+    analytics, posted_search, posted_filters = filter_analytics(request)
+
     for analytic in analytics:
         snapshot = Snapshot.objects.filter(analytic=analytic, date=datetime.today()-timedelta(days=1)).order_by('date')
         if len(snapshot) > 0:
@@ -340,7 +359,56 @@ def list_analytics(request):
         'posted_filters': posted_filters,
     }
     return render(request, 'list_analytics.html', context)
-    
+
+
+@login_required
+@permission_required("qm.view_endpoint", raise_exception=True)
+def endpoints_from_analytics(request):
+    """
+    Show the list of distinct endpoints identified across all analytics
+    matching the combination of filters passed in ``request.GET`` (same filters
+    as the analytics list view). For each endpoint, the number of distinct
+    matching analytics is displayed.
+    """
+    start_time = time.time()
+
+    analytics, posted_search, posted_filters = filter_analytics(request)
+
+    endpoints = (
+        Endpoint.objects
+        .filter(snapshot__analytic__in=analytics)
+        .values('hostname', 'site')
+        .annotate(analytics_count=Count('snapshot__analytic', distinct=True))
+        .order_by('-analytics_count', 'hostname')
+    )
+
+    endpoints_count = endpoints.count()
+
+    # Paginate the endpoints list
+    paginator = Paginator(endpoints, ANALYTICS_PER_PAGE)
+    page_number = int(request.GET.get('page', 1))
+    page_obj = paginator.get_page(page_number)
+
+    # Preserve filters in pagination links
+    querydict = request.GET.copy()
+    if 'page' in querydict:
+        del querydict['page']
+    query_string = querydict.urlencode()
+
+    elapsed_time = time.time() - start_time
+
+    context = {
+        'endpoints': page_obj,
+        'endpoints_count': endpoints_count,
+        'analytics_count': analytics.count(),
+        'query_string': query_string,
+        'posted_search': posted_search,
+        'posted_filters': posted_filters,
+        'elapsed_time': elapsed_time,
+    }
+    return render(request, 'endpoints_from_analytics.html', context)
+
+
 @login_required
 @permission_required("qm.view_snapshot", raise_exception=True)
 def trend(request, analytic_id, tab=0):

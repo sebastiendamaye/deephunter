@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load qm_extras %}
+
+{% block style %}
+    <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/list_analytics.css">
+{% endblock %}
+{% block body %}
+    <h1>Distinct endpoints matching the filters</h1>
+    <p>
+        This page lists the distinct endpoints identified across all
+        {{ analytics_count }} analytic{{ analytics_count|pluralize }} matching the
+        selected filters. For each endpoint, the number of distinct matching
+        analytics is displayed.
+        &nbsp;<a href="/qm/listanalytics/?{{ query_string }}" class="button">Back to analytics</a>
+    </p>
+    <div>{{ endpoints_count }} distinct endpoint{{ endpoints_count|pluralize }}</div>
+    <table class="mitre">
+        <tr>
+            <th>Hostname</th>
+            <th>Site</th>
+            <th># distinct analytics</th>
+        </tr>
+        {% for endpoint in endpoints %}
+            <tr>
+                {% if perms.qm.view_timeline %}<td><a href="/qm/timeline?hostname={{ endpoint.hostname }}">{{ endpoint.hostname }}</a></td>{% else %}<td>{{ endpoint.hostname }}</td>{% endif %}
+                <td>{{ endpoint.site }}</td>
+                <td>{{ endpoint.analytics_count }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3">No endpoint matches the selected filters.</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+
+<div class="pagination">
+	<span class="step-links">
+		<span class="previous">
+			{% if endpoints.has_previous %}
+			<a href="?page={{ endpoints.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">Previous</a>
+			{% endif %}
+		</span>
+
+		<span class="current">
+			{% for i in endpoints.paginator.num_pages|to_range %}
+				{% if i == endpoints.number %}
+					<span class="pagelink">{{ i }}</span>
+				{% else %}
+					<span class="pagelink"><a href="?page={{ i }}{% if query_string %}&{{ query_string }}{% endif %}">{{ i }}</a></span>
+				{% endif %}
+			{% endfor %}
+		</span>
+
+		<span class="next">
+			{% if endpoints.has_next %}
+				<span class="next"><a href="?page={{ endpoints.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}">Next</a></span>
+			{% endif %}
+		</span>
+	</span>
+</div>
+<!--Query executed in {{ elapsed_time|floatformat:2 }} seconds.-->
+{% endblock %}

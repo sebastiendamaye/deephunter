@@ -10,3 +10,4 @@ Analytics
    review
    create_modify_analytic
    saved_searches
+   endpoints
