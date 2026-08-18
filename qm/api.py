@@ -16,21 +16,23 @@ Authorization reuses Django's per-model permissions: the authenticated user
 must hold 'qm.view_analytic' to read and 'qm.add_analytic' to create (see
 StrictDjangoModelPermissions below).
 """
+from django.db.models import Count, Q
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 
-from rest_framework import generics, permissions, viewsets
+from rest_framework import generics, permissions, status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from connectors.models import Connector
 from .models import (
     Analytic, Category, Tag, MitreTechnique, ThreatName, ThreatActor,
-    TargetOs, Vulnerability, Snapshot, Endpoint, TasksStatus,
+    TargetOs, Vulnerability, Snapshot, Endpoint, TasksStatus, SavedSearch,
 )
 from .serializers import (
     AnalyticSerializer, ConnectorSerializer, CategorySerializer, TagSerializer,
     MitreTechniqueSerializer, ThreatNameSerializer, ThreatActorSerializer,
-    TargetOsSerializer, VulnerabilitySerializer,
+    TargetOsSerializer, VulnerabilitySerializer, SavedSearchSerializer,
 )
 
 
@@ -149,6 +151,107 @@ class AnalyticRunStatusView(APIView):
             'progress': 100.0,
             'last_run_date': last_snapshot.date,
             'distinct_endpoints': distinct_endpoints,
+        })
+
+
+class _FilterQueryRequest:
+    """Minimal stand-in for a Django request exposing only ``.GET``.
+
+    The shared ``filter_analytics()`` view helper reads its filters exclusively
+    from ``request.GET`` (a ``QueryDict``). A hunting package (``SavedSearch``)
+    stores its whole filter set as a URL-encoded query string in its ``search``
+    field, so wrapping that string in a ``QueryDict`` lets us reuse the exact
+    same filtering logic the web UI uses, without duplicating it.
+    """
+    def __init__(self, query_string):
+        self.GET = QueryDict((query_string or '').lstrip('?'))
+
+
+def _visible_saved_searches(user):
+    """Saved searches a user may see: public ones plus their own.
+
+    Mirrors the visibility rule enforced in the web UI so the API does not
+    expose another user's private hunting packages.
+    """
+    return SavedSearch.objects.filter(Q(is_public=True) | Q(created_by=user))
+
+
+class SavedSearchListView(generics.ListAPIView):
+    """
+    GET /api/saved-searches/   List hunting packages (saved searches).
+
+    Returns the packages visible to the authenticated user (public ones plus
+    their own), so a client can discover the exact name to pass to the
+    endpoints report below. Requires 'qm.view_savedsearch'.
+    """
+    serializer_class = SavedSearchSerializer
+    permission_classes = [StrictDjangoModelPermissions]
+    # DjangoModelPermissions resolves the required perm from this model.
+    queryset = SavedSearch.objects.all()
+
+    def get_queryset(self):
+        return _visible_saved_searches(self.request.user).order_by('name')
+
+
+class SavedSearchEndpointsView(APIView):
+    """
+    GET /api/saved-searches/endpoints/?name=<name>
+
+    Given a hunting package (saved search) name, report how many distinct
+    endpoints match its filters and list those endpoints.
+
+    A hunting package stores a set of filters (free-text search, connectors,
+    categories, tags, MITRE techniques, threats, actors, ...). Those filters
+    select a set of analytics; each analytic's runs record the endpoints
+    (hostnames) it matched. This endpoint resolves the package's filters to the
+    matching analytics (reusing the same logic as the web UI), then aggregates
+    the distinct endpoints across those analytics' runs.
+
+    Response fields:
+      - ``name``: the resolved saved-search name.
+      - ``analytics_count``: number of analytics matching the package filters.
+      - ``endpoints_count``: number of distinct endpoints (hostname/site pairs).
+      - ``endpoints``: list of ``{hostname, site, analytics_count}`` where
+        ``analytics_count`` is how many of the matching analytics hit that
+        endpoint, ordered by that count descending then hostname.
+
+    Requires 'qm.view_endpoint' (matching the web endpoints report).
+    """
+    # DjangoModelPermissions resolves the required perm from this model, so a
+    # GET here maps to 'qm.view_endpoint'.
+    queryset = Endpoint.objects.all()
+    permission_classes = [StrictDjangoModelPermissions]
+
+    def get(self, request):
+        name = request.query_params.get('name')
+        if not name:
+            return Response(
+                {'detail': "Query parameter 'name' is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        saved_search = get_object_or_404(
+            _visible_saved_searches(request.user), name=name
+        )
+
+        # Reuse the web UI's filtering logic. Imported lazily to avoid coupling
+        # the API module's import to the (heavier) views module at load time.
+        from .views import filter_analytics
+        analytics, _, _ = filter_analytics(_FilterQueryRequest(saved_search.search))
+
+        endpoints = list(
+            Endpoint.objects
+            .filter(snapshot__analytic__in=analytics)
+            .values('hostname', 'site')
+            .annotate(analytics_count=Count('snapshot__analytic', distinct=True))
+            .order_by('-analytics_count', 'hostname')
+        )
+
+        return Response({
+            'name': saved_search.name,
+            'analytics_count': analytics.count(),
+            'endpoints_count': len(endpoints),
+            'endpoints': endpoints,
         })
 
 

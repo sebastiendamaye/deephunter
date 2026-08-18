@@ -130,10 +130,12 @@ Authorization
 The API reuses DeepHunter's existing Django model permissions. The user tied
 to the token must hold the relevant permissions:
 
-* ``qm.view_analytic`` — to list/retrieve analytics.
+* ``qm.view_analytic`` — to list/retrieve analytics and read run status.
 * ``qm.add_analytic`` — to create analytics.
 * ``qm.view_tag`` — to list tags.
 * ``qm.add_tag`` — to create tags.
+* ``qm.view_savedsearch`` — to list hunting packages (saved searches).
+* ``qm.view_endpoint`` — to read a hunting package's matching endpoints.
 
 It is recommended to create a dedicated service account for the AI assistant,
 grant it only these permissions, and use its token.
@@ -207,6 +209,59 @@ Response (``201 Created``)::
     {"name": "lolbin"}
 
 Posting a name that already exists returns a ``400`` validation error.
+
+Hunting packages (saved searches)
+---------------------------------
+
+A *hunting package* (saved search) bundles a set of analytic filters (free-text
+search, connectors, categories, tags, MITRE techniques, threats, actors, ...)
+under a unique name. These endpoints let a client find how many endpoints match
+a package and list them.
+
+``GET /api/saved-searches/``
+    List hunting packages. **Only saved searches with "public" visibility are
+    listed** (plus any created by the authenticated user's own account) —
+    private searches owned by other users are not returned. Since the MCP
+    connects as a dedicated service account that typically owns no searches,
+    this effectively lists only public packages; to expose a private search,
+    its owner must mark it public. Returns ``[{name, description, is_public}]``.
+    Requires ``qm.view_savedsearch``.
+
+``GET /api/saved-searches/endpoints/?name=<name>``
+    Report the distinct endpoints matching a hunting package's filters. The
+    package is identified by its ``name`` query parameter (names may contain
+    spaces, so URL-encode it). Requires ``qm.view_endpoint``.
+
+    The package's filters are resolved to the matching analytics (the same
+    logic as the web UI), then the distinct endpoints across those analytics'
+    runs are aggregated.
+
+.. code-block:: bash
+
+    curl -G https://deephunter.domain.tld/api/saved-searches/endpoints/ \
+         --data-urlencode "name=Emotet hunting" \
+         -H "Authorization: Token $TOKEN"
+
+Response::
+
+    {
+        "name": "Emotet hunting",
+        "analytics_count": 7,
+        "endpoints_count": 3,
+        "endpoints": [
+            {"hostname": "WKS-001", "site": "HQ", "analytics_count": 4},
+            {"hostname": "WKS-042", "site": "HQ", "analytics_count": 2},
+            {"hostname": "SRV-DC1", "site": "DC", "analytics_count": 1}
+        ]
+    }
+
+* ``analytics_count`` (top level) — number of analytics matching the package.
+* ``endpoints_count`` — number of distinct endpoints (hostname/site pairs).
+* ``endpoints[].analytics_count`` — how many of the matching analytics hit that
+  endpoint (the list is ordered by this count descending, then hostname).
+
+An unknown or non-visible package name returns ``404 Not Found``; omitting
+``name`` returns ``400``.
 
 Reference data (read-only)
 --------------------------

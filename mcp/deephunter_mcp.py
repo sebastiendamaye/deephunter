@@ -58,9 +58,13 @@ client = httpx.Client(
 
 # --- Helpers ---------------------------------------------------------------
 
-def _get(path: str) -> Any:
-    """GET a path and return parsed JSON, surfacing API errors as text."""
-    return _handle(client.get(path))
+def _get(path: str, params: dict | None = None) -> Any:
+    """GET a path and return parsed JSON, surfacing API errors as text.
+
+    Optional query-string parameters are passed via ``params`` so httpx handles
+    URL-encoding (e.g. saved-search names containing spaces).
+    """
+    return _handle(client.get(path, params=params))
 
 
 def _post(path: str, payload: dict) -> Any:
@@ -239,6 +243,41 @@ def create_analytic(
         if value is not None:
             payload[key] = value
     return _post("/analytics/", payload)
+
+
+# --- Hunting packages (saved searches) -------------------------------------
+
+@mcp.tool()
+def list_saved_searches() -> list[dict]:
+    """List hunting packages (a.k.a. saved searches). Returns
+    [{name, description, is_public}]. Use this to discover the exact name to
+    pass to get_saved_search_endpoints.
+
+    Only saved searches with "public" visibility are listed (plus any created by
+    this token's own service account); private searches owned by other users are
+    not returned. Requires the `qm.view_savedsearch` permission."""
+    return _get("/saved-searches/")
+
+
+@mcp.tool()
+def get_saved_search_endpoints(name: str) -> dict:
+    """Given a hunting package (saved search) name, report how many distinct
+    endpoints match its filters and list those endpoints.
+
+    A hunting package bundles a set of filters (threat name, category, tags,
+    MITRE techniques, connectors, ...). This resolves those filters to the
+    matching analytics and aggregates the distinct endpoints their runs hit.
+    Returns:
+      - name: the resolved saved-search name.
+      - analytics_count: number of analytics matching the package filters.
+      - endpoints_count: number of distinct endpoints (hostname/site pairs).
+      - endpoints: list of {hostname, site, analytics_count}, where
+        analytics_count is how many of the matching analytics hit that endpoint
+        (ordered by that count descending, then hostname).
+
+    Look up the exact name with list_saved_searches first if unsure. Requires
+    the `qm.view_endpoint` permission."""
+    return _get("/saved-searches/endpoints/", params={"name": name})
 
 
 # --- Tags ------------------------------------------------------------------

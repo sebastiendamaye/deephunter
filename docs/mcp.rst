@@ -144,6 +144,16 @@ Read-only (require ``qm.view_analytic``):
   ``progress`` percentage) and, once complete, the number of distinct endpoints
   it matched (``distinct_endpoints``). Poll it after ``create_analytic`` to wait
   for the run and learn how prevalent the analytic is.
+- ``list_saved_searches`` (requires ``qm.view_savedsearch``) -- list hunting
+  packages (saved searches), to discover the exact name to pass to
+  ``get_saved_search_endpoints``. **Only saved searches with "public"
+  visibility are listed by the MCP service** (plus any created by the token's
+  own service account). Private searches owned by other users are not returned;
+  to expose one, its owner must mark it public.
+- ``get_saved_search_endpoints`` (requires ``qm.view_endpoint``) -- given a
+  hunting package name, report how many distinct endpoints match its filters
+  (``endpoints_count``) and list them (``endpoints`` with ``hostname``,
+  ``site`` and per-endpoint ``analytics_count``).
 
 Write:
 
@@ -183,6 +193,14 @@ Check an analytic's run status and its distinct-endpoint count
     "Has analytic 42 finished running? If so, how many distinct endpoints did
      it match?"
     "What's the status of the analytic I just created?"
+
+Query a hunting package / saved search (``list_saved_searches`` then
+``get_saved_search_endpoints``)::
+
+    "Which hunting packages are available?"
+    "How many endpoints match the 'Emotet hunting' package, and list them."
+    "For the saved search named 'Ransomware TTPs', how many distinct endpoints
+     are affected and which hosts are they?"
 
 Chain creation and status in one request (the client creates the analytic, then
 polls ``get_analytic_status`` until the run completes)::

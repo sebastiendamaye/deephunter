@@ -15,6 +15,10 @@ Analytics:
   GET  /api/analytics/<id>/       Retrieve an analytic
   GET  /api/analytics/<id>/status/ Run/completion status + distinct-endpoint count
 
+Hunting packages (saved searches):
+  GET  /api/saved-searches/                    List hunting packages
+  GET  /api/saved-searches/endpoints/?name=<n> Distinct endpoints matching a package
+
 Tags:
   GET  /api/tags/                List tags
   POST /api/tags/                Create a tag
@@ -53,6 +57,11 @@ urlpatterns = [
     # Run/completion status of an analytic's stats regeneration, plus its
     # distinct-endpoint count once complete.
     path('analytics/<int:pk>/status/', api.AnalyticRunStatusView.as_view(), name='api_analytic_status'),
+
+    # Hunting packages (saved searches). The endpoints report takes the package
+    # name as a `?name=` query parameter (names may contain spaces or slashes).
+    path('saved-searches/', api.SavedSearchListView.as_view(), name='api_saved_search_list'),
+    path('saved-searches/endpoints/', api.SavedSearchEndpointsView.as_view(), name='api_saved_search_endpoints'),
 
     # Tags (list + create). Reference-only listing also lives at /api/ref/tags/;
     # this endpoint additionally supports POST to create a missing tag.

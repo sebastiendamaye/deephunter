@@ -11,7 +11,7 @@ from rest_framework import serializers
 from connectors.models import Connector
 from .models import (
     Analytic, Category, Tag, MitreTechnique, ThreatName, ThreatActor,
-    TargetOs, Vulnerability,
+    TargetOs, Vulnerability, SavedSearch,
 )
 
 
@@ -144,3 +144,10 @@ class VulnerabilitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Vulnerability
         fields = ['name', 'base_score', 'description']
+
+
+class SavedSearchSerializer(serializers.ModelSerializer):
+    """Read-only view of a hunting package (saved search)."""
+    class Meta:
+        model = SavedSearch
+        fields = ['name', 'description', 'is_public']
