@@ -8,7 +8,7 @@ from repos.models import Repo
 from .forms import RepoForm
 from repos.tasks import import_repo_task
 import requests
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
 import base64
 from notifications.utils import add_debug_notification, add_error_notification, add_success_notification, add_info_notification
 from celery import current_app
@@ -68,9 +68,25 @@ def preview(request, url):
     # Add back padding if necessary
     padding = '=' * (-len(url) % 4)
     url += padding
+    try:
+        decoded_url = unquote(base64.urlsafe_b64decode(url).decode())
+    except Exception:
+        return HttpResponse("Invalid URL encoding", status=400)
+
+    parsed_url = urlparse(decoded_url)
+    trusted_hosts = {"github.com", "bitbucket.org"}
+    hostname = parsed_url.hostname.lower() if parsed_url.hostname else ""
+    is_trusted_host = hostname in trusted_hosts or any(
+        hostname.endswith(f".{trusted_host}") for trusted_host in trusted_hosts
+    )
+
+    if parsed_url.scheme not in {"http", "https"} or not is_trusted_host:
+        return HttpResponse("URL not allowed", status=400)
+
     results = requests.get(
-        unquote(base64.urlsafe_b64decode(url).decode()),
-        proxies=PROXY
+        decoded_url,
+        proxies=PROXY,
+        timeout=10
     )
     return HttpResponse(results.json() if results.headers.get('Content-Type') == 'application/json' else results.text)
 
