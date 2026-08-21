@@ -196,6 +196,11 @@ def import_repo(request, repo_id, mode):
 @login_required
 def progress_import_repo(request, repo_id):
     try:
+        repo_id = int(repo_id)
+    except (TypeError, ValueError):
+        return HttpResponse('', status=400)
+
+    try:
         repo = get_object_or_404(Repo, pk=repo_id)
         celery_status = get_object_or_404(TasksStatus, taskname=f"import_repo_{repo.id}")
         button = f'<span><b>Task progress:</b> {round(celery_status.progress)}%'
