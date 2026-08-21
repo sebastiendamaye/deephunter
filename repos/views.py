@@ -8,7 +8,7 @@ from repos.models import Repo
 from .forms import RepoForm
 from repos.tasks import import_repo_task
 import requests
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urlparse, urlunparse
 import base64
 from notifications.utils import add_debug_notification, add_error_notification, add_success_notification, add_info_notification
 from celery import current_app
@@ -80,13 +80,25 @@ def preview(request, url):
         hostname.endswith(f".{trusted_host}") for trusted_host in trusted_hosts
     )
 
-    if parsed_url.scheme not in {"http", "https"} or not is_trusted_host:
+    has_userinfo = parsed_url.username is not None or parsed_url.password is not None
+    is_allowed_port = parsed_url.port in {None, 80, 443}
+    if parsed_url.scheme not in {"http", "https"} or not is_trusted_host or has_userinfo or not is_allowed_port:
         return HttpResponse("URL not allowed", status=400)
 
+    safe_url = urlunparse((
+        parsed_url.scheme,
+        parsed_url.netloc,
+        parsed_url.path,
+        "",
+        parsed_url.query,
+        ""
+    ))
+
     results = requests.get(
-        decoded_url,
+        safe_url,
         proxies=PROXY,
-        timeout=10
+        timeout=10,
+        allow_redirects=False
     )
     return HttpResponse(results.json() if results.headers.get('Content-Type') == 'application/json' else results.text)
 
