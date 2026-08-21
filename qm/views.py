@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseForbidde
 from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
 from django.urls import reverse
+from django.utils.html import escape
 from datetime import datetime, timedelta, timezone
 import time
 import numpy as np
@@ -979,7 +980,9 @@ def regencampaignstatus(request, campaign_name):
         button += '</span>'
         return HttpResponse(button)
     except:
-        return HttpResponse(f'<button hx-get="/qm/regencampaign/{campaign_name}/" class="buttonred">Regenerate</button>')
+        safe_campaign_name = quote(str(campaign_name), safe='')
+        regen_url = escape(f"/qm/regencampaign/{safe_campaign_name}/")
+        return HttpResponse(f'<button hx-get="{regen_url}" class="buttonred">Regenerate</button>')
 
 @login_required
 @permission_required("qm.view_savedsearch", raise_exception=True)
