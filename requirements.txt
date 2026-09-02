@@ -11,7 +11,7 @@ django-extensions==4.1
 django-markup==1.10
 django-rest-knox==5.0.2
 django-simple-history==3.13.0
-djangorestframework==3.16.1
+djangorestframework==3.17.2
 google-genai==2.16.0
 ldap3==2.9.1
 lxml==6.1.1
