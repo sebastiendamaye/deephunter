@@ -1,4 +1,6 @@
 *.pyc
+*.pyo
+*.pyd
 */migrations/*
 db.sqlite3
 _docs/*
@@ -12,3 +14,8 @@ plugins/*.py
 CLAUDE.local.md
 CLAUDE.md
 AGENTS.md
+build/
+dist/
+*.egg-info/
+.vscode/
+.idea/
