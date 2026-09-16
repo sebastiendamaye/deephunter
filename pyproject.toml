@@ -1,0 +1,17 @@
+[project]
+name = "deephunter"
+version = "0.1.0"
+description = "DeepHunter, an Innovative Threat Hunting Platform"
+readme = "README.md"
+authors = [
+    { name = "Sebastien DAMAYE", email = "sebastien.damaye@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+deephunter = "deephunter:main"
+
+[build-system]
+requires = ["uv_build>=0.12.15,<0.13.0"]
+build-backend = "uv_build"
