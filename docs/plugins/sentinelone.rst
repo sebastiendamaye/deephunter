@@ -90,6 +90,17 @@ S1_TOKEN
 
 	S1_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30'
 
+S1_ACCOUNT_IDS
+==============
+- **Type**: string (optional)
+- **Description**: Comma-separated list of SentinelOne account IDs used to scope the PowerQueries (run with the Long Running Query API). If empty, queries run against the whole tenant (all accounts the token can access). Set it if your token is scoped to specific accounts, or if queries unexpectedly return no results while the same query returns results in the SentinelOne console.
+- **Example**:
+
+.. code-block:: python
+
+	S1_ACCOUNT_IDS = ''  # whole tenant
+	#S1_ACCOUNT_IDS = '1234567890123456789,9876543210987654321'
+
 XDR_URL and XDR_PARAMS
 ======================
 

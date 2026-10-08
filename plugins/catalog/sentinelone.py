@@ -6,7 +6,7 @@ from connectors.utils import get_connector_conf
 from django.conf import settings
 import requests
 import re
-from time import sleep
+from time import sleep, monotonic
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote, quote_plus
 from connectors.utils import manage_analytic_error
@@ -15,7 +15,7 @@ from notifications.utils import add_error_notification
 _globals_initialized = False
 def init_globals():
     global DEBUG, PROXY, DB_DATA_RETENTION, CAMPAIGN_MAX_HOSTS_THRESHOLD, \
-            S1_URL, S1_TOKEN, S1_THREATS_URL, XDR_URL, XDR_PARAMS, SYNC_STAR_RULES, STAR_RULES_PREFIX, \
+            S1_URL, S1_TOKEN, S1_ACCOUNT_IDS, S1_THREATS_URL, XDR_URL, XDR_PARAMS, SYNC_STAR_RULES, STAR_RULES_PREFIX, \
             STAR_RULES_DEFAULTS, QUERY_ERROR_INFO, QUERY_LANGUAGE
     global _globals_initialized
     if not _globals_initialized:
@@ -26,6 +26,8 @@ def init_globals():
         CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
         S1_URL = get_connector_conf('sentinelone', 'S1_URL')
         S1_TOKEN = get_connector_conf('sentinelone', 'S1_TOKEN')
+        # Optional. Comma-separated account IDs to scope LRQ queries. Empty/missing = whole tenant
+        S1_ACCOUNT_IDS = get_connector_conf('sentinelone', 'S1_ACCOUNT_IDS')
         S1_THREATS_URL = get_connector_conf('sentinelone', 'S1_THREATS_URL')
         XDR_URL = get_connector_conf('sentinelone', 'XDR_URL')
         XDR_PARAMS = get_connector_conf('sentinelone', 'XDR_PARAMS')
@@ -56,6 +58,120 @@ def query_language():
     init_globals()
     return QUERY_LANGUAGE
 
+LRQ_POLL_INTERVAL = 1   # seconds. A LRQ query expires 30s after the last poll
+LRQ_TIMEOUT = 900       # seconds. Cancel the query if not complete after 15 minutes
+
+class PowerQueryError(Exception):
+    pass
+
+def _lrq_headers(forward_tag=None):
+    # LRQ expects the same token as the mgmt API, but with the "Bearer" prefix
+    headers = {'Authorization': f'Bearer {S1_TOKEN}'}
+    if forward_tag:
+        headers['X-Dataset-Query-Forward-Tag'] = forward_tag
+    return headers
+
+def _to_utc_iso(d):
+    # LRQ expects ISO-8601 with a "Z" suffix. Naive dates are considered UTC
+    if isinstance(d, str):
+        d = datetime.fromisoformat(d)
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=timezone.utc)
+    return d.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+def _hacklist_to_str(value):
+    # Keep the "[a,b,c]" string format returned by the former dv/events/pq endpoint
+    if isinstance(value, list):
+        return '[{}]'.format(','.join(str(v) for v in value))
+    return value
+
+def run_powerquery(q, from_date, to_date, debug=False):
+    """
+    Run a PowerQuery with the Long Running Query (LRQ) API.
+    Replaces /web/api/v2.1/dv/events/pq (deprecated on Feb 15, 2027).
+    :param q: PowerQuery string.
+    :param from_date: Start date (datetime or ISO string).
+    :param to_date: End date (datetime or ISO string).
+    :return: tuple (columns, values): list of column names, list of rows.
+    :raise PowerQueryError: with the API response text if the query fails.
+    """
+    init_globals()
+
+    body = {
+        'queryType': 'PQ',
+        'startTime': _to_utc_iso(from_date),
+        'endTime': _to_utc_iso(to_date),
+        'queryPriority': 'HIGH',
+        'pq': {'query': q, 'resultType': 'TABLE'}
+    }
+    if S1_ACCOUNT_IDS:
+        body['tenant'] = False
+        body['accountIds'] = [i.strip() for i in S1_ACCOUNT_IDS.split(',') if i.strip()]
+    else:
+        body['tenant'] = True
+
+    if debug:
+        print(f'*** LRQ BODY: {body}')
+
+    r = requests.post(f'{S1_URL}/sdl/v2/api/queries',
+        json=body,
+        headers=_lrq_headers(),
+        proxies=PROXY)
+    if r.status_code >= 400:
+        raise PowerQueryError(r.text)
+
+    query_id = r.json()['id']
+    # Must be sent back on every GET/DELETE (routes to the shard holding the query)
+    headers = _lrq_headers(r.headers.get('X-Dataset-Query-Forward-Tag'))
+
+    try:
+        steps_seen = 0
+        deadline = monotonic() + LRQ_TIMEOUT
+        while True:
+            if monotonic() > deadline:
+                raise PowerQueryError(f'LRQ query {query_id} not complete after {LRQ_TIMEOUT}s')
+
+            r = requests.get(f'{S1_URL}/sdl/v2/api/queries/{query_id}',
+                params={'lastStepSeen': steps_seen},
+                headers=headers,
+                proxies=PROXY)
+            if r.status_code == 429:
+                # Rate limit (3 req/s per user): wait and retry, well below the 30s expiration
+                sleep(LRQ_POLL_INTERVAL * 2)
+                continue
+            if r.status_code >= 400:
+                raise PowerQueryError(r.text)
+
+            result = r.json()
+            steps_seen = result.get('stepsCompleted') or 0
+            steps_total = result.get('stepsTotal') or 0
+
+            if debug:
+                print(f'PROGRESS: {steps_seen}/{steps_total}')
+
+            if steps_total > 0 and steps_seen >= steps_total:
+                break
+
+            sleep(LRQ_POLL_INTERVAL)
+    finally:
+        # Always cancel the query (even on success) to release server-side resources
+        try:
+            requests.delete(f'{S1_URL}/sdl/v2/api/queries/{query_id}',
+                headers=headers,
+                proxies=PROXY)
+        except requests.RequestException:
+            pass
+
+    data = result.get('data') or {}
+    columns = [c.get('name') if isinstance(c, dict) else c for c in data.get('columns') or []]
+    values = data.get('values') or []
+
+    if debug:
+        print(f'***COLUMNS: {columns}')
+        print(f'***VALUES: {values}')
+
+    return columns, values
+
 def query(analytic, from_date=None, to_date=None, debug=None):
     init_globals()
     
@@ -66,7 +182,8 @@ def query(analytic, from_date=None, to_date=None, debug=None):
     # Run analytic with filter for the last 24 hours by default, as the script is run every day, or from the given date range
     # hacklist is used instead of array_agg_distinct to get list of storylineid because
     # array_agg_distinct prevents the powerquery from executing without error
-    q = f"{analytic.query} | group nb=count(), storylineid=hacklist(src.process.storyline.id) by endpoint.name, site.name"
+    # LRQ has no "limit" body parameter, so the limit is part of the query
+    q = f"{analytic.query} | group nb=count(), storylineid=hacklist(src.process.storyline.id) by endpoint.name, site.name | limit {CAMPAIGN_MAX_HOSTS_THRESHOLD}"
     
     if not from_date:
         # if date range is not provided, we use the last 24 hours
@@ -74,53 +191,27 @@ def query(analytic, from_date=None, to_date=None, debug=None):
         from_date = (to_date - timedelta(hours=24)).isoformat()
         to_date = to_date.isoformat()
     
-    body = {
-        'fromDate': from_date,
-        'query': q,
-        'toDate': to_date,
-        'limit': CAMPAIGN_MAX_HOSTS_THRESHOLD
-    }
-    
-    if debug or DEBUG:
+    if debug:
         print('*** RUNNING QUERY {}: {}'.format(analytic.name, analytic.query))
-        print('*** BODY: {}'.format(body))
         
     try:
-        r = requests.post(f'{S1_URL}/web/api/v2.1/dv/events/pq',
-            json=body,
-            headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
-            proxies=PROXY)
+        columns, values = run_powerquery(q, from_date, to_date, debug)
 
-        query_id = r.json()['data']['queryId']
-        status = r.json()['data']['status']
+        # Callers expect rows as [endpoint.name, site.name, nb, storylineid]
+        idx = [columns.index(c) for c in ('endpoint.name', 'site.name', 'nb', 'storylineid')]
+        data = []
+        for v in values:
+            row = [v[i] for i in idx]
+            row[3] = _hacklist_to_str(row[3])
+            data.append(row)
 
-        # Ping PowerQuery every second, until it is complete (unless you do that, the PQ will be cancelled)
-        while status == 'RUNNING':
-            r = requests.get(f'{S1_URL}/web/api/v2.1/dv/events/pq-ping',
-                params = {"queryId": query_id},
-                headers={'Authorization': f'ApiToken:{S1_TOKEN}'},
-                proxies=PROXY)
-                
-            status = r.json()['data']['status']
-            progress = r.json()['data']['progress']
-            
-            if debug or DEBUG:
-                print('PROGRESS: {}'.format(progress))
-            
-            sleep(1)
-
-                
-        if debug or DEBUG:
-            print('***DATA (JSON): {}'.format(r.json()))
-        
-        return r.json()['data']['data']
+        return data
     
-    
-    except:
-        if debug or DEBUG:
+    except Exception as e:
+        if debug:
             print(f"[ ERROR ] Analytic {analytic.name} failed. Check report for more info.")
         
-        manage_analytic_error(analytic, r.text)
+        manage_analytic_error(analytic, str(e))
 
         return "ERROR"
 
@@ -407,37 +498,20 @@ and dst.ip.address != '127.0.0.1'
 ) on dst.ip.address 
 | sort nbhosts
 """
-    body = {
-        'fromDate': (datetime.now() - timedelta(hours=timerange)).isoformat(),
-        'query': query,
-        'toDate': datetime.now().isoformat(),
-        'limit': 100
-    }
-            
-    r = requests.post('{}/web/api/v2.1/dv/events/pq'.format(S1_URL),
-        json=body,
-        headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
-        proxies=PROXY)
+    query += "| limit 100"
 
     try:
-        query_id = r.json()['data']['queryId']
-        status = r.json()['data']['status']
-    
-        # Ping PowerQuery every second, until it is complete (unless you do that, the PowerQuery will be cancelled)
-        while status == 'RUNNING':
-            r = requests.get('{}/web/api/v2.1/dv/events/pq-ping'.format(S1_URL),
-                params = {"queryId": query_id},
-                headers={'Authorization': 'ApiToken:{}'.format(S1_TOKEN)},
-                proxies=PROXY)
-                
-            status = r.json()['data']['status']
-            progress = r.json()['data']['progress']
-            
-            sleep(1)
+        columns, values = run_powerquery(query,
+            datetime.now() - timedelta(hours=timerange),
+            datetime.now())
+        if not values:
+            return None
 
-        return r.json()['data']['data'] if r.status_code == 200 and r.json()['data']['data'] else None
-    
-    except:
+        # Callers expect rows as [dst.ip.address, nbevents, dstports, nbhosts]
+        idx = [columns.index(c) for c in ('dst.ip.address', 'nbevents', 'dstports', 'nbhosts')]
+        return [[_hacklist_to_str(v[i]) for i in idx] for v in values]
+
+    except Exception:
         return None
 
 
