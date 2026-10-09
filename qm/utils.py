@@ -133,6 +133,8 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
     
     # List of analytics with the run_daily flag but not archived
     analytics = Analytic.objects.filter(run_daily=True).exclude(status='ARCH')
+    # Counted once: failed analytics lose their run_daily flag during the campaign, which would skew the progress
+    nb_analytics = analytics.count()
 
     # Filter analytic with the "run_daily" flag set
     for progress, analytic in enumerate(analytics, start=1):
@@ -159,9 +161,11 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
             debug=debug
             )
 
-        # if error, we exit the for loop
+        # if error (already recorded by the connector), we skip this analytic and continue with the next one
         if data == "ERROR":
-            break
+            task_status.progress = progress / nb_analytics * 100
+            task_status.save()
+            continue
 
         # store current time (used to update snapshot runtime)
         end_runtime = datetime.now()
@@ -296,11 +300,11 @@ def run_campaign(campaigndate=None, debug=False, celery=False):
         snapshot.save()
         
         # update task progress
-        task_status.progress = progress / analytics.count() * 100
+        task_status.progress = progress / nb_analytics * 100
         task_status.save()
 
         if debug:
-            print(f"PROGRESS: {progress / analytics.count() * 100}%")
+            print(f"PROGRESS: {progress / nb_analytics * 100}%")
             print("================================")
 
 
