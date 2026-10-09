@@ -14,8 +14,8 @@ plugins/*.py
 CLAUDE.local.md
 CLAUDE.md
 AGENTS.md
-build/
-dist/
+/build/
+/dist/
 *.egg-info/
 .vscode/
 .idea/
