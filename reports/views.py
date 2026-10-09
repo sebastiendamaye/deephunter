@@ -2,6 +2,7 @@ from django.conf import settings
 import json
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required, permission_required
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.db.models import Q, Sum, Count, F
 from django.core.paginator import Paginator
@@ -318,31 +319,72 @@ def query_error(request):
     context = {}
     return render(request, 'query_error.html', context)
 
+def get_analytics_with_errors(include_info):
+    """Return (analytic, error_is_info) tuples for non-archived analytics flagged with a query error.
+    INFO messages are only included if include_info is True."""
+    analytics_with_errors = Analytic.objects.filter(analyticmeta__query_error = True).exclude(status='ARCH').order_by('-analyticmeta__query_error_date')
+    result = []
+    for analytic in analytics_with_errors:
+        error_is_info = all_connectors.get(analytic.connector.name).error_is_info(analytic.analyticmeta.query_error_message)
+        if (not error_is_info) or include_info:
+            result.append((analytic, error_is_info))
+    return result
+
+def clear_analytic_error(analytic):
+    """Reset maxhosts count, remove error flag/message and re-enable run_daily for an analytic"""
+    analytic.analyticmeta.maxhosts_count = 0
+    analytic.analyticmeta.query_error = False
+    analytic.analyticmeta.query_error_message = ''
+    analytic.analyticmeta.query_error_date = None
+    analytic.analyticmeta.save()
+    # Errors and max hosts threshold move the analytic to PENDING, which forces run_daily to False (pre_save signal).
+    # Restore the status the analytic had before it was set to PENDING (fallback to PUB)
+    if analytic.status == 'PENDING':
+        previous = analytic.history.exclude(status__in=['PENDING', 'ARCH']).order_by('-history_date').first()
+        analytic.status = previous.status if previous else 'PUB'
+    if not analytic.run_daily:
+        analytic.run_daily = True
+    analytic.save()
+
+@login_required
+@permission_required('qm.change_analytic', raise_exception=True)
+@require_POST
+def query_error_clear(request, analytic_id):
+    analytic = get_object_or_404(Analytic, pk=analytic_id)
+    clear_analytic_error(analytic)
+    return query_error_table(request)
+
+@login_required
+@permission_required('qm.change_analytic', raise_exception=True)
+@require_POST
+def query_error_clear_all(request):
+    include_info = request.POST.get('include_info', 'off') == 'on'
+    for analytic, _ in get_analytics_with_errors(include_info):
+        clear_analytic_error(analytic)
+    return query_error_table(request)
+
 @login_required
 @permission_required('qm.view_analytic', raise_exception=True)
 def query_error_table(request):
     start_time = time.time()
-    analytics_with_errors = Analytic.objects.filter(analyticmeta__query_error = True).exclude(status='ARCH').order_by('-analyticmeta__query_error_date')
-    include_info = request.GET.get('include_info', 'off') == 'on'  # Get checkbox value
+    include_info = request.GET.get('include_info', request.POST.get('include_info', 'off')) == 'on'  # Get checkbox value
     
     analytics = []
-    for analytic in analytics_with_errors:
-        error_is_info = all_connectors.get(analytic.connector.name).error_is_info(analytic.analyticmeta.query_error_message)
-        if (not error_is_info) or (error_is_info and include_info):
-            analytics.append({
-                'id': analytic.id,
-                'name': analytic.name,
-                'description': analytic.description,
-                'query': analytic.query,
-                'status': analytic.status,
-                'maxhosts_count': analytic.analyticmeta.maxhosts_count,
-                'connector_name': analytic.connector.name,
-                'run_daily': analytic.run_daily,
-                'error': analytic.analyticmeta.query_error,
-                'error_is_info': error_is_info,
-                'query_error_message': analytic.analyticmeta.query_error_message,
-                'query_error_date': analytic.analyticmeta.query_error_date,
-            })
+    for analytic, error_is_info in get_analytics_with_errors(include_info):
+        analytics.append({
+            'id': analytic.id,
+            'name': analytic.name,
+            'description': analytic.description,
+            'query': analytic.query,
+            'status': analytic.status,
+            'maxhosts_count': analytic.analyticmeta.maxhosts_count,
+            'connector_name': analytic.connector.name,
+            'run_daily': analytic.run_daily,
+            'error': analytic.analyticmeta.query_error,
+            'error_is_info': error_is_info,
+            'query_error_message': analytic.analyticmeta.query_error_message,
+            'query_error_date': analytic.analyticmeta.query_error_date,
+        })
 
     paginator = Paginator(analytics, ANALYTICS_PER_PAGE)
     page_number = int(request.GET.get('page', 1))

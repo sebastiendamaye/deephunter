@@ -19,6 +19,12 @@
                 {% if perms.qm.change_analytic %}<a class="button" href="/qm/analytic/{{ analytic.id }}/change/">edit analytic</a>{% endif %}
                 {% if perms.qm.view_snapshot %}<a class="button" target="_blank" href="/qm/{{ analytic.id }}/trend/">stats</a>{% endif %}
                 {% if perms.qm.run_query %}<a class="button" target="_blank" href="/qm/events/{{ analytic.id }}/">run&nbsp;query</a>{% endif %}
+                {% if perms.qm.change_analytic %}<a class="button" href="#"
+                    hx-post="{% url 'query_error_clear' analytic.id %}"
+                    hx-target="#message-table"
+                    hx-include="#filter-form"
+                    hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                    hx-confirm="Clear the error for this analytic? This resets the maxhosts count, removes the error flag and message, and re-enables the run_daily flag.">clear&nbsp;error</a>{% endif %}
             </td>
             <td>{{ analytic.connector_name }}</td>
             <td title="DESCRIPTION:&#013;===========&#013;{{ analytic.description }}&#013;&#013;QUERY:&#013;===========&#013;{{analytic.query}}">{{ analytic.name }}</td>

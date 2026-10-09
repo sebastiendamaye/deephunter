@@ -32,6 +32,16 @@
 				hx-trigger="load, change">
 			Include INFO messages
 		</label>
+		{% if perms.qm.change_analytic %}
+		<button type="button" class="button"
+			hx-post="{% url 'query_error_clear_all' %}"
+			hx-target="#message-table"
+			hx-include="#filter-form"
+			hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+			hx-confirm="Clear errors for all listed analytics? This resets the maxhosts count, removes the error flag and message, and re-enables the run_daily flag.">
+			Clear all errors
+		</button>
+		{% endif %}
 	</form>
 
 	<div id="message-table">
