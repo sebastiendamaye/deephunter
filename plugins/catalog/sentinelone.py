@@ -60,6 +60,9 @@ def query_language():
 
 LRQ_POLL_INTERVAL = 1   # seconds. A LRQ query expires 30s after the last poll
 LRQ_TIMEOUT = 900       # seconds. Cancel the query if not complete after 15 minutes
+LRQ_REQUEST_TIMEOUT = 30    # seconds. Timeout of each HTTP call
+LRQ_RETRY_DELAYS = [1, 2, 4, 8]    # seconds. Total stays below the 30s expiration of a LRQ query
+LRQ_RETRY_STATUSES = {429, 500, 502, 503, 504}
 
 class PowerQueryError(Exception):
     pass
@@ -70,6 +73,26 @@ def _lrq_headers(forward_tag=None):
     if forward_tag:
         headers['X-Dataset-Query-Forward-Tag'] = forward_tag
     return headers
+
+def _lrq_request(method, url, **kwargs):
+    """
+    HTTP call to the LRQ API, retried on transient errors: rate limit (429), gateway errors
+    (e.g., 503 "upstream connect error or disconnect/reset before headers") and connection errors.
+    :return: the last response. Raise the last connection error if all attempts failed.
+    """
+    for attempt, delay in enumerate(LRQ_RETRY_DELAYS + [None], start=1):
+        try:
+            r = requests.request(method, url, proxies=PROXY, timeout=LRQ_REQUEST_TIMEOUT, **kwargs)
+            if r.status_code not in LRQ_RETRY_STATUSES or delay is None:
+                return r
+            error = f'HTTP {r.status_code}: {r.text}'
+        except (requests.ConnectionError, requests.Timeout) as e:
+            if delay is None:
+                raise
+            error = repr(e)
+        if DEBUG:
+            print(f'[ WARNING ] LRQ {method} attempt {attempt} failed ({error}). Retrying in {delay}s')
+        sleep(delay)
 
 def _to_utc_iso(d):
     # LRQ expects ISO-8601 with a "Z" suffix. Naive dates are considered UTC
@@ -113,10 +136,9 @@ def run_powerquery(q, from_date, to_date, debug=False):
     if debug:
         print(f'*** LRQ BODY: {body}')
 
-    r = requests.post(f'{S1_URL}/sdl/v2/api/queries',
+    r = _lrq_request('POST', f'{S1_URL}/sdl/v2/api/queries',
         json=body,
-        headers=_lrq_headers(),
-        proxies=PROXY)
+        headers=_lrq_headers())
     if r.status_code >= 400:
         raise PowerQueryError(r.text)
 
@@ -131,14 +153,9 @@ def run_powerquery(q, from_date, to_date, debug=False):
             if monotonic() > deadline:
                 raise PowerQueryError(f'LRQ query {query_id} not complete after {LRQ_TIMEOUT}s')
 
-            r = requests.get(f'{S1_URL}/sdl/v2/api/queries/{query_id}',
+            r = _lrq_request('GET', f'{S1_URL}/sdl/v2/api/queries/{query_id}',
                 params={'lastStepSeen': steps_seen},
-                headers=headers,
-                proxies=PROXY)
-            if r.status_code == 429:
-                # Rate limit (3 req/s per user): wait and retry, well below the 30s expiration
-                sleep(LRQ_POLL_INTERVAL * 2)
-                continue
+                headers=headers)
             if r.status_code >= 400:
                 raise PowerQueryError(r.text)
 
@@ -158,7 +175,8 @@ def run_powerquery(q, from_date, to_date, debug=False):
         try:
             requests.delete(f'{S1_URL}/sdl/v2/api/queries/{query_id}',
                 headers=headers,
-                proxies=PROXY)
+                proxies=PROXY,
+                timeout=LRQ_REQUEST_TIMEOUT)
         except requests.RequestException:
             pass
 
