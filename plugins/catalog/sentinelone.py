@@ -63,6 +63,7 @@ LRQ_TIMEOUT = 900       # seconds. Cancel the query if not complete after 15 min
 LRQ_REQUEST_TIMEOUT = 30    # seconds. Timeout of each HTTP call
 LRQ_RETRY_DELAYS = [1, 2, 4, 8]    # seconds. Total stays below the 30s expiration of a LRQ query
 LRQ_RETRY_STATUSES = {429, 500, 502, 503, 504}
+LRQ_MAX_SUBMISSIONS = 3    # Resubmit a query up to 2 times if it expires server-side (404 on poll)
 
 class PowerQueryError(Exception):
     pass
@@ -136,49 +137,61 @@ def run_powerquery(q, from_date, to_date, debug=False):
     if debug:
         print(f'*** LRQ BODY: {body}')
 
-    r = _lrq_request('POST', f'{S1_URL}/sdl/v2/api/queries',
-        json=body,
-        headers=_lrq_headers())
-    if r.status_code >= 400:
-        raise PowerQueryError(r.text)
+    deadline = monotonic() + LRQ_TIMEOUT
+    for submission in range(1, LRQ_MAX_SUBMISSIONS + 1):
+        r = _lrq_request('POST', f'{S1_URL}/sdl/v2/api/queries',
+            json=body,
+            headers=_lrq_headers())
+        if r.status_code >= 400:
+            raise PowerQueryError(r.text)
 
-    query_id = r.json()['id']
-    # Must be sent back on every GET/DELETE (routes to the shard holding the query)
-    headers = _lrq_headers(r.headers.get('X-Dataset-Query-Forward-Tag'))
+        query_id = r.json()['id']
+        # Must be sent back on every GET/DELETE (routes to the shard holding the query)
+        headers = _lrq_headers(r.headers.get('X-Dataset-Query-Forward-Tag'))
 
-    try:
-        steps_seen = 0
-        deadline = monotonic() + LRQ_TIMEOUT
-        while True:
-            if monotonic() > deadline:
-                raise PowerQueryError(f'LRQ query {query_id} not complete after {LRQ_TIMEOUT}s')
-
-            r = _lrq_request('GET', f'{S1_URL}/sdl/v2/api/queries/{query_id}',
-                params={'lastStepSeen': steps_seen},
-                headers=headers)
-            if r.status_code >= 400:
-                raise PowerQueryError(r.text)
-
-            result = r.json()
-            steps_seen = result.get('stepsCompleted') or 0
-            steps_total = result.get('stepsTotal') or 0
-
-            if debug:
-                print(f'PROGRESS: {steps_seen}/{steps_total}')
-
-            if steps_total > 0 and steps_seen >= steps_total:
-                break
-
-            sleep(LRQ_POLL_INTERVAL)
-    finally:
-        # Always cancel the query (even on success) to release server-side resources
+        expired = False
         try:
-            requests.delete(f'{S1_URL}/sdl/v2/api/queries/{query_id}',
-                headers=headers,
-                proxies=PROXY,
-                timeout=LRQ_REQUEST_TIMEOUT)
-        except requests.RequestException:
-            pass
+            steps_seen = 0
+            while True:
+                if monotonic() > deadline:
+                    raise PowerQueryError(f'LRQ query {query_id} not complete after {LRQ_TIMEOUT}s')
+
+                r = _lrq_request('GET', f'{S1_URL}/sdl/v2/api/queries/{query_id}',
+                    params={'lastStepSeen': steps_seen},
+                    headers=headers)
+                # 404 "Requested token=<id> not found": the query expired server-side (not polled
+                # within 30s, e.g., after a slow or timed out poll). Resubmit it
+                if r.status_code == 404 and submission < LRQ_MAX_SUBMISSIONS:
+                    expired = True
+                    break
+                if r.status_code >= 400:
+                    raise PowerQueryError(r.text)
+
+                result = r.json()
+                steps_seen = result.get('stepsCompleted') or 0
+                steps_total = result.get('stepsTotal') or 0
+
+                if debug:
+                    print(f'PROGRESS: {steps_seen}/{steps_total}')
+
+                if steps_total > 0 and steps_seen >= steps_total:
+                    break
+
+                sleep(LRQ_POLL_INTERVAL)
+        finally:
+            # Always cancel the query (even on success) to release server-side resources
+            try:
+                requests.delete(f'{S1_URL}/sdl/v2/api/queries/{query_id}',
+                    headers=headers,
+                    proxies=PROXY,
+                    timeout=LRQ_REQUEST_TIMEOUT)
+            except requests.RequestException:
+                pass
+
+        if not expired:
+            break
+        if debug:
+            print(f'[ WARNING ] LRQ query {query_id} expired (submission {submission}). Resubmitting')
 
     data = result.get('data') or {}
     columns = [c.get('name') if isinstance(c, dict) else c for c in data.get('columns') or []]
