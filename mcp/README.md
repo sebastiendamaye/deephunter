@@ -79,7 +79,12 @@ Write (needs `qm.add_analytic`):
 
 - `create_analytic(name, connector, query, …)` — `name`, `connector`, and
   `query` are required; relations are natural keys and must already exist
-  (discover valid values with the `list_*` tools).
+  (discover valid values with the `list_*` tools). **Exception:** any `tags`
+  that do not yet exist are created automatically before the analytic is saved
+  (passing `tags` needs `qm.view_tag`, plus `qm.add_tag` when a tag must be
+  created), so an unknown tag never fails the call.
+- `create_tag(name)` (needs `qm.add_tag`) — explicitly create a tag. Usually
+  not needed, since `create_analytic` auto-creates missing tags.
 
 ## Example prompts
 

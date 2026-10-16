@@ -212,8 +212,8 @@ def create_analytic(
       the analytic is saved (so an unknown tag does not fail the request). Other
       relations are NOT auto-created.
 
-    Requires the `qm.add_analytic` permission (and `qm.add_tag` if any new tag
-    needs to be created). Creating an analytic triggers the same server-side
+    Requires the `qm.add_analytic` permission (plus `qm.view_tag` when `tags`
+    is given, and `qm.add_tag` if any new tag needs to be created). Creating an analytic triggers the same server-side
     behaviour as the web UI (AnalyticMeta creation, optional remote rule sync,
     automatic stats regeneration). Returns the full created analytic including
     its server-assigned id.
@@ -299,9 +299,9 @@ def _ensure_tags_exist(tags: list[str]) -> None:
 def create_tag(name: str) -> dict:
     """Create a new tag.
 
-    Tags referenced from an analytic (the `tags` argument of create_analytic)
-    must already exist, otherwise creation fails with a validation error. Use
-    this tool to create a missing tag first, then reference it by name.
+    Usually not needed: create_analytic automatically creates any tag in its
+    `tags` argument that does not already exist. Use this tool to create a tag
+    on its own (e.g. ahead of time, without creating an analytic).
 
     - name: the tag name (max 20 characters, must be unique).
 
