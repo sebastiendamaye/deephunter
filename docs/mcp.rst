@@ -37,8 +37,8 @@ On the DeepHunter server, generate a Knox token for the user (see the
 
 ``--grant-perms`` grants ``qm.view_analytic`` (needed by the read tools),
 ``qm.add_analytic`` (needed by ``create_analytic``) and ``qm.view_tag`` /
-``qm.add_tag`` (needed by ``create_tag``). The plaintext token is printed once
--- copy it.
+``qm.add_tag`` (needed by ``create_tag``, and by ``create_analytic`` to
+auto-create missing tags). The plaintext token is printed once -- copy it.
 
 2. Create a Python environment
 =============================
@@ -161,8 +161,9 @@ Write:
   and ``query`` are required; relations are natural keys and must already exist
   (discover valid values with the ``list_*`` tools). **Exception:** any ``tags``
   that do not yet exist are created automatically before the analytic is saved
-  (this needs ``qm.add_tag``), so an unknown tag never fails the call. All other
-  relations must already exist.
+  (passing ``tags`` needs ``qm.view_tag``, and ``qm.add_tag`` when a tag must
+  be created), so an unknown tag never fails the call. All other relations
+  must already exist.
 - ``create_tag`` (requires ``qm.add_tag``) -- explicitly create a tag by name.
   Usually not needed, since ``create_analytic`` auto-creates missing tags; use
   it to create a tag on its own.
