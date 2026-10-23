@@ -168,7 +168,10 @@ Write:
   that do not yet exist are created automatically before the analytic is saved
   (passing ``tags`` needs ``qm.view_tag``, and ``qm.add_tag`` when a tag must
   be created), so an unknown tag never fails the call. All other relations
-  must already exist.
+  must already exist. Display pipes (e.g. SentinelOne ``| columns ...``) go in
+  the separate ``columns`` argument, not in ``query``: if you give the client a
+  query ending with ``| columns ...``, it splits it into the two fields (see
+  `Query and columns <api.html#query-and-columns>`_).
 - ``update_analytic`` (requires ``qm.change_analytic``) -- modify an existing
   analytic by ``analytic_id``. Only the arguments passed are changed. List
   relations (``tags``, ``mitre_techniques``, ...) **replace** the current list,

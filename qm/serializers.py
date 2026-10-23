@@ -6,6 +6,8 @@ external AI assistant creating analytics). Related objects are referenced by
 their human-readable natural keys (names / MITRE IDs) rather than by database
 primary keys, so callers don't need to know internal IDs.
 """
+import re
+
 from rest_framework import exceptions, serializers
 
 from connectors.models import Connector
@@ -13,6 +15,10 @@ from .models import (
     Analytic, Category, Tag, MitreTechnique, ThreatName, ThreatActor,
     TargetOs, Vulnerability, SavedSearch,
 )
+
+
+# Matches a PowerQuery "| columns" pipe (any spacing / case).
+S1_COLUMNS_PIPE = re.compile(r'\|\s*columns\b', re.IGNORECASE)
 
 
 class AnalyticSerializer(serializers.ModelSerializer):
@@ -123,6 +129,26 @@ class AnalyticSerializer(serializers.ModelSerializer):
         if not value or not value.strip():
             raise serializers.ValidationError("Query cannot be empty.")
         return value
+
+    def validate(self, attrs):
+        # SentinelOne: the scheduled run appends its own
+        # "| group ... by endpoint.name, site.name" to the query, and a
+        # "| columns" pipe would drop those fields first (breaking the run and
+        # the stats). Display columns belong in the separate "columns" field,
+        # which is only used to build the console link.
+        # Only checked when query or connector is being set, so a PATCH of
+        # unrelated fields is not blocked by a pre-existing query.
+        if 'query' in attrs or 'connector' in attrs:
+            connector = attrs.get('connector') or getattr(self.instance, 'connector', None)
+            query = attrs.get('query', getattr(self.instance, 'query', ''))
+            if (connector is not None and connector.name == 'sentinelone'
+                    and S1_COLUMNS_PIPE.search(query or '')):
+                raise serializers.ValidationError({'query': (
+                    "The query must not contain a '| columns' pipe. Keep the "
+                    "query filter-only and put the '| columns ...' statement in "
+                    "the 'columns' field instead."
+                )})
+        return attrs
 
 
 class ConnectorSerializer(serializers.ModelSerializer):

@@ -195,6 +195,41 @@ Referenced objects must already exist; unknown values return a validation
 error. Tags are the exception: a missing tag can be created first via the
 ``/api/tags/`` endpoint (see below), then referenced by name.
 
+Query and columns
+~~~~~~~~~~~~~~~~~
+
+An analytic's query is split across two fields:
+
+``query``
+    The filter logic only. When DeepHunter runs the analytic (daily campaign,
+    stats regeneration), it appends its own aggregation to this field, e.g.
+    ``| group nb=count(), ... by endpoint.name, site.name`` for SentinelOne or
+    ``| summarize count() by Computer`` for Microsoft Defender. It is also the
+    query synced as a remote detection rule (``create_rule``).
+
+``columns``
+    Optional display-only pipe, appended to ``query`` (on a new line) **only**
+    to build the "open in console" link. Write the full pipe statement, as you
+    would type it in the console.
+
+For example, the SentinelOne query
+``src.process.name='oops.exe' | columns event.time, src.process.name, src.process.cmdline``
+must be sent as::
+
+    "query":   "src.process.name='oops.exe'",
+    "columns": "| columns event.time, src.process.name, src.process.cmdline"
+
+Leaving ``| columns`` in ``query`` would drop ``endpoint.name`` and
+``site.name`` before DeepHunter's aggregation, breaking the run and the stats.
+For the ``sentinelone`` connector, the API therefore **rejects** (``400``) a
+``query`` containing a ``| columns`` pipe, on both creation and update.
+
+.. note::
+
+   For Microsoft Defender, a ``| project Computer = ...`` transformation needed
+   to define the ``Computer`` column must stay in ``query``; only display
+   projections belong in ``columns``.
+
 Tags
 ----
 
@@ -483,7 +518,7 @@ relation, behaviour and anomaly-threshold fields):
                "notes": "Investigate the parent process and destination host.",
                "connector": "sentinelone",
                "query": "...",
-               "columns": "endpoint.name,src.process.cmdline",
+               "columns": "| columns event.time, endpoint.name, src.process.cmdline",
                "status": "DRAFT",
                "confidence": 2,
                "relevance": 3,

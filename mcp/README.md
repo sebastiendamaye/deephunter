@@ -84,7 +84,10 @@ Write:
   (discover valid values with the `list_*` tools). **Exception:** any `tags`
   that do not yet exist are created automatically before the analytic is saved
   (passing `tags` needs `qm.view_tag`, plus `qm.add_tag` when a tag must be
-  created), so an unknown tag never fails the call.
+  created), so an unknown tag never fails the call. Display pipes (e.g.
+  SentinelOne `| columns …`) go in the separate `columns` argument; `query`
+  must be the filter logic only (the API rejects a SentinelOne query containing
+  `| columns`).
 - `update_analytic(analytic_id, …)` (needs `qm.change_analytic`) — modify an
   existing analytic; only the arguments passed are changed, and list relations
   replace the current list. Changing `status` also needs

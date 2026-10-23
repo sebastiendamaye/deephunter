@@ -192,6 +192,7 @@ def create_analytic(
     name: str,
     connector: str,
     query: str,
+    columns: str = "",
     description: str = "",
     status: str = "DRAFT",
     confidence: int | None = None,
@@ -209,6 +210,19 @@ def create_analytic(
     Required: name, connector, query.
     - connector: name of an enabled 'analytics' connector (see list_connectors,
       e.g. 'sentinelone').
+    - query vs columns: DeepHunter appends its own aggregation to `query` when
+      it runs the analytic (SentinelOne: `| group ... by endpoint.name,
+      site.name`; Defender: `| summarize count() by Computer`), so `query` must
+      be the filter logic only. Any display-only pipe (SentinelOne
+      `| columns ...`, Defender `| project ...` for display) goes in `columns`,
+      written as the full pipe statement (exception: a Defender
+      `| project Computer = ...` transformation must stay in `query`), e.g.
+        query:   src.process.name = 'oops.exe'
+        columns: | columns event.time, src.process.name, src.process.cmdline
+      `columns` is only used to build the "open in console" link. If the user
+      gives a single query that ends with such a pipe, split it into the two
+      fields. For SentinelOne the API rejects a `query` containing
+      `| columns`.
     - status: only 'DRAFT' or 'PUB' are accepted at creation (default 'DRAFT').
     - Relations (category, mitre_techniques, threats, actors, target_os,
       vulnerabilities) are natural keys and must already exist -- discover valid
@@ -229,6 +243,7 @@ def create_analytic(
         "name": name,
         "connector": connector,
         "query": query,
+        "columns": columns,
         "description": description,
         "status": status,
     }
@@ -256,6 +271,7 @@ def update_analytic(
     name: str | None = None,
     connector: str | None = None,
     query: str | None = None,
+    columns: str | None = None,
     description: str | None = None,
     notes: str | None = None,
     status: str | None = None,
@@ -273,6 +289,9 @@ def update_analytic(
 
     Partial update: only the arguments you pass are changed; omitted arguments
     keep their current value. Call get_analytic first to see the current values.
+    - query / columns: same split as in create_analytic -- `query` is the
+      filter logic only, display pipes (e.g. `| columns ...`) go in `columns`.
+      Pass columns="" to clear it.
     - List relations (tags, mitre_techniques, threats, actors, target_os,
       vulnerabilities) REPLACE the current list: to add an item, pass the
       existing items plus the new one. Pass [] to clear a list.
@@ -295,6 +314,7 @@ def update_analytic(
             ("name", name),
             ("connector", connector),
             ("query", query),
+            ("columns", columns),
             ("description", description),
             ("notes", notes),
             ("status", status),
