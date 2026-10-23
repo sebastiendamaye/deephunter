@@ -52,14 +52,14 @@ class StrictDjangoModelPermissions(permissions.DjangoModelPermissions):
 
 class AnalyticListCreateView(generics.ListCreateAPIView):
     """
-    GET  /api/analytics/       List analytics.
+    GET  /api/analytics/       List analytics (archived ones are excluded).
     POST /api/analytics/       Create a new analytic.
 
     Creation mirrors the web UI: created_by is set to the authenticated user,
     only DRAFT/PUB status is accepted, and the model's save()/signals handle
     AnalyticMeta creation, optional remote rule sync, and stats regeneration.
     """
-    queryset = Analytic.objects.all().order_by('name')
+    queryset = Analytic.objects.exclude(status='ARCH').order_by('name')
     serializer_class = AnalyticSerializer
     permission_classes = [StrictDjangoModelPermissions]
 
@@ -80,8 +80,10 @@ class AnalyticRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     created_by and pub_date are never modified. Saving goes through the model's
     save()/signals, so a query change triggers the same side effects as the web
     UI (remote rule sync, stats regeneration).
+
+    Archived analytics are not exposed (404), like in the list endpoint.
     """
-    queryset = Analytic.objects.all()
+    queryset = Analytic.objects.exclude(status='ARCH')
     serializer_class = AnalyticSerializer
     permission_classes = [StrictDjangoModelPermissions]
 
@@ -116,11 +118,11 @@ class AnalyticRunStatusView(APIView):
     """
     # DjangoModelPermissions resolves the required permission from this queryset,
     # so a GET here maps to 'qm.view_analytic'.
-    queryset = Analytic.objects.all()
+    queryset = Analytic.objects.exclude(status='ARCH')
     permission_classes = [StrictDjangoModelPermissions]
 
     def get(self, request, pk):
-        analytic = get_object_or_404(Analytic, pk=pk)
+        analytic = get_object_or_404(self.queryset, pk=pk)
 
         # A TasksStatus row keyed on the analytic name means a run is in
         # progress; it is deleted by regenerate_stats() once the run completes.

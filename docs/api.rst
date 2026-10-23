@@ -154,7 +154,7 @@ Analytics
 ---------
 
 ``GET /api/analytics/``
-    List all analytics.
+    List all analytics, except archived ones (status ``ARCH``).
 
 ``POST /api/analytics/``
     Create a new analytic. ``created_by`` is set automatically to the
@@ -165,6 +165,13 @@ Analytics
 
 ``GET /api/analytics/<id>/``
     Retrieve a single analytic.
+
+.. note::
+
+    Archived analytics (status ``ARCH``) are not exposed by the API: they are
+    omitted from the list, and retrieving, updating or querying the run status
+    of an archived analytic returns ``404 Not Found``. Archiving an analytic
+    through ``PATCH`` is allowed, after which it is no longer visible.
 
 ``PATCH /api/analytics/<id>/``
     Partially update an analytic: only the fields sent are changed. ``PUT``
@@ -382,8 +389,8 @@ List analytics
     curl https://deephunter.domain.tld/api/analytics/ \
          -H "Authorization: Token $TOKEN"
 
-Returns a JSON array of analytics, each in the same shape as a single retrieve
-(see below).
+Returns a JSON array of analytics (archived ones excluded), each in the same
+shape as a single retrieve (see below).
 
 Read a single analytic
 ----------------------
@@ -428,7 +435,7 @@ Response (relations are returned as natural keys, not database IDs)::
         "anomaly_threshold_endpoints": null
     }
 
-A request for an unknown ``id`` returns ``404 Not Found``.
+A request for an unknown or archived ``id`` returns ``404 Not Found``.
 
 Analytic run status
 -------------------

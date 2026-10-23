@@ -152,14 +152,16 @@ def list_vulnerabilities() -> list[dict]:
 
 @mcp.tool()
 def list_analytics() -> list[dict]:
-    """List all analytics. Each item has the same shape as get_analytic."""
+    """List all analytics, except archived ones (status ARCH). Each item has
+    the same shape as get_analytic."""
     return _get("/analytics/")
 
 
 @mcp.tool()
 def get_analytic(analytic_id: int) -> dict:
     """Retrieve a single analytic by its numeric id. Relations are returned
-    as natural keys (connector name, category name, MITRE ids, ...)."""
+    as natural keys (connector name, category name, MITRE ids, ...).
+    Archived analytics (status ARCH) are not exposed and return a 404."""
     return _get(f"/analytics/{analytic_id}/")
 
 
