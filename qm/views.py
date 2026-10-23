@@ -18,7 +18,7 @@ from .models import (Country, Analytic, Snapshot, Campaign, TargetOs, Vulnerabil
     SavedSearch, Repo, CampaignCompletion)
 from notifications.models import UserNotification
 from connectors.models import Connector
-from .tasks import regenerate_stats, regenerate_campaign
+from .tasks import start_regenerate_stats, regenerate_campaign
 import ipaddress
 from connectors.utils import is_connector_enabled, is_connector_for_analytics, get_connector_conf
 from celery import current_app
@@ -762,17 +762,10 @@ def storyline(request, storylineids, eventdate):
 @permission_required("qm.change_snapshot", raise_exception=True)
 def regen(request, analytic_id):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
-        
-    # start the celery task (defined in qm/tasks.py)
-    taskid = regenerate_stats.delay(analytic_id)
 
-    # Create task in TasksStatus object
-    celery_status = TasksStatus(
-        taskname=analytic.name,
-        taskid = taskid,
-        started_by = request.user
-    )
-    celery_status.save()
+    # start the celery task (defined in qm/tasks.py), cancelling any regeneration
+    # already running for this analytic
+    start_regenerate_stats(analytic, started_by=request.user)
 
     return HttpResponse('running...')
 

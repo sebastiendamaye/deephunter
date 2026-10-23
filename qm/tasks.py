@@ -1,5 +1,8 @@
 from django.conf import settings
+from django.db import transaction, DatabaseError
+from django.utils import timezone
 from datetime import datetime, timedelta
+from uuid import uuid4
 import numpy as np
 from scipy import stats
 from math import isnan
@@ -7,10 +10,10 @@ from qm.models import Analytic, Snapshot, Campaign, Endpoint, TasksStatus
 from connectors.models import Connector
 from qm.utils import run_campaign, get_campaign_date
 import requests
-from celery import shared_task
+from celery import shared_task, current_app
 from django.shortcuts import get_object_or_404
 from time import sleep
-from notifications.utils import add_info_notification, add_success_notification, add_warning_notification, del_notification_by_uid
+from notifications.utils import add_info_notification, add_success_notification, add_warning_notification, add_error_notification, del_notification_by_uid
 
 # Dynamically import all connectors
 import importlib
@@ -27,9 +30,80 @@ DB_DATA_RETENTION = settings.DB_DATA_RETENTION
 CAMPAIGN_MAX_HOSTS_THRESHOLD = settings.CAMPAIGN_MAX_HOSTS_THRESHOLD
 ON_MAXHOSTS_REACHED = settings.ON_MAXHOSTS_REACHED
 
-@shared_task()
-def regenerate_stats(analytic_id):
+def start_regenerate_stats(analytic, started_by=None):
+    """
+    Start a stats regeneration for an analytic, cancelling any regeneration
+    already running for it (e.g. when the analytic is modified mid-run).
+
+    The TasksStatus row is reused and pointed at the new task id, generated
+    upfront so that the row exists before the task starts. A cancelled task that
+    keeps running (revoke is asynchronous) notices that the row no longer
+    carries its id, and stops (see regenerate_stats).
+
+    The existing stats of the analytic are deleted right away, so that the
+    regeneration starts from a pristine state and the trend graph never shows a
+    mix of old and recomputed stats.
+    """
+    taskid = str(uuid4())
+    with transaction.atomic():
+        current = TasksStatus.objects.select_for_update().filter(taskname=analytic.name).first()
+        if current and current.taskid:
+            # without signal='SIGKILL', the task is not cancelled immediately
+            current_app.control.revoke(current.taskid, terminate=True, signal='SIGKILL')
+        TasksStatus.objects.update_or_create(
+            taskname=analytic.name,
+            defaults={
+                'taskid': taskid,
+                'progress': 0,
+                'started_by': started_by,
+                'date': timezone.now(),
+            },
+        )
+
+    # Delete all snapshots for this analytic (related Endpoint objects are cascade
+    # deleted). Done outside of the above transaction: a cancelled task that is
+    # not killed yet may still be writing snapshots, and a DB conflict here must
+    # not prevent the new regeneration from starting (the task deletes the
+    # snapshots again when it starts anyway).
+    try:
+        with transaction.atomic():
+            Snapshot.objects.filter(analytic=analytic).delete()
+    except DatabaseError as e:
+        add_warning_notification(f'Could not delete stats of analytic "{analytic.name}" before regenerating them: {e}')
+
+    # Only start the task once the analytic and the TasksStatus row are
+    # committed (if the transaction is rolled back, the task is never started).
+    transaction.on_commit(lambda: regenerate_stats.apply_async((analytic.id,), task_id=taskid))
+    return taskid
+
+@shared_task(bind=True)
+def regenerate_stats(self, analytic_id):
+    # The TasksStatus row is looked up by task id (not by analytic name), so that
+    # it is still found if the analytic is renamed while the task is running.
+    # If it does not exist (anymore), this task has been cancelled or superseded
+    # by a newer regeneration for the same analytic.
+    celery_status = TasksStatus.objects.filter(taskid=self.request.id)
+    if not celery_status.exists():
+        return
+
+    # Filled in by _regenerate_stats() once the campaign is created
+    ctx = {}
+    try:
+        _regenerate_stats(self.request.id, celery_status, analytic_id, ctx)
+    except Exception as e:
+        # Never leave the TasksStatus row behind on failure: the UI would show the
+        # task stalled at its last progress forever, and get_analytic_status
+        # would report it as running.
+        celery_status.delete()
+        if ctx.get('campaign') is not None:
+            # Discard the partial stats (cascade deleted with the campaign)
+            ctx['campaign'].delete()
+        add_error_notification(f'Regenerate stats task for analytic id {analytic_id} failed: {e}')
+        raise
+
+def _regenerate_stats(taskid, celery_status, analytic_id, ctx):
     analytic = get_object_or_404(Analytic, pk=analytic_id)
+
     add_info_notification(f'Regenerate stats task started for analytic "{analytic.name}"')
 
     # we assume that analytic won't fail (flag will be set later if analytic fails).
@@ -40,24 +114,31 @@ def regenerate_stats(analytic_id):
     
     # Create Campaign
     # Date of campaign is when the script runs (today) while snapshot date is the day before (detection date)
+    # The campaign name must be unique: it includes the seconds and part of the
+    # task id, as a regeneration can now be restarted within the same minute.
     campaign = Campaign(
-        name='regenerate_stats_{}_{}'.format(analytic.name, datetime.now().strftime("%Y-%m-%d-%H-%M")),
+        name='regenerate_stats_{}_{}_{}'.format(analytic.name, datetime.now().strftime("%Y-%m-%d-%H-%M-%S"), taskid[:8]),
         description='Regenerate stats for {}'.format(analytic.name),
         date_start=datetime.now(),
         nb_queries=1
         )
     campaign.save()
-
-    # Get task in TasksStatus object
-    celery_status = get_object_or_404(TasksStatus, taskname=analytic.name)
+    ctx['campaign'] = campaign
 
     # Delete all snapshots for this analytic
-    # (related Endpoint object will automatically cascade delete)
+    # (related Endpoint object will automatically cascade delete).
+    # Already done when the regeneration is triggered (start_regenerate_stats),
+    # repeated here in case a cancelled task wrote snapshots in the meantime.
     Snapshot.objects.filter(analytic=analytic).delete()
     
     # Rebuild campaigns for last DB_DATA_RETENTION (90 days by default) for the analytic
     for days in reversed(range(DB_DATA_RETENTION)):
-        
+
+        # Stop if the task has been cancelled or superseded (see start_regenerate_stats)
+        if not celery_status.exists():
+            _abort_regenerate_stats(analytic, campaign)
+            return
+
         # store current time (used to update snapshot runtime)
         start_runtime = datetime.now()
 
@@ -128,10 +209,19 @@ def regenerate_stats(analytic_id):
             add_info_notification(f"Max number of hosts reached for analytic {analytic.name}", uid=f"max_number_hosts_reached_{datetime.now().strftime('%Y%m%d')}_{analytic.id}")
             # Update the maxhost counter if reached
             analytic.analyticmeta.maxhosts_count += 1
+            analytic.analyticmeta.save()
             # if threshold is reached
             if analytic.analyticmeta.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
                 # notification
                 add_warning_notification(f"Max hosts threshold reached for analytic {analytic.name}")
+                # A superseded task must not update the (newer version of the) analytic
+                if not celery_status.exists():
+                    _abort_regenerate_stats(analytic, campaign)
+                    return
+                # Reload the analytic before updating it: it may have been edited
+                # while this task was running, and saving the stale copy would
+                # revert that edit (and trigger yet another stats regeneration).
+                analytic.refresh_from_db()
                 # If DISABLE_RUN_DAILY is set and run_daily_lock is not set, we disable the run_daily flag for the analytic
                 if ON_MAXHOSTS_REACHED['DISABLE_RUN_DAILY'] and not analytic.run_daily_lock:
                     analytic.run_daily = False
@@ -139,9 +229,8 @@ def regenerate_stats(analytic_id):
                 # If DELETE_STATS is set and run_daily_lock is not set, we delete all stats for the analytic
                 if ON_MAXHOSTS_REACHED['DELETE_STATS'] and not analytic.run_daily_lock:
                     Snapshot.objects.filter(analytic=analytic).delete()
-            # we update the analytic (counter updated, and flags updated)
-            analytic.analyticmeta.save()
-            analytic.save()
+                # we update the analytic (flags updated)
+                analytic.save()
             # if threshold is reached, we exit the for loop
             if analytic.analyticmeta.maxhosts_count >= ON_MAXHOSTS_REACHED['THRESHOLD']:
                 break
@@ -177,18 +266,30 @@ def regenerate_stats(analytic_id):
         snapshot.save()
         
 
-        # Update Celery task progress
-        celery_status.progress = (DB_DATA_RETENTION-days)*100/DB_DATA_RETENTION
-        celery_status.save()
+        # Update Celery task progress. update() (rather than save()) never
+        # re-creates the row if it was deleted, i.e. if the task was cancelled.
+        if not celery_status.update(progress=(DB_DATA_RETENTION-days)*100/DB_DATA_RETENTION):
+            _abort_regenerate_stats(analytic, campaign)
+            return
 
     # Close Campaign
     campaign.date_end = datetime.now()
     campaign.save()
 
-    # Delete Celery task in DB
+    # Delete Celery task in DB (only this task's row, never a newer task's one)
     celery_status.delete()
 
     add_success_notification(f'Regenerate stats task for analytic "{analytic.name}" successfully completed.')
+
+def _abort_regenerate_stats(analytic, campaign):
+    """
+    Clean up after a cancelled/superseded regenerate_stats task: delete the
+    snapshots it created (identified by its own campaign, so the snapshots of a
+    newer regeneration are left untouched) and the campaign itself.
+    """
+    # Snapshots (and their endpoints) are cascade-deleted with the campaign
+    campaign.delete()
+    add_info_notification(f'Regenerate stats task for analytic "{analytic.name}" cancelled.')
 
 @shared_task()
 def regenerate_campaign(campaigndate):

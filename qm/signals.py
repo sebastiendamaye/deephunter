@@ -7,9 +7,8 @@ from datetime import datetime, timedelta
 from .models import Analytic, TasksStatus, AnalyticMeta
 from qm.utils import is_update_available, is_mitre_update_available
 from connectors.utils import is_connector_enabled
-from qm.tasks import regenerate_stats
+from qm.tasks import start_regenerate_stats
 from notifications.utils import del_notification_by_uid, add_info_notification, add_error_notification, add_warning_notification
-import time
 
 # Dynamically import all connectors
 import importlib
@@ -61,22 +60,11 @@ def user_logged_in_receiver(sender, request, user, **kwargs):
                 # remove notifications related to token expiration for the connector
                 del_notification_by_uid(f"tokenexpires_{connector_name}")
 
-# This function is already defined in the views, but expects the request param that is not available in the signal handler.
-# So we cloned this function here so that it can be called from the signal handler.
+# Start the stats regeneration (celery task defined in qm/tasks.py).
+# Any regeneration already running for the analytic is cancelled first, and the
+# task is only started once the analytic is committed to the DB.
 def regenerate_analytic_stats(analytic):
-    # sleep 1 second to make sure the task is not started immediately
-    # unless we do that, the task fails for newly created analytics
-    time.sleep(1)
-
-    # start the celery task (defined in qm/tasks.py)
-    taskid = regenerate_stats.delay(analytic.id)
-    
-    # Create task in TasksStatus object
-    celery_status = TasksStatus(
-        taskname=analytic.name,
-        taskid = taskid
-    )
-    celery_status.save()
+    start_regenerate_stats(analytic)
 
 # This handler is triggered before an "Analytic" object is saved (pre_save when created or updated)
 @receiver(pre_save, sender=Analytic)
@@ -86,6 +74,12 @@ def pre_save_handler(sender, instance, **kwargs):
     if instance.pk:
         # Retrieve the current value of the field from the database
         original_instance = Analytic.objects.get(pk=instance.pk)
+
+        ### When the analytic is renamed, rename its stats regeneration task (if any) accordingly,
+        ### as TasksStatus objects of regenerations are identified by the analytic name
+        if (original_instance.name != instance.name
+        and not TasksStatus.objects.filter(taskname=instance.name).exists()):
+            TasksStatus.objects.filter(taskname=original_instance.name).update(taskname=instance.name)
 
         ### Reset counters, error flag and message, and last_time_seen when the "query" field of the analytic is updated
         ### or when zscore thresholds are updated

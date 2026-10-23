@@ -483,6 +483,14 @@ Typical usage from a client that just created an analytic: poll this endpoint
 (e.g. every few seconds) until ``state`` is ``complete``, then read
 ``distinct_endpoints``. Requires ``qm.view_analytic``.
 
+When a regeneration is triggered, all existing stats of the analytic are
+deleted first, so the run starts from a pristine state (the trend graph never
+mixes old and recomputed stats). If the analytic's query is changed again while
+a run is still in progress (e.g. through ``PATCH /api/analytics/<id>/``), the
+running regeneration is cancelled and a new run starts from scratch with the
+new query. ``progress`` therefore restarts from ``0``. Only one regeneration runs at a time for a given analytic, and renaming
+an analytic during a run does not lose track of it.
+
 Create an analytic (minimal)
 ----------------------------
 
