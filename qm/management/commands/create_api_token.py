@@ -26,6 +26,9 @@ Examples:
 
     # also grant the model permissions the API requires
     python manage.py create_api_token jdoe --grant-perms
+
+    # also allow updating existing analytics (incl. their status)
+    python manage.py create_api_token jdoe --grant-perms --grant-change-perms
 """
 from datetime import timedelta
 
@@ -41,6 +44,13 @@ API_PERMISSIONS = (
     # Tag list/create endpoint (/api/tags/), used to create a missing tag
     # before referencing it from a new analytic.
     'qm.view_tag', 'qm.add_tag',
+)
+
+# Permissions to modify existing analytics (PATCH/PUT /api/analytics/<id>/).
+# Opt-in via --grant-change-perms so that a token can create analytics without
+# being able to modify (e.g. unpublish) existing ones.
+API_CHANGE_PERMISSIONS = (
+    'qm.change_analytic', 'qm.change_analytic_status',
 )
 
 
@@ -71,6 +81,12 @@ class Command(BaseCommand):
             help="Also grant the model permissions the API requires "
                  f"({', '.join(API_PERMISSIONS)}).",
         )
+        parser.add_argument(
+            '--grant-change-perms',
+            action='store_true',
+            help="Also grant the permissions needed to modify existing analytics "
+                 f"({', '.join(API_CHANGE_PERMISSIONS)}).",
+        )
 
     def handle(self, *args, **options):
         User = get_user_model()
@@ -90,7 +106,9 @@ class Command(BaseCommand):
             )
 
         if options['grant_perms']:
-            self._grant_api_permissions(user)
+            self._grant_api_permissions(user, API_PERMISSIONS)
+        if options['grant_change_perms']:
+            self._grant_api_permissions(user, API_CHANGE_PERMISSIONS)
 
         expiry = None if options['no_expiry'] else timedelta(days=options['days'])
         _instance, token = AuthToken.objects.create(user, expiry=expiry)
@@ -102,8 +120,8 @@ class Command(BaseCommand):
 
         self._report(user, token, lifetime)
 
-    def _grant_api_permissions(self, user):
-        for perm in API_PERMISSIONS:
+    def _grant_api_permissions(self, user, perms):
+        for perm in perms:
             app_label, codename = perm.split('.')
             try:
                 permission = Permission.objects.get(
@@ -113,7 +131,7 @@ class Command(BaseCommand):
                 raise CommandError(f"Permission '{perm}' not found.")
             user.user_permissions.add(permission)
         self.stdout.write(self.style.SUCCESS(
-            f"Granted {', '.join(API_PERMISSIONS)} to '{user.username}'."
+            f"Granted {', '.join(perms)} to '{user.username}'."
         ))
 
     def _report(self, user, token, lifetime):

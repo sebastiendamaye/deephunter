@@ -6,7 +6,7 @@ external AI assistant creating analytics). Related objects are referenced by
 their human-readable natural keys (names / MITRE IDs) rather than by database
 primary keys, so callers don't need to know internal IDs.
 """
-from rest_framework import serializers
+from rest_framework import exceptions, serializers
 
 from connectors.models import Connector
 from .models import (
@@ -17,7 +17,7 @@ from .models import (
 
 class AnalyticSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating and reading Analytic objects.
+    Serializer for creating, reading and updating Analytic objects.
 
     Relations are exposed as natural keys:
       - connector            -> Connector.name (must be an enabled 'analytics' connector)
@@ -86,9 +86,36 @@ class AnalyticSerializer(serializers.ModelSerializer):
 
     def validate_status(self, value):
         # Mirror the web UI: only DRAFT and PUB are allowed at creation time.
-        if self.instance is None and value not in ('DRAFT', 'PUB'):
+        if self.instance is None:
+            if value not in ('DRAFT', 'PUB'):
+                raise serializers.ValidationError(
+                    "Only 'DRAFT' or 'PUB' status is allowed when creating an analytic."
+                )
+            return value
+
+        # Update: an unchanged status is always accepted.
+        if value == self.instance.status:
+            return value
+
+        # Changing the status of an existing analytic additionally requires the
+        # dedicated 'qm.change_analytic_status' permission (as the web UI's
+        # status button does).
+        request = self.context.get('request')
+        if request is None or not request.user.has_perm('qm.change_analytic_status'):
+            raise exceptions.PermissionDenied(
+                "Changing the status of an analytic requires the "
+                "'qm.change_analytic_status' permission."
+            )
+
+        # Only transitions allowed by the status workflow are accepted (same
+        # rule as the web UI edit form). Imported lazily: qm.utils loads every
+        # connector plugin at import time.
+        from .utils import get_available_statuses
+        allowed = get_available_statuses(self.instance, edit=True)
+        if value not in allowed:
             raise serializers.ValidationError(
-                "Only 'DRAFT' or 'PUB' status is allowed when creating an analytic."
+                f"Cannot change status from '{self.instance.status}' to "
+                f"'{value}'. Allowed: {', '.join(allowed) or 'none'}."
             )
         return value
 

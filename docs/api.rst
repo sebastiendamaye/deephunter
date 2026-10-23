@@ -1,8 +1,8 @@
 REST API
 ########
 
-DeepHunter exposes a REST API for creating and reading threat-hunting
-analytics programmatically. It is intended for automation clients such as an
+DeepHunter exposes a REST API for creating, reading and updating
+threat-hunting analytics programmatically. It is intended for automation clients such as an
 external AI assistant running on a separate server.
 
 The API is built with `Django REST Framework <https://www.django-rest-framework.org/>`_
@@ -82,6 +82,10 @@ Options:
   to headless service accounts.
 * ``--grant-perms`` — also grant the model permissions the API requires
   (``qm.view_analytic``, ``qm.add_analytic``, ``qm.view_tag``, ``qm.add_tag``).
+* ``--grant-change-perms`` — also grant the permissions needed to modify
+  existing analytics (``qm.change_analytic``, ``qm.change_analytic_status``).
+  Kept separate from ``--grant-perms`` so a token can create analytics without
+  being able to modify (e.g. unpublish or archive) existing ones.
 
 Only a hash of the token is stored server-side; the plaintext value is shown
 only once, at creation, and cannot be retrieved again. If it is lost, generate
@@ -132,6 +136,9 @@ to the token must hold the relevant permissions:
 
 * ``qm.view_analytic`` — to list/retrieve analytics and read run status.
 * ``qm.add_analytic`` — to create analytics.
+* ``qm.change_analytic`` — to update analytics (``PATCH`` / ``PUT``).
+* ``qm.change_analytic_status`` — additionally required when an update changes
+  an analytic's ``status``.
 * ``qm.view_tag`` — to list tags.
 * ``qm.add_tag`` — to create tags.
 * ``qm.view_savedsearch`` — to list hunting packages (saved searches).
@@ -158,6 +165,11 @@ Analytics
 
 ``GET /api/analytics/<id>/``
     Retrieve a single analytic.
+
+``PATCH /api/analytics/<id>/``
+    Partially update an analytic: only the fields sent are changed. ``PUT``
+    performs a full update (``name``, ``connector`` and ``query`` required).
+    See `Update an analytic`_ below. Requires ``qm.change_analytic``.
 
 ``GET /api/analytics/<id>/status/``
     Report the run/completion status of the analytic's stats regeneration and,
@@ -505,3 +517,44 @@ shape as the retrieve example above), including the server-assigned ``id``,
    of ``tags`` when created through the MCP server (see below) — must already
    exist, otherwise the request returns a ``400`` validation error. To create a
    missing tag through the REST API, ``POST`` it to ``/api/tags/`` first.
+
+Update an analytic
+------------------
+
+Send only the fields to change with ``PATCH``; every other field keeps its
+current value:
+
+.. code-block:: bash
+
+    curl -X PATCH https://deephunter.domain.tld/api/analytics/42/ \
+         -H "Authorization: Token $TOKEN" \
+         -H "Content-Type: application/json" \
+         -d '{
+               "query": "...",
+               "confidence": 3,
+               "tags": ["network", "lolbin", "rundll32"]
+             }'
+
+The response is ``200 OK`` with the full updated analytic (same shape as the
+retrieve example above).
+
+Rules:
+
+* **Permissions.** The token's user needs ``qm.change_analytic``, otherwise the
+  request returns ``403 Forbidden``. If the update changes ``status``, the user
+  also needs ``qm.change_analytic_status`` (``403`` otherwise). Sending the
+  current status unchanged does not require it.
+* **Status workflow.** A status change must be allowed by the same workflow as
+  the web UI edit form (e.g. ``DRAFT`` → ``PUB`` / ``ARCH``; an analytic in
+  ``REVIEW`` cannot change status through an edit). A disallowed transition
+  returns a ``400`` validation error listing the allowed statuses.
+* **List relations are replaced**, not merged: ``tags``, ``mitre_techniques``,
+  ``threats``, ``actors``, ``target_os`` and ``vulnerabilities`` are set to
+  exactly the list sent (``[]`` clears it). Referenced objects must already
+  exist, as for creation.
+* ``id``, ``created_by``, ``pub_date`` and ``weighted_relevance`` are read-only
+  and cannot be modified.
+* Saving goes through the same model logic as the web UI: changing the
+  ``query`` resets the analytic's error flag, triggers the optional remote
+  rule sync, and regenerates its stats (poll `Analytic run status`_), and a
+  ``PENDING`` analytic whose query changes moves back to ``DRAFT``.

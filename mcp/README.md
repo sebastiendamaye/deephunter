@@ -2,7 +2,7 @@
 
 A thin [Model Context Protocol](https://modelcontextprotocol.io/) wrapper around
 the DeepHunter REST API. It lets an LLM client (Claude Desktop, Claude Code, …)
-read and create threat-hunting analytics conversationally, by exposing the
+read, create and update threat-hunting analytics conversationally, by exposing the
 `/api/` endpoints as MCP tools.
 
 Each tool call becomes an authenticated HTTPS request to the REST API. No logic
@@ -27,7 +27,9 @@ user's filesystem permissions.
    ```
 
    `--grant-perms` grants `qm.view_analytic` (needed by the `list_*` / `get_*`
-   tools) and `qm.add_analytic` (needed by `create_analytic`). The plaintext
+   tools) and `qm.add_analytic` (needed by `create_analytic`). Add
+   `--grant-change-perms` to also grant `qm.change_analytic` and
+   `qm.change_analytic_status` (needed by `update_analytic`). The plaintext
    token is printed once — copy it.
 
 2. **Python deps on the user's machine** (not the WSGI host):
@@ -75,14 +77,18 @@ Read-only (need `qm.view_analytic`):
   `list_threats`, `list_actors`, `list_target_os`, `list_vulnerabilities`
 - `list_analytics`, `get_analytic(analytic_id)`
 
-Write (needs `qm.add_analytic`):
+Write:
 
-- `create_analytic(name, connector, query, …)` — `name`, `connector`, and
+- `create_analytic(name, connector, query, …)` (needs `qm.add_analytic`) — `name`, `connector`, and
   `query` are required; relations are natural keys and must already exist
   (discover valid values with the `list_*` tools). **Exception:** any `tags`
   that do not yet exist are created automatically before the analytic is saved
   (passing `tags` needs `qm.view_tag`, plus `qm.add_tag` when a tag must be
   created), so an unknown tag never fails the call.
+- `update_analytic(analytic_id, …)` (needs `qm.change_analytic`) — modify an
+  existing analytic; only the arguments passed are changed, and list relations
+  replace the current list. Changing `status` also needs
+  `qm.change_analytic_status` and must follow the status workflow.
 - `create_tag(name)` (needs `qm.add_tag`) — explicitly create a tag. Usually
   not needed, since `create_analytic` auto-creates missing tags.
 
@@ -90,5 +96,6 @@ Write (needs `qm.add_analytic`):
 
 - "List the DeepHunter connectors."
 - "Show me analytic 42."
+- "Add the tag 'lolbin' to analytic 42 and raise its confidence to High."
 - "Create a DRAFT analytic named 'Suspicious rundll32 network activity' on the
   sentinelone connector with query …"

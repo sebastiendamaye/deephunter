@@ -13,8 +13,9 @@ have no local password). Send the token as:
     Authorization: Token <token>
 
 Authorization reuses Django's per-model permissions: the authenticated user
-must hold 'qm.view_analytic' to read and 'qm.add_analytic' to create (see
-StrictDjangoModelPermissions below).
+must hold 'qm.view_analytic' to read, 'qm.add_analytic' to create and
+'qm.change_analytic' to update (see StrictDjangoModelPermissions below).
+Changing an analytic's status additionally requires 'qm.change_analytic_status'.
 """
 from django.db.models import Count, Q
 from django.http import QueryDict
@@ -66,8 +67,20 @@ class AnalyticListCreateView(generics.ListCreateAPIView):
         serializer.save(created_by=self.request.user)
 
 
-class AnalyticRetrieveView(generics.RetrieveAPIView):
-    """GET /api/analytics/<id>/   Retrieve a single analytic."""
+class AnalyticRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+    """
+    GET   /api/analytics/<id>/   Retrieve a single analytic.
+    PATCH /api/analytics/<id>/   Partially update an analytic (only the fields sent).
+    PUT   /api/analytics/<id>/   Fully update an analytic.
+
+    Updating requires 'qm.change_analytic' (enforced by
+    StrictDjangoModelPermissions for PUT/PATCH), like the web UI edit form.
+    Changing the status additionally requires 'qm.change_analytic_status' and
+    must follow the status workflow (see AnalyticSerializer.validate_status).
+    created_by and pub_date are never modified. Saving goes through the model's
+    save()/signals, so a query change triggers the same side effects as the web
+    UI (remote rule sync, stats regeneration).
+    """
     queryset = Analytic.objects.all()
     serializer_class = AnalyticSerializer
     permission_classes = [StrictDjangoModelPermissions]

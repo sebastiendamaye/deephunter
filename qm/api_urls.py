@@ -13,6 +13,7 @@ Analytics:
   GET  /api/analytics/            List analytics
   POST /api/analytics/            Create an analytic
   GET  /api/analytics/<id>/       Retrieve an analytic
+  PATCH /api/analytics/<id>/      Partially update an analytic (PUT for a full update)
   GET  /api/analytics/<id>/status/ Run/completion status + distinct-endpoint count
 
 Hunting packages (saved searches):
@@ -53,7 +54,7 @@ urlpatterns = [
 
     # Analytics
     path('analytics/', api.AnalyticListCreateView.as_view(), name='api_analytic_list_create'),
-    path('analytics/<int:pk>/', api.AnalyticRetrieveView.as_view(), name='api_analytic_detail'),
+    path('analytics/<int:pk>/', api.AnalyticRetrieveUpdateView.as_view(), name='api_analytic_detail'),
     # Run/completion status of an analytic's stats regeneration, plus its
     # distinct-endpoint count once complete.
     path('analytics/<int:pk>/status/', api.AnalyticRunStatusView.as_view(), name='api_analytic_status'),

@@ -2,8 +2,8 @@
 DeepHunter MCP server (local stdio).
 
 Exposes the DeepHunter REST API (mounted at /api/) as MCP tools so an LLM
-client (Claude Desktop, Claude Code, ...) can read and create threat-hunting
-analytics conversationally.
+client (Claude Desktop, Claude Code, ...) can read, create and update
+threat-hunting analytics conversationally.
 
 This is a thin wrapper: each tool translates a call into an HTTPS request
 against the existing REST API, authenticating with a Knox token. No business
@@ -16,8 +16,9 @@ their own tokens (and their own permissions / created_by attribution).
 
 Auth: obtain a token out-of-band with `python manage.py create_api_token
 <username>` on the DeepHunter server, then pass it via DEEPHUNTER_API_TOKEN.
-The token's user needs `qm.view_analytic` (read tools) and `qm.add_analytic`
-(create_analytic).
+The token's user needs `qm.view_analytic` (read tools), `qm.add_analytic`
+(create_analytic) and `qm.change_analytic` (update_analytic; plus
+`qm.change_analytic_status` to change an analytic's status).
 
 Run:
     DEEPHUNTER_API_URL=https://deephunter.se.com/api \
@@ -69,6 +70,10 @@ def _get(path: str, params: dict | None = None) -> Any:
 
 def _post(path: str, payload: dict) -> Any:
     return _handle(client.post(path, json=payload))
+
+
+def _patch(path: str, payload: dict) -> Any:
+    return _handle(client.patch(path, json=payload))
 
 
 def _handle(r: httpx.Response) -> Any:
@@ -243,6 +248,73 @@ def create_analytic(
         if value is not None:
             payload[key] = value
     return _post("/analytics/", payload)
+
+
+@mcp.tool()
+def update_analytic(
+    analytic_id: int,
+    name: str | None = None,
+    connector: str | None = None,
+    query: str | None = None,
+    description: str | None = None,
+    notes: str | None = None,
+    status: str | None = None,
+    confidence: int | None = None,
+    relevance: int | None = None,
+    category: str | None = None,
+    tags: list[str] | None = None,
+    mitre_techniques: list[str] | None = None,
+    threats: list[str] | None = None,
+    actors: list[str] | None = None,
+    target_os: list[str] | None = None,
+    vulnerabilities: list[str] | None = None,
+) -> dict:
+    """Modify an existing analytic, identified by its numeric id.
+
+    Partial update: only the arguments you pass are changed; omitted arguments
+    keep their current value. Call get_analytic first to see the current values.
+    - List relations (tags, mitre_techniques, threats, actors, target_os,
+      vulnerabilities) REPLACE the current list: to add an item, pass the
+      existing items plus the new one. Pass [] to clear a list.
+    - Relations are natural keys and must already exist (see the list_* tools),
+      except tags: missing tags are created automatically, as in create_analytic.
+    - status: must follow DeepHunter's status workflow (e.g. a DRAFT analytic
+      can go to PUB or ARCH; an analytic in REVIEW cannot change status here).
+      The API rejects disallowed transitions and lists the allowed ones.
+
+    Requires the `qm.change_analytic` permission; changing `status` also
+    requires `qm.change_analytic_status` (plus `qm.view_tag` / `qm.add_tag`
+    when `tags` is given). Without them the API returns a 403 error. Changing
+    the query triggers the same server-side behaviour as the web UI (remote
+    rule sync, automatic stats regeneration -- poll get_analytic_status).
+    Returns the full updated analytic.
+    """
+    payload: dict[str, Any] = {
+        key: value
+        for key, value in (
+            ("name", name),
+            ("connector", connector),
+            ("query", query),
+            ("description", description),
+            ("notes", notes),
+            ("status", status),
+            ("confidence", confidence),
+            ("relevance", relevance),
+            ("category", category),
+            ("tags", tags),
+            ("mitre_techniques", mitre_techniques),
+            ("threats", threats),
+            ("actors", actors),
+            ("target_os", target_os),
+            ("vulnerabilities", vulnerabilities),
+        )
+        if value is not None
+    }
+    if not payload:
+        raise ValueError("Nothing to update: pass at least one field to change.")
+    if tags:
+        _ensure_tags_exist(tags)
+    return _patch(f"/analytics/{analytic_id}/", payload)
 
 
 # --- Hunting packages (saved searches) -------------------------------------

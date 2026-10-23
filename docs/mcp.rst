@@ -40,6 +40,11 @@ On the DeepHunter server, generate a Knox token for the user (see the
 ``qm.add_tag`` (needed by ``create_tag``, and by ``create_analytic`` to
 auto-create missing tags). The plaintext token is printed once -- copy it.
 
+To also allow the user to modify existing analytics with ``update_analytic``,
+add ``--grant-change-perms`` (grants ``qm.change_analytic`` and
+``qm.change_analytic_status``). It is opt-in: without it, the MCP can create
+analytics but not modify existing ones.
+
 2. Create a Python environment
 =============================
 
@@ -164,6 +169,14 @@ Write:
   (passing ``tags`` needs ``qm.view_tag``, and ``qm.add_tag`` when a tag must
   be created), so an unknown tag never fails the call. All other relations
   must already exist.
+- ``update_analytic`` (requires ``qm.change_analytic``) -- modify an existing
+  analytic by ``analytic_id``. Only the arguments passed are changed. List
+  relations (``tags``, ``mitre_techniques``, ...) **replace** the current list,
+  so pass the existing items plus any new one. Missing ``tags`` are
+  auto-created, as with ``create_analytic``. Changing ``status`` additionally
+  requires ``qm.change_analytic_status`` and must follow the status workflow
+  (disallowed transitions are rejected). A user without these permissions gets
+  a ``403`` error and the analytic is left unchanged.
 - ``create_tag`` (requires ``qm.add_tag``) -- explicitly create a tag by name.
   Usually not needed, since ``create_analytic`` auto-creates missing tags; use
   it to create a tag on its own.
@@ -187,6 +200,13 @@ calls ``create_analytic``)::
     "Create a DeepHunter analytic named 'Suspicious rundll32 network activity'
      for the sentinelone connector that detects rundll32.exe making network
      connections. Tag it 'lolbin' and 'network', and map it to T1218.011."
+
+Modify an existing analytic (the client typically calls ``get_analytic``
+first, then ``update_analytic``)::
+
+    "Add the tag 'credential-access' to analytic 42."
+    "Raise the confidence of analytic 42 to High and publish it."
+    "Fix the query of analytic 42 to also exclude svchost.exe."
 
 Check an analytic's run status and its distinct-endpoint count
 (``get_analytic_status``)::
