@@ -17,6 +17,35 @@ from django.conf import settings
 from qm.models import MitreTechnique, MitreTactic
 
 PROXY = settings.PROXY
+STATIC_PATH = settings.STATIC_ROOT
+
+def get_current_mitre_version():
+    """
+    Return the MITRE ATT&CK version currently used in DeepHunter
+    (maintained in static/VERSION_MITRE, e.g. "v18.0"), or None if unreadable.
+    """
+    try:
+        with open(f'{STATIC_PATH}/VERSION_MITRE', 'r') as f:
+            return f.readline().strip()
+    except OSError:
+        return None
+
+def get_target_mitre_version():
+    """
+    Return the latest MITRE ATT&CK version available, based on the latest
+    release of the mitre/cti repository (e.g. tag "ATT&CK-v20.0"), normalized
+    to the VERSION_MITRE format (e.g. "v20.0"). Returns None on failure.
+    """
+    try:
+        r = requests.get(
+            'https://api.github.com/repos/mitre/cti/releases/latest',
+            proxies=PROXY,
+            timeout=30
+            )
+        r.raise_for_status()
+        return r.json()['tag_name'].replace('ATT&CK-', '')
+    except (requests.RequestException, KeyError, ValueError):
+        return None
 
 def str2tactic(s):
     """
@@ -108,6 +137,14 @@ def run(*args):
     interactive = True if 'interactive' in args else False
     # Track if changes were applied to display conditionnal message at the end
     changes_applied = False
+
+    # Display current and target MITRE ATT&CK versions
+    current_version = get_current_mitre_version()
+    target_version = get_target_mitre_version()
+    print(f"\nCurrent MITRE ATT&CK version (DeepHunter): {current_version or 'unknown'}")
+    print(f"Target MITRE ATT&CK version (latest):      {target_version or 'unknown'}")
+    if current_version and target_version and current_version != target_version:
+        print(f"DeepHunter is not using the latest MITRE ATT&CK version ({current_version} -> {target_version}).")
 
     # URL of the remote JSON data
     url = 'https://raw.githubusercontent.com/mitre/cti/refs/heads/master/enterprise-attack/enterprise-attack.json'
@@ -375,13 +412,9 @@ def run(*args):
 
 
         if changes_applied:
-            r = requests.get(
-                'https://api.github.com/repos/mitre-attack/attack-stix-data/releases/latest',
-                proxies=PROXY
-            )
-            version = r.json()['tag_name']
-            print("\nDon't forget to update the version of MITRE in DeepHunter.")
-            print(f"Latest MITRE version: {version}")
+            print("\nDon't forget to update the version of MITRE in DeepHunter (static/VERSION_MITRE).")
+            print(f"Current MITRE version: {current_version or 'unknown'}")
+            print(f"Target MITRE version: {target_version or 'unknown'}")
 
     else:
         print(f"Failed to fetch data. Status code: {response.status_code}")
