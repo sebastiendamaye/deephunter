@@ -270,7 +270,7 @@ def create_analytic(
         ("actors", actors),
         ("target_os", target_os),
         ("vulnerabilities", vulnerabilities),
-        ("references", references),
+        ("references", "\n".join(references) if references is not None else None),
         ("notes", notes),
         ("emulation_validation", emulation_validation),
     ):
@@ -343,7 +343,7 @@ def update_analytic(
             ("actors", actors),
             ("target_os", target_os),
             ("vulnerabilities", vulnerabilities),
-            ("references", references),
+            ("references", "\n".join(references) if references is not None else None),
             ("emulation_validation", emulation_validation),
         )
         if value is not None
