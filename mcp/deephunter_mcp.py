@@ -206,6 +206,9 @@ def create_analytic(
     actors: list[str] | None = None,
     target_os: list[str] | None = None,
     vulnerabilities: list[str] | None = None,
+    references: list[str] | None = None,
+    notes: str | None = None,
+    emulation_validation: str | None = None,
 ) -> dict:
     """Create a new analytic.
 
@@ -232,6 +235,12 @@ def create_analytic(
     - tags: any tag that does not already exist is created automatically before
       the analytic is saved (so an unknown tag does not fail the request). Other
       relations are NOT auto-created.
+    - references: list of sources (typically URLs: blog posts, threat reports,
+      MITRE pages, ...), one per item, e.g.
+      ["https://attack.mitre.org/techniques/T1218/011/", "https://example.com/report"].
+    - notes: free-text analyst notes (e.g. triage / investigation guidance).
+    - emulation_validation: how to emulate the behavior and validate that the
+      analytic fires (Markdown syntax).
 
     Requires the `qm.add_analytic` permission (plus `qm.view_tag` when `tags`
     is given, and `qm.add_tag` if any new tag needs to be created). Creating an analytic triggers the same server-side
@@ -261,6 +270,9 @@ def create_analytic(
         ("actors", actors),
         ("target_os", target_os),
         ("vulnerabilities", vulnerabilities),
+        ("references", references),
+        ("notes", notes),
+        ("emulation_validation", emulation_validation),
     ):
         if value is not None:
             payload[key] = value
@@ -286,6 +298,8 @@ def update_analytic(
     actors: list[str] | None = None,
     target_os: list[str] | None = None,
     vulnerabilities: list[str] | None = None,
+    references: list[str] | None = None,
+    emulation_validation: str | None = None,
 ) -> dict:
     """Modify an existing analytic, identified by its numeric id.
 
@@ -294,9 +308,9 @@ def update_analytic(
     - query / columns: same split as in create_analytic -- `query` is the
       filter logic only, display pipes (e.g. `| columns ...`) go in `columns`.
       Pass columns="" to clear it.
-    - List relations (tags, mitre_techniques, threats, actors, target_os,
-      vulnerabilities) REPLACE the current list: to add an item, pass the
-      existing items plus the new one. Pass [] to clear a list.
+    - List fields (tags, mitre_techniques, threats, actors, target_os,
+      vulnerabilities, references) REPLACE the current list: to add an item,
+      pass the existing items plus the new one. Pass [] to clear a list.
     - Relations are natural keys and must already exist (see the list_* tools),
       except tags: missing tags are created automatically, as in create_analytic.
     - status: must follow DeepHunter's status workflow (e.g. a DRAFT analytic
@@ -329,6 +343,8 @@ def update_analytic(
             ("actors", actors),
             ("target_os", target_os),
             ("vulnerabilities", vulnerabilities),
+            ("references", references),
+            ("emulation_validation", emulation_validation),
         )
         if value is not None
     }

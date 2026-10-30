@@ -172,10 +172,14 @@ Write:
   the separate ``columns`` argument, not in ``query``: if you give the client a
   query ending with ``| columns ...``, it splits it into the two fields (see
   `Query and columns <api.html#query-and-columns>`_).
+  Sources go in ``references``, a list of strings (typically URLs), e.g.
+  ``["https://attack.mitre.org/techniques/T1218/011/", "https://example.com/report"]``.
+  Optional ``notes`` (analyst notes) and ``emulation_validation`` (how to
+  emulate and validate the detection, Markdown) can also be set.
 - ``update_analytic`` (requires ``qm.change_analytic``) -- modify an existing
   analytic by ``analytic_id``. Only the arguments passed are changed. List
-  relations (``tags``, ``mitre_techniques``, ...) **replace** the current list,
-  so pass the existing items plus any new one. Missing ``tags`` are
+  fields (``tags``, ``mitre_techniques``, ``references``, ...) **replace** the
+  current list, so pass the existing items plus any new one. Missing ``tags`` are
   auto-created, as with ``create_analytic``. Changing ``status`` additionally
   requires ``qm.change_analytic_status`` and must follow the status workflow
   (disallowed transitions are rejected). A user without these permissions gets
@@ -202,7 +206,9 @@ calls ``create_analytic``)::
 
     "Create a DeepHunter analytic named 'Suspicious rundll32 network activity'
      for the sentinelone connector that detects rundll32.exe making network
-     connections. Tag it 'lolbin' and 'network', and map it to T1218.011."
+     connections. Tag it 'lolbin' and 'network', map it to T1218.011, and add
+     https://attack.mitre.org/techniques/T1218/011/ and
+     https://lolbas-project.github.io/lolbas/Binaries/Rundll32/ as references."
 
 Modify an existing analytic (the client typically calls ``get_analytic``
 first, then ``update_analytic``)::

@@ -202,6 +202,21 @@ Referenced objects must already exist; unknown values return a validation
 error. Tags are the exception: a missing tag can be created first via the
 ``/api/tags/`` endpoint (see below), then referenced by name.
 
+References
+~~~~~~~~~~
+
+``references`` is a **list of strings** (typically URLs), one source per item::
+
+    "references": [
+        "https://attack.mitre.org/techniques/T1218/011/",
+        "https://lolbas-project.github.io/lolbas/Binaries/Rundll32/"
+    ]
+
+It is always returned as a list (``[]`` when empty). Blank items are ignored.
+On update, the list **replaces** the current references; send ``[]`` to clear
+them. For backward compatibility, a single string is still accepted on input
+and is split on newlines (one reference per line).
+
 Query and columns
 ~~~~~~~~~~~~~~~~~
 
@@ -426,7 +441,9 @@ Response (relations are returned as natural keys, not database IDs)::
         "target_os": ["Windows"],
         "vulnerabilities": [],
         "emulation_validation": "",
-        "references": "",
+        "references": [
+            "https://attack.mitre.org/techniques/T1218/011/"
+        ],
         "create_rule": false,
         "run_daily": true,
         "run_daily_lock": false,
@@ -545,7 +562,10 @@ relation, behaviour and anomaly-threshold fields):
                "target_os": ["Windows"],
                "vulnerabilities": [],
                "emulation_validation": "Run rundll32 with a URL argument.",
-               "references": "https://attack.mitre.org/techniques/T1218/011/",
+               "references": [
+                 "https://attack.mitre.org/techniques/T1218/011/",
+                 "https://lolbas-project.github.io/lolbas/Binaries/Rundll32/"
+               ],
                "create_rule": false,
                "run_daily": true,
                "run_daily_lock": false,

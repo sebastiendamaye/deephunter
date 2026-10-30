@@ -21,6 +21,25 @@ from .models import (
 S1_COLUMNS_PIPE = re.compile(r'\|\s*columns\b', re.IGNORECASE)
 
 
+class ReferencesField(serializers.ListField):
+    """
+    Exposes a "one source per line" TextField (e.g. Analytic.references) as a
+    list of strings. Blank entries are dropped. For backward compatibility, a
+    plain newline-separated string is also accepted as input.
+    """
+    child = serializers.CharField(allow_blank=True)
+
+    def to_internal_value(self, data):
+        if isinstance(data, str):
+            data = data.splitlines()
+        values = super().to_internal_value(data)
+        lines = [line.strip() for value in values for line in value.splitlines()]
+        return '\n'.join(line for line in lines if line)
+
+    def to_representation(self, value):
+        return [line.strip() for line in (value or '').splitlines() if line.strip()]
+
+
 class AnalyticSerializer(serializers.ModelSerializer):
     """
     Serializer for creating, reading and updating Analytic objects.
@@ -37,6 +56,8 @@ class AnalyticSerializer(serializers.ModelSerializer):
 
     Referenced objects must already exist; unknown values raise a validation
     error rather than being created implicitly.
+
+    `references` is exposed as a list of strings (stored one per line).
     """
     # Only enabled analytics connectors are selectable, matching the web UI.
     connector = serializers.SlugRelatedField(
@@ -72,6 +93,10 @@ class AnalyticSerializer(serializers.ModelSerializer):
     vulnerabilities = serializers.SlugRelatedField(
         slug_field='name', queryset=Vulnerability.objects.all(),
         many=True, required=False,
+    )
+    references = ReferencesField(
+        required=False,
+        help_text="List of sources (e.g. URLs), one per item.",
     )
     created_by = serializers.StringRelatedField(read_only=True)
 
