@@ -44,7 +44,7 @@ def db_analyticsrunintodaycampaign(request):
             campaign = get_object_or_404(Campaign, name=f"daily_cron_{(datetime.now() - timedelta(days=i-1)).strftime('%Y-%m-%d')}")
             analytics_run = CampaignCompletion.objects.filter(campaign=campaign).aggregate(
                 total_queries=Sum('nb_queries_complete')
-                )['total_queries']
+                )['total_queries'] or 0
             sparkline.append(analytics_run)
         except:
             sparkline.append(0)
