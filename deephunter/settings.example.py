@@ -243,6 +243,7 @@ STORAGES = {
     },
 }
 DBBACKUP_GPG_RECIPIENT = 'email@domain.com'
+DBBACKUP_GPG_ALWAYS_TRUST = True
 
 # Logout automatically after 1 hour
 AUTO_LOGOUT = {
